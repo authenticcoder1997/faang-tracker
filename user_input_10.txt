@@ -1,0 +1,6 @@
+<USER_REQUEST>
+now make the website more beautiful and load all the questions..you only loaded 2or 3 and on lciking it should the open the problem and also have a dark mode switch and deploy the latest changes to vercel
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-22T17:15:58+05:30.
+</ADDITIONAL_METADATA>

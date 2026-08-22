@@ -1,0 +1,23 @@
+<USER_REQUEST>
+I want to create a daily personal tracker. So that whenver I study for 4-6 hours.. I do some dsa some lld and some system design...
+
+
+DSA Roadmap - https://takeuforward.org/plus/dsa-concept-revision/roadmap
+I have solved for some of the days so make sure to store the data locally.
+
+LLD Roadmap -https://algomaster.io/learn/lld
+LLD interview questions practice 1daily
+
+HLD https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly
+Questions breakdown 1 daily
+
+So create a personal website tracker for faang preparation and host it somewhere I dont know or you can suggest me some website to host so start working. So that I can check list and crack faang maybe google
+
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-22T16:49:32+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

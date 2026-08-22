@@ -1,0 +1,11 @@
+<USER_REQUEST>
+/browser create a new GitHub repository for the FAANG tracker.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-22T17:06:09+05:30.
+
+The user has mentioned some items in the form @[ITEM]. Here is extra information about the items that were mentioned by the user, in the order that they appear:
+
+/browser is a [Slash Command]:
+<SUBAGENT>The user has explicitly added the `browser` subagent. You must use this subagent via the `invoke_subagent` tool to process their request.</SUBAGENT>
+</ADDITIONAL_METADATA>

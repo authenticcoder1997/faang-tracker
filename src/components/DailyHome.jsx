@@ -1,9 +1,8 @@
 import React from 'react';
 import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Calendar, Check, ExternalLink, Sparkles } from 'lucide-react';
+import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
 export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setActiveTab }) {
-  const sections = Array.from(new Set(dsa.map(i => i.section)));
-  
   // Calculate section matching today's date
   const now = new Date();
   const todayDay = now.getDate();
@@ -16,11 +15,11 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
   else if (todayMonth === 'Aug') todaySectionIndex = todayDay; // Aug 1 -> 1 ... Aug 22 -> 22
   else if (todayMonth === 'Sep') todaySectionIndex = 31 + todayDay; // Sep 1 -> 32
 
-  if (todaySectionIndex < 0 || todaySectionIndex >= sections.length) {
+  if (todaySectionIndex < 0 || todaySectionIndex >= DSA_SECTIONS_LIST.length) {
     todaySectionIndex = 22; // fallback to active August day
   }
 
-  const todaySectionName = sections[todaySectionIndex] || sections[0];
+  const todaySectionName = DSA_SECTIONS_LIST[todaySectionIndex]?.name || DSA_SECTIONS_LIST[0].name;
   const todayDsaQuestions = dsa.filter(i => i.section === todaySectionName);
   const todayDsaCompleted = todayDsaQuestions.filter(i => i.completed).length;
 

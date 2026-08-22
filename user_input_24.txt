@@ -1,0 +1,6 @@
+<USER_REQUEST>
+For today focus it should show the dsa questions for todays date
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-22T19:35:05+05:30.
+</ADDITIONAL_METADATA>

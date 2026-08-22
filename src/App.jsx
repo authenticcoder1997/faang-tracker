@@ -12,48 +12,20 @@ import { hldTopics } from './data/hldTopics';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const mergeData = (stored, defaults, storageKey) => {
-    let oldStored = [];
-    if (!stored || stored.length === 0) {
-      // Try to recover from older versions if this is a fresh load of a new key
-      try {
-        const v2 = JSON.parse(localStorage.getItem('faang-tracker-dsa-v2') || '[]');
-        const v3 = JSON.parse(localStorage.getItem('faang-tracker-dsa-v3') || '[]');
-        oldStored = [...v3, ...v2];
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    const merged = defaults.map(defaultItem => {
-      // 1. Try to find in current stored by ID
-      const currentStored = stored?.find(d => d.id === defaultItem.id);
-      if (currentStored) {
+  const mergeData = (stored, defaults) => {
+    if (!stored || stored.length === 0) return defaults;
+    return defaults.map(defaultItem => {
+      const currentStored = stored.find(d => d.id === defaultItem.id || d.url === defaultItem.url);
+      if (currentStored !== undefined) {
         return { ...defaultItem, completed: currentStored.completed };
       }
-      
-      // 2. Try to find in older stored by matching Title
-      const olderMatch = oldStored.find(o => 
-        o.title.toLowerCase().trim() === defaultItem.title.toLowerCase().trim() ||
-        o.url === defaultItem.url
-      );
-      if (olderMatch && olderMatch.completed) {
-        return { ...defaultItem, completed: true };
-      }
-
       return defaultItem;
     });
-
-    return merged;
   };
 
-  const [storedDsa, setDsa] = useLocalStorage('faang-tracker-dsa-v5', dsaTopics);
-  const [storedLld, setLld] = useLocalStorage('faang-tracker-lld-v3', lldTopics);
-  const [storedHld, setHld] = useLocalStorage('faang-tracker-hld-v3', hldTopics);
-
-  const dsa = mergeData(storedDsa, dsaTopics, 'faang-tracker-dsa-v5');
-  const lld = mergeData(storedLld, lldTopics, 'faang-tracker-lld-v3');
-  const hld = mergeData(storedHld, hldTopics, 'faang-tracker-hld-v3');
+  const [dsa, setDsa] = useLocalStorage('faang-tracker-dsa-v7', dsaTopics, mergeData);
+  const [lld, setLld] = useLocalStorage('faang-tracker-lld-v7', lldTopics, mergeData);
+  const [hld, setHld] = useLocalStorage('faang-tracker-hld-v7', hldTopics, mergeData);
 
   useEffect(() => {
     document.documentElement.classList.add('dark');

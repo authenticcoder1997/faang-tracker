@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles } from 'lucide-react';
+import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
 export default function DsaTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -10,13 +11,11 @@ export default function DsaTracker({ items, setItems }) {
     ));
   };
 
-  const sections = Array.from(new Set(items.map(i => i.section)));
-  
   const totalCompleted = items.filter(i => i.completed).length;
   const overallPct = items.length > 0 ? Math.round((totalCompleted / items.length) * 100) : 0;
 
-  const completedDays = sections.filter(sec => {
-    const sItems = items.filter(i => i.section === sec);
+  const completedDays = DSA_SECTIONS_LIST.filter(secObj => {
+    const sItems = items.filter(i => i.section === secObj.name);
     return sItems.length > 0 && sItems.every(i => i.completed);
   }).length;
 
@@ -33,7 +32,7 @@ export default function DsaTracker({ items, setItems }) {
               <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
             </div>
             <div className="flex items-center gap-2 text-green-500 text-sm font-bold sm:ml-4">
-              <Trophy size={16} /> Day {completedDays}/{sections.length}
+              <Trophy size={16} /> Day {completedDays}/{DSA_SECTIONS_LIST.length}
               <span className="text-gray-400 font-normal text-xs ml-1">({totalCompleted}/{items.length} problems)</span>
             </div>
           </div>
@@ -56,20 +55,14 @@ export default function DsaTracker({ items, setItems }) {
 
         {/* Accordion Sections */}
         <div className="space-y-2 sm:space-y-4">
-          {sections.map((section, idx) => {
+          {DSA_SECTIONS_LIST.map((secObj, idx) => {
+            const section = secObj.name;
             const sectionItems = items.filter(i => i.section === section);
             const sectionCompleted = sectionItems.filter(i => i.completed).length;
             const isFullyCompleted = sectionCompleted === sectionItems.length && sectionItems.length > 0;
             const isCollapsed = collapsedSections[section] !== undefined ? collapsedSections[section] : true; // Default collapsed
             const sectionPct = sectionItems.length > 0 ? Math.round((sectionCompleted / sectionItems.length) * 100) : 0;
-            
-            // Real sequential date logic starting July 31st (matches Planly schedule)
-            const startDate = new Date(2024, 6, 31); // 31 July
-            const targetDate = new Date(startDate);
-            targetDate.setDate(startDate.getDate() + idx);
-            const day = String(targetDate.getDate()).padStart(2, '0');
-            const month = targetDate.toLocaleString('en-US', { month: 'short' });
-            const dateStr = `${day} ${month} - ${day} ${month}`;
+            const dateStr = secObj.date;
 
             return (
               <div key={section} className="w-full flex bg-[#111111] flex-col rounded-xl border border-gray-800 transition-all">

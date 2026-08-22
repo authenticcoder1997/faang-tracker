@@ -1,0 +1,32 @@
+<USER_REQUEST>
+
+Graph VI
+(0/3)
+
+30 Aug - 30 Aug
+
+
+
+Graph VII and Maths
+(0/3)
+
+1 Aug - 1 Aug
+
+
+
+Dynamic Programming I
+(0/5)
+
+2 Aug - 2 Aug
+
+
+
+
+how does 1 aug come after 30 aug
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-08-22T19:19:29+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from Gemini 3.1 Pro (High) to Gemini 3.7 Flash (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>
