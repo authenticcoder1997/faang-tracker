@@ -57,8 +57,13 @@ export default function DsaTracker({ items, setItems }) {
             const isCollapsed = collapsedSections[section] !== undefined ? collapsedSections[section] : true; // Default collapsed
             const sectionPct = sectionItems.length > 0 ? Math.round((sectionCompleted / sectionItems.length) * 100) : 0;
             
-            // Dummy date logic for UI matching
-            const dateStr = `${(idx % 30) + 1} Aug - ${(idx % 30) + 1} Aug`;
+            // Real sequential date logic starting July 31st (matches Planly schedule)
+            const startDate = new Date(2024, 6, 31); // 31 July
+            const targetDate = new Date(startDate);
+            targetDate.setDate(startDate.getDate() + idx);
+            const day = String(targetDate.getDate()).padStart(2, '0');
+            const month = targetDate.toLocaleString('en-US', { month: 'short' });
+            const dateStr = `${day} ${month} - ${day} ${month}`;
 
             return (
               <div key={section} className="w-full flex bg-[#111111] flex-col rounded-xl border border-gray-800 transition-all">
