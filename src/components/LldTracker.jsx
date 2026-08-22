@@ -177,7 +177,7 @@ export default function LldTracker({ items, setItems }) {
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">#</div>
             <div className="col-span-3">Problem</div>
-            <div className="col-span-2">Notes</div>
+            <div className="col-span-2 text-center">Notes</div>
             <div className="col-span-2">Pattern</div>
             <div className="col-span-2 text-center">Priority</div>
             <div className="col-span-1 text-center">Difficulty</div>

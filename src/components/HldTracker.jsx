@@ -68,7 +68,7 @@ export default function HldTracker({ items, setItems }) {
         <div className="w-full">
           <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
             <div className="col-span-5 pl-6">Interview Question</div>
-            <div className="col-span-4">Notes</div>
+            <div className="col-span-4 text-center">Notes</div>
             <div className="col-span-2 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
           </div>
