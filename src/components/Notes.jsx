@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Edit3, Sparkles, Send, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Edit3, Sparkles, ArrowRight, Loader2, Mic } from 'lucide-react';
 
 export default function Notes({ notes, setNotes }) {
   const [activeNoteId, setActiveNoteId] = useState(null);
@@ -9,7 +9,10 @@ export default function Notes({ notes, setNotes }) {
   // AI State
   const [aiInput, setAiInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  
   const textareaRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   // Debounced auto-save
   useEffect(() => {
@@ -27,6 +30,15 @@ export default function Notes({ notes, setNotes }) {
 
     return () => clearTimeout(timer);
   }, [editTitle, editContent, activeNoteId, notes, setNotes]);
+
+  // Clean up speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
 
   const createNote = () => {
     const newNote = {
@@ -54,19 +66,74 @@ export default function Notes({ notes, setNotes }) {
     setEditContent(note.content);
   };
 
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please try Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    // Store the text that was already in the input before we started talking
+    const originalText = aiInput;
+
+    recognition.onstart = () => setIsListening(true);
+    
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      const newText = (originalText ? originalText + ' ' : '') + finalTranscript + interimTranscript;
+      setAiInput(newText);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   const handleAiSubmit = async (e) => {
     e.preventDefault();
     if (!aiInput.trim() || isGenerating) return;
+    
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    }
 
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
-      alert("Gemini API Key is missing! Please add VITE_GEMINI_API_KEY to your environment variables.");
+      alert("Gemini API Key is missing! Check your Vercel Environment Variables.");
       return;
     }
 
     setIsGenerating(true);
     const userText = aiInput;
-    setAiInput(''); // Clear input immediately for better UX
+    setAiInput(''); 
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
@@ -85,13 +152,11 @@ export default function Notes({ notes, setNotes }) {
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         const generatedText = data.candidates[0].content.parts[0].text.trim();
         
-        // Append to current content
         setEditContent(prev => {
           const newContent = prev.trim() ? `${prev}\n\n${generatedText}` : generatedText;
           return newContent;
         });
 
-        // Scroll to bottom of textarea
         setTimeout(() => {
           if (textareaRef.current) {
             textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
@@ -167,29 +232,41 @@ export default function Notes({ notes, setNotes }) {
             />
 
             {/* AI Input Wrapper */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#1e1e1e] border border-[#333] rounded-full shadow-2xl p-2 flex items-center gap-2">
-              <div className="pl-3 text-purple-400">
-                <Sparkles size={18} />
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-[#1e1e1e] border border-[#333] rounded-2xl shadow-2xl p-2 px-3 flex items-center gap-3">
+              <div className="text-gray-400">
+                <Sparkles size={20} />
               </div>
-              <form onSubmit={handleAiSubmit} className="flex-1 flex items-center">
+              <form onSubmit={handleAiSubmit} className="flex-1 flex items-center gap-2">
                 <input 
                   type="text"
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
                   disabled={isGenerating}
-                  placeholder="Jot down rough notes, Gemini will format them..."
-                  className="w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-500 disabled:opacity-50"
+                  placeholder={isListening ? "Listening..." : "Dictate or type rough notes, Gemini will format them..."}
+                  className={`w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-500 disabled:opacity-50 ${isListening ? 'animate-pulse text-green-400' : ''}`}
                 />
+                
+                {/* Mic Button */}
+                <button 
+                  type="button"
+                  onClick={toggleListening}
+                  className={`p-2 rounded-full transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-[#333]'}`}
+                  title="Dictate Note"
+                >
+                  <Mic size={18} className={isListening ? 'animate-pulse' : ''} />
+                </button>
+
+                {/* Send Button */}
                 <button 
                   type="submit"
-                  disabled={isGenerating || !aiInput.trim()}
-                  className={`p-2 rounded-full flex items-center justify-center transition-colors ${
-                    isGenerating || !aiInput.trim() 
+                  disabled={isGenerating || (!aiInput.trim() && !isListening)}
+                  className={`p-2 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
+                    isGenerating || (!aiInput.trim() && !isListening)
                       ? 'bg-[#333] text-gray-500' 
-                      : 'bg-white text-black hover:bg-gray-200'
+                      : 'bg-[#333] text-white hover:bg-[#444]'
                   }`}
                 >
-                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                 </button>
               </form>
             </div>
