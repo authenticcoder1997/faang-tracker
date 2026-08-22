@@ -12,20 +12,38 @@ import { hldTopics } from './data/hldTopics';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const mergeData = (stored, defaults) => {
-    if (!stored || stored.length === 0) return defaults;
-    const merged = stored.map(item => {
-      const defaultItem = defaults.find(d => d.id === item.id);
-      if (defaultItem && (!item.url || item.title !== defaultItem.title || item.section !== defaultItem.section)) {
-        return { ...item, url: defaultItem.url, title: defaultItem.title, difficulty: defaultItem.difficulty, section: defaultItem.section };
+  const mergeData = (stored, defaults, storageKey) => {
+    let oldStored = [];
+    if (!stored || stored.length === 0) {
+      // Try to recover from older versions if this is a fresh load of a new key
+      try {
+        const v2 = JSON.parse(localStorage.getItem('faang-tracker-dsa-v2') || '[]');
+        const v3 = JSON.parse(localStorage.getItem('faang-tracker-dsa-v3') || '[]');
+        oldStored = [...v3, ...v2];
+      } catch (e) {
+        // ignore
       }
-      return item;
-    });
-    defaults.forEach(defaultItem => {
-      if (!merged.find(m => m.id === defaultItem.id)) {
-        merged.push({ ...defaultItem });
+    }
+
+    const merged = defaults.map(defaultItem => {
+      // 1. Try to find in current stored by ID
+      const currentStored = stored?.find(d => d.id === defaultItem.id);
+      if (currentStored) {
+        return { ...defaultItem, completed: currentStored.completed };
       }
+      
+      // 2. Try to find in older stored by matching Title
+      const olderMatch = oldStored.find(o => 
+        o.title.toLowerCase().trim() === defaultItem.title.toLowerCase().trim() ||
+        o.url === defaultItem.url
+      );
+      if (olderMatch && olderMatch.completed) {
+        return { ...defaultItem, completed: true };
+      }
+
+      return defaultItem;
     });
+
     return merged;
   };
 
@@ -33,9 +51,9 @@ function App() {
   const [storedLld, setLld] = useLocalStorage('faang-tracker-lld-v3', lldTopics);
   const [storedHld, setHld] = useLocalStorage('faang-tracker-hld-v3', hldTopics);
 
-  const dsa = mergeData(storedDsa, dsaTopics);
-  const lld = mergeData(storedLld, lldTopics);
-  const hld = mergeData(storedHld, hldTopics);
+  const dsa = mergeData(storedDsa, dsaTopics, 'faang-tracker-dsa-v4');
+  const lld = mergeData(storedLld, lldTopics, 'faang-tracker-lld-v3');
+  const hld = mergeData(storedHld, hldTopics, 'faang-tracker-hld-v3');
 
   useEffect(() => {
     document.documentElement.classList.add('dark');

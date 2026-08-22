@@ -11,7 +11,7 @@ export const dsaTopics = [
     "id": "dsa-v4-2",
     "title": "Pascal's Triangle",
     "section": "Sorting & Arrays I",
-    "url": "https://leetcode.com/problems/pascal-s-triangle/",
+    "url": "https://leetcode.com/problems/pascals-triangle/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -25,9 +25,9 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-4",
-    "title": "Kadane's Algorithm",
+    "title": "Maximum Subarray",
     "section": "Sorting & Arrays I",
-    "url": "https://leetcode.com/problems/kadane-s-algorithm/",
+    "url": "https://leetcode.com/problems/maximum-subarray/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -169,9 +169,9 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-22",
-    "title": "Find First and Last Position",
+    "title": "Find First and Last Position of Element in Sorted Array",
     "section": "Binary Search I",
-    "url": "https://leetcode.com/problems/find-first-and-last-position/",
+    "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -201,7 +201,7 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-26",
-    "title": "Koko eating bananas",
+    "title": "Koko Eating Bananas",
     "section": "Binary Search II",
     "url": "https://leetcode.com/problems/koko-eating-bananas/",
     "difficulty": "Medium",
@@ -209,9 +209,9 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-27",
-    "title": "Minimum days to make M bouquets",
+    "title": "Minimum Number of Days to Make m Bouquets",
     "section": "Binary Search II",
-    "url": "https://leetcode.com/problems/minimum-days-to-make-m-bouquets/",
+    "url": "https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -225,17 +225,17 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-29",
-    "title": "Book Allocation Problem",
+    "title": "Allocate Books",
     "section": "Binary Search II",
-    "url": "https://leetcode.com/problems/book-allocation-problem/",
+    "url": "https://leetcode.com/problems/allocate-books/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-30",
-    "title": "Median of 2 sorted arrays",
+    "title": "Median of Two Sorted Arrays",
     "section": "Binary Search II",
-    "url": "https://leetcode.com/problems/median-of-2-sorted-arrays/",
+    "url": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -257,9 +257,9 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-33",
-    "title": "Capacity To Ship Packages",
+    "title": "Capacity To Ship Packages Within D Days",
     "section": "Binary Search III",
-    "url": "https://leetcode.com/problems/capacity-to-ship-packages/",
+    "url": "https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -689,25 +689,25 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-87",
-    "title": "Inorder Traversal",
+    "title": "Binary Tree Inorder Traversal",
     "section": "Binary Tree I",
-    "url": "https://leetcode.com/problems/inorder-traversal/",
+    "url": "https://leetcode.com/problems/binary-tree-inorder-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-88",
-    "title": "Preorder Traversal",
+    "title": "Binary Tree Preorder Traversal",
     "section": "Binary Tree I",
-    "url": "https://leetcode.com/problems/preorder-traversal/",
+    "url": "https://leetcode.com/problems/binary-tree-preorder-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-89",
-    "title": "Postorder Traversal",
+    "title": "Binary Tree Postorder Traversal",
     "section": "Binary Tree I",
-    "url": "https://leetcode.com/problems/postorder-traversal/",
+    "url": "https://leetcode.com/problems/binary-tree-postorder-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -729,17 +729,17 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-92",
-    "title": "Level Order Traversal",
+    "title": "Binary Tree Level Order Traversal",
     "section": "Binary Tree II",
-    "url": "https://leetcode.com/problems/level-order-traversal/",
+    "url": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-93",
-    "title": "Height of a Binary Tree",
+    "title": "Maximum Depth of Binary Tree",
     "section": "Binary Tree II",
-    "url": "https://leetcode.com/problems/height-of-a-binary-tree/",
+    "url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -753,57 +753,57 @@ export const dsaTopics = [
   },
   {
     "id": "dsa-v4-95",
-    "title": "Check if two trees are identical or not",
+    "title": "Same Tree",
     "section": "Binary Tree II",
-    "url": "https://leetcode.com/problems/check-if-two-trees-are-identical-or-not/",
+    "url": "https://leetcode.com/problems/same-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-96",
-    "title": "LCA in Binary Tree",
+    "title": "Lowest Common Ancestor of a Binary Tree",
     "section": "Binary Tree II",
-    "url": "https://leetcode.com/problems/lca-in-binary-tree/",
+    "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-97",
-    "title": "Maximum path sum",
+    "title": "Binary Tree Maximum Path Sum",
     "section": "Binary Tree III",
-    "url": "https://leetcode.com/problems/maximum-path-sum/",
+    "url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-98",
-    "title": "Construct Binary Tree from inorder and preorder",
+    "title": "Construct Binary Tree from Preorder and Inorder Traversal",
     "section": "Binary Tree III",
-    "url": "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-preorder/",
+    "url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-99",
-    "title": "Construct Binary Tree from Inorder and Postorder",
+    "title": "Construct Binary Tree from Inorder and Postorder Traversal",
     "section": "Binary Tree III",
-    "url": "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder/",
+    "url": "https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-100",
-    "title": "Symmetric Binary Tree",
+    "title": "Symmetric Tree",
     "section": "Binary Tree III",
-    "url": "https://leetcode.com/problems/symmetric-binary-tree/",
+    "url": "https://leetcode.com/problems/symmetric-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-101",
-    "title": "Flatten Binary Tree to LinkedList",
+    "title": "Flatten Binary Tree to Linked List",
     "section": "Binary Tree III",
-    "url": "https://leetcode.com/problems/flatten-binary-tree-to-linkedlist/",
+    "url": "https://leetcode.com/problems/flatten-binary-tree-to-linked-list/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -811,7 +811,7 @@ export const dsaTopics = [
     "id": "dsa-v4-102",
     "title": "Morris Inorder Traversal",
     "section": "Binary Tree IV",
-    "url": "https://leetcode.com/problems/morris-inorder-traversal/",
+    "url": "https://leetcode.com/problemset/all/?search=Morris%20Inorder%20Traversal",
     "difficulty": "Medium",
     "completed": false
   },
@@ -819,87 +819,87 @@ export const dsaTopics = [
     "id": "dsa-v4-103",
     "title": "Morris Preorder Traversal",
     "section": "Binary Tree IV",
-    "url": "https://leetcode.com/problems/morris-preorder-traversal/",
+    "url": "https://leetcode.com/problemset/all/?search=Morris%20Preorder%20Traversal",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-104",
-    "title": "Max width of a Binary Tree",
+    "title": "Maximum Width of Binary Tree",
     "section": "Binary Tree IV",
-    "url": "https://leetcode.com/problems/max-width-of-a-binary-tree/",
+    "url": "https://leetcode.com/problems/maximum-width-of-binary-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-105",
-    "title": "Populate Next Right pointers of Tree",
+    "title": "Populating Next Right Pointers in Each Node",
     "section": "Binary Tree V and BST I",
-    "url": "https://leetcode.com/problems/populate-next-right-pointers-of-tree/",
+    "url": "https://leetcode.com/problems/populating-next-right-pointers-in-each-node/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-106",
-    "title": "Search given Key in BST",
+    "title": "Search in a Binary Search Tree",
     "section": "Binary Tree V and BST I",
-    "url": "https://leetcode.com/problems/search-given-key-in-bst/",
+    "url": "https://leetcode.com/problems/search-in-a-binary-search-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-107",
-    "title": "Construct BST from given keys",
+    "title": "Convert Sorted Array to Binary Search Tree",
     "section": "Binary Tree V and BST I",
-    "url": "https://leetcode.com/problems/construct-bst-from-given-keys/",
+    "url": "https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-108",
-    "title": "Find LCA of two nodes in BST",
+    "title": "Lowest Common Ancestor of a Binary Search Tree",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/find-lca-of-two-nodes-in-bst/",
+    "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-109",
-    "title": "Find the inorder predecessor/successor of a given Key in BST",
+    "title": "Inorder Successor in BST",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/find-the-inorder-predecessor-successor-of-a-given-key-in-bst/",
+    "url": "https://leetcode.com/problems/inorder-successor-in-bst/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-110",
-    "title": "Floor in a BST",
+    "title": "Floor in BST",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/floor-in-a-bst/",
+    "url": "https://leetcode.com/problemset/all/?search=Floor%20in%20BST",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-111",
-    "title": "Ceil in a BST",
+    "title": "Ceil in BST",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/ceil-in-a-bst/",
+    "url": "https://leetcode.com/problemset/all/?search=Ceil%20in%20BST",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-112",
-    "title": "Find K-th smallest element in BST",
+    "title": "Kth Smallest Element in a BST",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/find-k-th-smallest-element-in-bst/",
+    "url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-113",
-    "title": "Find K-th largest element in BST",
+    "title": "Kth Largest Element in a BST",
     "section": "Binary Search Tree II",
-    "url": "https://leetcode.com/problems/find-k-th-largest-element-in-bst/",
+    "url": "https://leetcode.com/problems/kth-largest-element-in-a-bst/",
     "difficulty": "Medium",
     "completed": false
   },
@@ -915,7 +915,7 @@ export const dsaTopics = [
     "id": "dsa-v4-115",
     "title": "DFS of Graph",
     "section": "Graph I",
-    "url": "https://leetcode.com/problems/dfs-of-graph/",
+    "url": "https://leetcode.com/problemset/all/?search=DFS%20of%20Graph",
     "difficulty": "Medium",
     "completed": false
   },
@@ -923,60 +923,52 @@ export const dsaTopics = [
     "id": "dsa-v4-116",
     "title": "BFS of Graph",
     "section": "Graph I",
-    "url": "https://leetcode.com/problems/bfs-of-graph/",
+    "url": "https://leetcode.com/problemset/all/?search=BFS%20of%20Graph",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-117",
-    "title": "Detect A cycle in Undirected Graph using BFS",
+    "title": "Detect Cycle in an Undirected Graph",
     "section": "Graph I",
-    "url": "https://leetcode.com/problems/detect-a-cycle-in-undirected-graph-using-bfs/",
+    "url": "https://leetcode.com/problems/detect-cycle-in-an-undirected-graph/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-118",
-    "title": "Detect A cycle in Undirected Graph using DFS",
+    "title": "Detect Cycle in a Directed Graph",
     "section": "Graph I",
-    "url": "https://leetcode.com/problems/detect-a-cycle-in-undirected-graph-using-dfs/",
+    "url": "https://leetcode.com/problems/detect-cycle-in-a-directed-graph/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-119",
-    "title": "Detect A cycle in a Directed Graph using DFS",
+    "title": "Course Schedule",
     "section": "Graph II",
-    "url": "https://leetcode.com/problems/detect-a-cycle-in-a-directed-graph-using-dfs/",
+    "url": "https://leetcode.com/problems/course-schedule/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-120",
-    "title": "Detect A cycle in a Directed Graph using BFS",
+    "title": "Course Schedule II",
     "section": "Graph II",
-    "url": "https://leetcode.com/problems/detect-a-cycle-in-a-directed-graph-using-bfs/",
+    "url": "https://leetcode.com/problems/course-schedule-ii/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-121",
-    "title": "Topological Sort BFS",
+    "title": "Topological Sort",
     "section": "Graph II",
-    "url": "https://leetcode.com/problems/topological-sort-bfs/",
+    "url": "https://leetcode.com/problems/topological-sort/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-122",
-    "title": "Topological Sort DFS",
-    "section": "Graph II",
-    "url": "https://leetcode.com/problems/topological-sort-dfs/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-123",
     "title": "Number of Islands",
     "section": "Graph II",
     "url": "https://leetcode.com/problems/number-of-islands/",
@@ -984,39 +976,31 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-124",
-    "title": "Bipartite Check using BFS",
+    "id": "dsa-v4-123",
+    "title": "Is Graph Bipartite?",
     "section": "Graph III",
-    "url": "https://leetcode.com/problems/bipartite-check-using-bfs/",
+    "url": "https://leetcode.com/problems/is-graph-bipartite/",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-v4-124",
+    "title": "Bipartite Graph",
+    "section": "Graph III",
+    "url": "https://leetcode.com/problems/bipartite-graph/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-125",
-    "title": "Bipartite Check using DFS",
+    "title": "Find Eventual Safe States",
     "section": "Graph III",
-    "url": "https://leetcode.com/problems/bipartite-check-using-dfs/",
+    "url": "https://leetcode.com/problems/find-eventual-safe-states/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-126",
-    "title": "Course Schedule",
-    "section": "Graph III",
-    "url": "https://leetcode.com/problems/course-schedule/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-127",
-    "title": "Course Schedule II",
-    "section": "Graph III",
-    "url": "https://leetcode.com/problems/course-schedule-ii/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-128",
     "title": "Shortest Path in Undirected Graph",
     "section": "Graph IV",
     "url": "https://leetcode.com/problems/shortest-path-in-undirected-graph/",
@@ -1024,7 +1008,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-129",
+    "id": "dsa-v4-127",
     "title": "Shortest Path in Directed Acyclic Graph",
     "section": "Graph IV",
     "url": "https://leetcode.com/problems/shortest-path-in-directed-acyclic-graph/",
@@ -1032,47 +1016,47 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-130",
-    "title": "Dijkstra's Algorithm",
+    "id": "dsa-v4-128",
+    "title": "Network Delay Time",
     "section": "Graph IV",
-    "url": "https://leetcode.com/problems/dijkstra-s-algorithm/",
+    "url": "https://leetcode.com/problems/network-delay-time/",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-v4-129",
+    "title": "Cheapest Flights Within K Stops",
+    "section": "Graph IV",
+    "url": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-v4-130",
+    "title": "Find the City With the Smallest Number of Neighbors at a Threshold Distance",
+    "section": "Graph V",
+    "url": "https://leetcode.com/problems/find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-131",
-    "title": "Bellman Ford Algorithm",
-    "section": "Graph IV",
-    "url": "https://leetcode.com/problems/bellman-ford-algorithm/",
+    "title": "Minimum Spanning Tree",
+    "section": "Graph V",
+    "url": "https://leetcode.com/problems/minimum-spanning-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-132",
-    "title": "Floyd Warshall Algorithm",
+    "title": "Kruskal's Algorithm",
     "section": "Graph V",
-    "url": "https://leetcode.com/problems/floyd-warshall-algorithm/",
+    "url": "https://leetcode.com/problems/kruskals-algorithm/",
     "difficulty": "Medium",
     "completed": false
   },
   {
     "id": "dsa-v4-133",
-    "title": "MST using Prim's Algo",
-    "section": "Graph V",
-    "url": "https://leetcode.com/problems/mst-using-prim-s-algo/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-134",
-    "title": "MST using Kruskal's Algo",
-    "section": "Graph V",
-    "url": "https://leetcode.com/problems/mst-using-kruskal-s-algo/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-135",
     "title": "Word Ladder",
     "section": "Graph VI",
     "url": "https://leetcode.com/problems/word-ladder/",
@@ -1080,7 +1064,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-136",
+    "id": "dsa-v4-134",
     "title": "Word Ladder II",
     "section": "Graph VI",
     "url": "https://leetcode.com/problems/word-ladder-ii/",
@@ -1088,7 +1072,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-137",
+    "id": "dsa-v4-135",
     "title": "Alien Dictionary",
     "section": "Graph VI",
     "url": "https://leetcode.com/problems/alien-dictionary/",
@@ -1096,23 +1080,23 @@ export const dsaTopics = [
     "completed": false
   },
   {
+    "id": "dsa-v4-136",
+    "title": "Strongly Connected Components",
+    "section": "Graph VII and Maths",
+    "url": "https://leetcode.com/problems/strongly-connected-components/",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-v4-137",
+    "title": "Bridges in a Graph",
+    "section": "Graph VII and Maths",
+    "url": "https://leetcode.com/problems/bridges-in-a-graph/",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
     "id": "dsa-v4-138",
-    "title": "Strongly Connected Component",
-    "section": "Graph VII and Maths",
-    "url": "https://leetcode.com/problems/strongly-connected-component/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-139",
-    "title": "Bridges in Graph",
-    "section": "Graph VII and Maths",
-    "url": "https://leetcode.com/problems/bridges-in-graph/",
-    "difficulty": "Medium",
-    "completed": false
-  },
-  {
-    "id": "dsa-v4-140",
     "title": "Articulation Point",
     "section": "Graph VII and Maths",
     "url": "https://leetcode.com/problems/articulation-point/",
@@ -1120,7 +1104,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-141",
+    "id": "dsa-v4-139",
     "title": "Climbing Stairs",
     "section": "Dynamic Programming I",
     "url": "https://leetcode.com/problems/climbing-stairs/",
@@ -1128,7 +1112,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-142",
+    "id": "dsa-v4-140",
     "title": "Fibonacci Number",
     "section": "Dynamic Programming I",
     "url": "https://leetcode.com/problems/fibonacci-number/",
@@ -1136,7 +1120,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-143",
+    "id": "dsa-v4-141",
     "title": "House Robber",
     "section": "Dynamic Programming I",
     "url": "https://leetcode.com/problems/house-robber/",
@@ -1144,7 +1128,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-144",
+    "id": "dsa-v4-142",
     "title": "House Robber II",
     "section": "Dynamic Programming I",
     "url": "https://leetcode.com/problems/house-robber-ii/",
@@ -1152,7 +1136,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-145",
+    "id": "dsa-v4-143",
     "title": "Decode Ways",
     "section": "Dynamic Programming I",
     "url": "https://leetcode.com/problems/decode-ways/",
@@ -1160,7 +1144,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-146",
+    "id": "dsa-v4-144",
     "title": "Unique Paths",
     "section": "Dynamic Programming II",
     "url": "https://leetcode.com/problems/unique-paths/",
@@ -1168,7 +1152,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-147",
+    "id": "dsa-v4-145",
     "title": "Unique Paths II",
     "section": "Dynamic Programming II",
     "url": "https://leetcode.com/problems/unique-paths-ii/",
@@ -1176,7 +1160,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-148",
+    "id": "dsa-v4-146",
     "title": "Minimum Path Sum",
     "section": "Dynamic Programming II",
     "url": "https://leetcode.com/problems/minimum-path-sum/",
@@ -1184,7 +1168,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-149",
+    "id": "dsa-v4-147",
     "title": "Triangle",
     "section": "Dynamic Programming II",
     "url": "https://leetcode.com/problems/triangle/",
@@ -1192,15 +1176,15 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-150",
-    "title": "0/1 Knapsack",
+    "id": "dsa-v4-148",
+    "title": "01 Knapsack",
     "section": "Dynamic Programming III",
-    "url": "https://leetcode.com/problems/0-1-knapsack/",
+    "url": "https://leetcode.com/problems/01-knapsack/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-151",
+    "id": "dsa-v4-149",
     "title": "Partition Equal Subset Sum",
     "section": "Dynamic Programming III",
     "url": "https://leetcode.com/problems/partition-equal-subset-sum/",
@@ -1208,7 +1192,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-152",
+    "id": "dsa-v4-150",
     "title": "Target Sum",
     "section": "Dynamic Programming III",
     "url": "https://leetcode.com/problems/target-sum/",
@@ -1216,7 +1200,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-153",
+    "id": "dsa-v4-151",
     "title": "Coin Change",
     "section": "Dynamic Programming III",
     "url": "https://leetcode.com/problems/coin-change/",
@@ -1224,7 +1208,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-154",
+    "id": "dsa-v4-152",
     "title": "Maximum Product Subarray",
     "section": "Dynamic Programming IV",
     "url": "https://leetcode.com/problems/maximum-product-subarray/",
@@ -1232,7 +1216,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-155",
+    "id": "dsa-v4-153",
     "title": "Longest Increasing Subsequence",
     "section": "Dynamic Programming IV",
     "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
@@ -1240,7 +1224,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-156",
+    "id": "dsa-v4-154",
     "title": "Number of Longest Increasing Subsequence",
     "section": "Dynamic Programming IV",
     "url": "https://leetcode.com/problems/number-of-longest-increasing-subsequence/",
@@ -1248,47 +1232,47 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-157",
-    "title": "Coin change II",
+    "id": "dsa-v4-155",
+    "title": "Coin Change II",
     "section": "Dynamic Programming V",
     "url": "https://leetcode.com/problems/coin-change-ii/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-158",
-    "title": "Unbounded knapsack",
+    "id": "dsa-v4-156",
+    "title": "Unbounded Knapsack",
     "section": "Dynamic Programming V",
     "url": "https://leetcode.com/problems/unbounded-knapsack/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-159",
-    "title": "Rod cutting problem",
+    "id": "dsa-v4-157",
+    "title": "Rod Cutting",
     "section": "Dynamic Programming V",
-    "url": "https://leetcode.com/problems/rod-cutting-problem/",
+    "url": "https://leetcode.com/problems/rod-cutting/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-160",
-    "title": "Minimum coins",
+    "id": "dsa-v4-158",
+    "title": "Minimum Coins",
     "section": "Dynamic Programming V",
     "url": "https://leetcode.com/problems/minimum-coins/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-161",
-    "title": "Longest common subsequence",
+    "id": "dsa-v4-159",
+    "title": "Longest Common Subsequence",
     "section": "Dynamic Programming V",
     "url": "https://leetcode.com/problems/longest-common-subsequence/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-162",
+    "id": "dsa-v4-160",
     "title": "Longest Palindromic Subsequence",
     "section": "Dynamic Programming VI",
     "url": "https://leetcode.com/problems/longest-palindromic-subsequence/",
@@ -1296,7 +1280,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-163",
+    "id": "dsa-v4-161",
     "title": "Distinct Subsequences",
     "section": "Dynamic Programming VI",
     "url": "https://leetcode.com/problems/distinct-subsequences/",
@@ -1304,7 +1288,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-164",
+    "id": "dsa-v4-162",
     "title": "Edit Distance",
     "section": "Dynamic Programming VI",
     "url": "https://leetcode.com/problems/edit-distance/",
@@ -1312,7 +1296,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-165",
+    "id": "dsa-v4-163",
     "title": "Wildcard Matching",
     "section": "Dynamic Programming VI",
     "url": "https://leetcode.com/problems/wildcard-matching/",
@@ -1320,7 +1304,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-166",
+    "id": "dsa-v4-164",
     "title": "Regular Expression Matching",
     "section": "Dynamic Programming VI",
     "url": "https://leetcode.com/problems/regular-expression-matching/",
@@ -1328,7 +1312,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-167",
+    "id": "dsa-v4-165",
     "title": "Burst Balloons",
     "section": "Dynamic Programming VII",
     "url": "https://leetcode.com/problems/burst-balloons/",
@@ -1336,7 +1320,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-168",
+    "id": "dsa-v4-166",
     "title": "Palindrome Partitioning II",
     "section": "Dynamic Programming VII",
     "url": "https://leetcode.com/problems/palindrome-partitioning-ii/",
@@ -1344,7 +1328,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-169",
+    "id": "dsa-v4-167",
     "title": "Matrix Chain Multiplication",
     "section": "Dynamic Programming VII",
     "url": "https://leetcode.com/problems/matrix-chain-multiplication/",
@@ -1352,7 +1336,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-170",
+    "id": "dsa-v4-168",
     "title": "Minimum Cost to Cut a Stick",
     "section": "Dynamic Programming VII",
     "url": "https://leetcode.com/problems/minimum-cost-to-cut-a-stick/",
@@ -1360,7 +1344,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-171",
+    "id": "dsa-v4-169",
     "title": "Maximum Profit in Job Scheduling",
     "section": "Dynamic Programming VIII",
     "url": "https://leetcode.com/problems/maximum-profit-in-job-scheduling/",
@@ -1368,7 +1352,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-172",
+    "id": "dsa-v4-170",
     "title": "Super Egg Drop",
     "section": "Dynamic Programming VIII",
     "url": "https://leetcode.com/problems/super-egg-drop/",
@@ -1376,7 +1360,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-173",
+    "id": "dsa-v4-171",
     "title": "Reverse Words in a String",
     "section": "String and Trie",
     "url": "https://leetcode.com/problems/reverse-words-in-a-string/",
@@ -1384,7 +1368,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-174",
+    "id": "dsa-v4-172",
     "title": "Longest Palindromic Substring",
     "section": "String and Trie",
     "url": "https://leetcode.com/problems/longest-palindromic-substring/",
@@ -1392,7 +1376,7 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-175",
+    "id": "dsa-v4-173",
     "title": "Roman to Integer",
     "section": "String and Trie",
     "url": "https://leetcode.com/problems/roman-to-integer/",
@@ -1400,15 +1384,15 @@ export const dsaTopics = [
     "completed": false
   },
   {
-    "id": "dsa-v4-176",
-    "title": "Implement Trie (Prefix Tree)",
+    "id": "dsa-v4-174",
+    "title": "Implement Trie Prefix Tree",
     "section": "String and Trie",
     "url": "https://leetcode.com/problems/implement-trie-prefix-tree/",
     "difficulty": "Medium",
     "completed": false
   },
   {
-    "id": "dsa-v4-177",
+    "id": "dsa-v4-175",
     "title": "Design Add and Search Words Data Structure",
     "section": "String and Trie",
     "url": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
