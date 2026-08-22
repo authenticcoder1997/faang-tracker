@@ -29,7 +29,7 @@ function App() {
     return merged;
   };
 
-  const [storedDsa, setDsa] = useLocalStorage('faang-tracker-dsa-v3', dsaTopics);
+  const [storedDsa, setDsa] = useLocalStorage('faang-tracker-dsa-v4', dsaTopics);
   const [storedLld, setLld] = useLocalStorage('faang-tracker-lld-v3', lldTopics);
   const [storedHld, setHld] = useLocalStorage('faang-tracker-hld-v3', hldTopics);
 

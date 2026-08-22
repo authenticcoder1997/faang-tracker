@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Plus, Minus, CheckSquare, Square, Trophy, RotateCcw, PauseCircle, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles } from 'lucide-react';
 
 export default function DsaTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -13,106 +13,124 @@ export default function DsaTracker({ items, setItems }) {
   const sections = Array.from(new Set(items.map(i => i.section)));
   
   const totalCompleted = items.filter(i => i.completed).length;
-  const overallPct = Math.round((totalCompleted / items.length) * 100) || 0;
+  const overallPct = items.length > 0 ? Math.round((totalCompleted / items.length) * 100) : 0;
 
   return (
-    <div className="bg-[#121212] min-h-screen text-gray-300 p-6 md:p-10 font-sans">
+    <div className="bg-[#0a0a0a] min-h-screen text-gray-300 p-4 sm:p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto">
         
         {/* Top Progress Bar */}
         <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
-          <div className="flex items-center gap-6 flex-1">
-            <span className="text-sm font-medium text-gray-400">Progress</span>
-            <div className="relative w-48 h-1.5 bg-gray-800 rounded-full flex items-center">
-              <div className="absolute h-1.5 bg-[#d97736] rounded-full" style={{ width: `${overallPct}%` }}></div>
-              <div className="absolute w-3 h-3 bg-[#d97736] rounded-full shadow" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
+          <div className="flex items-center gap-4 sm:gap-6 flex-1">
+            <span className="hidden sm:inline text-sm font-medium text-gray-400">Progress</span>
+            <div className="relative w-32 sm:w-48 h-1.5 bg-gray-800 rounded-full flex items-center">
+              <div className="absolute h-1.5 bg-green-500 rounded-full transition-all duration-300" style={{ width: `${overallPct}%` }}></div>
+              <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
             </div>
-            <div className="flex items-center gap-2 text-[#d97736] text-sm font-bold ml-4">
-              <Trophy size={16} /> Day {totalCompleted}/40
+            <div className="flex items-center gap-2 text-green-500 text-sm font-bold sm:ml-4">
+              <Trophy size={16} /> Day {totalCompleted}/{items.length}
             </div>
           </div>
-          <div className="flex items-center gap-4 text-gray-500 text-sm">
+          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-sm">
             <button className="flex items-center gap-1 hover:text-gray-300"><RotateCcw size={14}/> Reset</button>
             <button className="flex items-center gap-1 hover:text-gray-300"><PauseCircle size={14}/> Pause</button>
           </div>
         </div>
 
         {/* Banner */}
-        <div className="bg-[#241710] border border-[#3d2516] rounded-xl p-4 mb-8 flex items-center gap-4">
-          <div className="bg-[#d97736]/20 p-2 rounded-lg">
-            <Sparkles size={20} className="text-[#d97736]" />
+        <div className="bg-[#112a1c] border border-[#1e4a31] rounded-xl p-4 mb-8 flex items-center gap-4">
+          <div className="bg-green-500/20 p-2 rounded-lg">
+            <Sparkles size={20} className="text-green-500" />
           </div>
           <div>
-            <h2 className="text-white font-semibold">Goodbye Roadmaps. <span className="text-[#d97736]">Hello Planly.</span></h2>
-            <p className="text-gray-400 text-sm">Roadmaps will retire this September, making way for Planly, a better way to learn.</p>
+            <h2 className="text-white font-semibold">Goodbye Roadmaps. <span className="text-green-500">Hello Planly.</span></h2>
+            <p className="text-gray-400 text-xs sm:text-sm">Roadmaps will retire this September, making way for Planly, a better way to learn.</p>
           </div>
         </div>
 
         {/* Accordion Sections */}
-        <div className="space-y-3">
-          {sections.map(section => {
+        <div className="space-y-2 sm:space-y-4">
+          {sections.map((section, idx) => {
             const sectionItems = items.filter(i => i.section === section);
             const sectionCompleted = sectionItems.filter(i => i.completed).length;
-            const isFullyCompleted = sectionCompleted === sectionItems.length;
-            const isCollapsed = collapsedSections[section];
-            const sectionPct = Math.round((sectionCompleted / sectionItems.length) * 100);
+            const isFullyCompleted = sectionCompleted === sectionItems.length && sectionItems.length > 0;
+            const isCollapsed = collapsedSections[section] !== undefined ? collapsedSections[section] : true; // Default collapsed
+            const sectionPct = sectionItems.length > 0 ? Math.round((sectionCompleted / sectionItems.length) * 100) : 0;
+            
+            // Dummy date logic for UI matching
+            const dateStr = `${(idx % 30) + 1} Aug - ${(idx % 30) + 1} Aug`;
 
             return (
-              <div key={section} className="border border-gray-800 rounded-xl bg-[#1a1a1a] overflow-hidden transition-all">
+              <div key={section} className="w-full flex bg-[#111111] flex-col rounded-xl border border-gray-800 transition-all">
                 {/* Header */}
-                <div 
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#222222]"
-                  onClick={() => setCollapsedSections(prev => ({...prev, [section]: !isCollapsed}))}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={isFullyCompleted ? 'text-gray-500' : 'text-[#d97736]'}>
-                      {isFullyCompleted ? <CheckSquare size={18} className="fill-[#333] text-black" /> : <Square size={18} />}
-                    </div>
-                    <span className={`font-semibold ${isFullyCompleted ? 'text-white/70' : 'text-white'}`}>
-                      {section} <span className="text-gray-500 font-normal ml-1">({sectionCompleted}/{sectionItems.length})</span>
-                    </span>
-                    
-                    {!isCollapsed && sectionPct > 0 && sectionPct < 100 && (
-                      <div className="ml-4 flex items-center gap-2">
-                        <div className="w-24 h-1 bg-gray-800 rounded-full">
-                          <div className="h-1 bg-gray-500 rounded-full" style={{ width: `${sectionPct}%` }}></div>
-                        </div>
-                        <span className="text-[10px] text-gray-500">{sectionPct}%</span>
+                <div className="rounded-xl border border-transparent">
+                  <button 
+                    className={`flex p-3 sm:p-[12px] px-3 sm:px-4 items-center justify-between w-full group text-gray-200 rounded-t-xl hover:bg-gray-800/50 ${!isCollapsed ? 'bg-gray-800/30' : ''}`}
+                    aria-expanded={!isCollapsed}
+                    onClick={() => setCollapsedSections(prev => ({...prev, [section]: !isCollapsed}))}
+                  >
+                    <div className="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
+                      <input 
+                        readOnly 
+                        disabled 
+                        className={`border-gray-500 border-[1.3px] h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 rounded-full ${isFullyCompleted ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
+                        type="checkbox" 
+                        checked={isFullyCompleted} 
+                      />
+                      <div className="flex text-left gap-1.5 text-sm sm:text-base font-bold min-w-0">
+                        <div className="font-medium truncate">{section}</div>
+                        <p className="font-medium whitespace-nowrap text-gray-500">({sectionCompleted}/{sectionItems.length})</p>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-gray-500 text-sm">
-                    <button className="p-1 hover:bg-gray-800 rounded-full"><Minus size={16} /></button>
-                    <span>01 Aug - 01 Aug</span>
-                    <button className="p-1 hover:bg-gray-800 rounded-full"><Plus size={16} /></button>
-                    {isCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-                  </div>
+                      
+                      {!isCollapsed && sectionPct >= 0 && (
+                        <div className="relative hidden md:flex items-center gap-2 min-w-48 px-2 ml-4">
+                          <div className="relative flex-1 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="absolute left-0 top-0 h-full rounded-full transition-all duration-300 ease-out bg-green-500" style={{ width: `${sectionPct}%` }}></div>
+                          </div>
+                          <div className="text-xs text-gray-500 whitespace-nowrap">{sectionPct}%</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-1 sm:gap-2 ml-2 shrink-0 text-gray-500">
+                      <div className="p-1 hover:text-gray-300 transition-colors"><CircleMinus size={18} strokeWidth={1.5} /></div>
+                      <div className="hidden sm:flex items-center"><p className="text-xs sm:text-sm">{dateStr}</p></div>
+                      <div className="p-1 hover:text-gray-300 transition-colors"><CirclePlus size={18} strokeWidth={1.5} /></div>
+                      <div className={`ml-1 sm:ml-4 transition-transform duration-200 ${!isCollapsed ? 'rotate-180' : ''}`}>
+                        <ChevronDown size={20} strokeWidth={2} />
+                      </div>
+                    </div>
+                  </button>
                 </div>
 
                 {/* Body */}
                 {!isCollapsed && (
-                  <div className="px-12 py-3 border-t border-gray-800/50 space-y-3 bg-[#171717]">
-                    {sectionItems.map(item => (
-                      <div 
-                        key={item.id} 
-                        className="flex items-center gap-3 group cursor-pointer"
-                        onClick={() => toggleItem(item.id)}
-                      >
-                        <div className="text-gray-600 group-hover:text-gray-400">
-                          {item.completed ? <CheckSquare size={16} className="fill-[#444] text-[#111]" /> : <Square size={16} />}
-                        </div>
-                        <a 
-                          href={item.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className={`text-sm font-medium ${item.completed ? 'text-gray-500 line-through' : 'text-gray-300 group-hover:text-white'}`}
-                          onClick={(e) => e.stopPropagation()} // Prevent double toggle
+                  <div className="text-sm text-gray-200 overflow-hidden border-t border-gray-800">
+                    <div className="flex flex-col py-2 bg-[#151515] rounded-b-xl">
+                      {sectionItems.map(item => (
+                        <div 
+                          key={item.id} 
+                          className="flex items-center w-full gap-x-3 px-4 sm:px-6 py-2 hover:bg-gray-800/60 transition-colors group cursor-pointer"
+                          onClick={() => toggleItem(item.id)}
                         >
-                          {item.title}
-                        </a>
-                      </div>
-                    ))}
+                          <input 
+                            readOnly 
+                            className={`border border-gray-500 h-4 w-4 rounded-full transition-colors ${item.completed ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
+                            type="checkbox" 
+                            checked={item.completed}
+                          />
+                          <a 
+                            href={item.url || '#'} 
+                            target={item.url ? "_blank" : "_self"} 
+                            rel="noopener noreferrer"
+                            className={`text-[15px] sm:text-[17px] font-medium transition-colors ${item.completed ? 'text-gray-500 line-through' : 'text-gray-400 group-hover:text-gray-200'}`}
+                            onClick={(e) => { e.stopPropagation(); }}
+                          >
+                            {item.title}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
