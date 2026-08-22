@@ -65,28 +65,28 @@ export default function HldTracker({ items, setItems }) {
         {/* Table */}
         <div className="w-full">
           <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
-            <div className="col-span-4 pl-4">Interview Question</div>
+            <div className="col-span-8 pl-4">Interview Question</div>
             <div className="col-span-2">Difficulty ↑</div>
-            <div className="col-span-2 text-center">Write-Up</div>
-            <div className="col-span-2 text-center">Mark as Read</div>
-            <div className="col-span-2 text-right pr-4">Guided Practice</div>
+            <div className="col-span-2 text-center">Solved</div>
           </div>
 
           {items.map((item, idx) => (
             <div key={item.id} className="grid grid-cols-12 items-center py-4 border-b border-gray-700/50 hover:bg-[#334155]/30 transition-colors">
-              <div className="col-span-4 flex items-center gap-3 pl-2">
+              <div className="col-span-8 flex items-center gap-3 pl-2">
                 <ChevronDown size={16} className="text-gray-500 cursor-pointer" />
-                <span className="text-gray-200">{item.title}</span>
+                <a 
+                  href={item.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-gray-200 hover:text-[#2dd4bf] transition-colors"
+                >
+                  {item.title}
+                </a>
               </div>
               <div className="col-span-2">
                 <span className={`text-sm ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
                   {item.difficulty}
                 </span>
-              </div>
-              <div className="col-span-2 flex justify-center">
-                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-[#2dd4bf] hover:text-[#5eead4]">
-                  <FileText size={20} />
-                </a>
               </div>
               <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                 {item.completed ? (
@@ -94,17 +94,6 @@ export default function HldTracker({ items, setItems }) {
                 ) : (
                   <Circle size={24} className="text-gray-500" />
                 )}
-              </div>
-              <div className="col-span-2 flex justify-end gap-2 pr-4">
-                <button 
-                  onClick={() => toggleItem(item.id)}
-                  className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${item.completed ? 'bg-[#2dd4bf]/20 text-[#2dd4bf] hover:bg-[#2dd4bf]/30' : 'bg-[#2dd4bf] text-[#0f172a] hover:bg-[#5eead4]'}`}
-                >
-                  {item.completed ? 'Resume' : 'Start'}
-                </button>
-                <button className="px-3 py-1.5 rounded text-sm font-medium border border-gray-600 text-gray-400 flex items-center gap-1 hover:bg-gray-700">
-                  <RotateCcw size={14} /> History
-                </button>
               </div>
             </div>
           ))}
