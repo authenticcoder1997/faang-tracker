@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit3 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, Edit3, Sparkles, Send, Loader2 } from 'lucide-react';
 
 export default function Notes({ notes, setNotes }) {
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  
+  // AI State
+  const [aiInput, setAiInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const textareaRef = useRef(null);
 
   // Debounced auto-save
   useEffect(() => {
@@ -18,7 +23,7 @@ export default function Notes({ notes, setNotes }) {
             : n
         ));
       }
-    }, 1000); // Save after 1 second of inactivity
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [editTitle, editContent, activeNoteId, notes, setNotes]);
@@ -49,10 +54,65 @@ export default function Notes({ notes, setNotes }) {
     setEditContent(note.content);
   };
 
+  const handleAiSubmit = async (e) => {
+    e.preventDefault();
+    if (!aiInput.trim() || isGenerating) return;
+
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+      alert("Gemini API Key is missing! Please add VITE_GEMINI_API_KEY to your environment variables.");
+      return;
+    }
+
+    setIsGenerating(true);
+    const userText = aiInput;
+    setAiInput(''); // Clear input immediately for better UX
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `You are an AI note-taking assistant. The user has provided some raw, unformatted, or dictated thoughts. Your job is to format this beautifully into markdown, correct any grammar or spelling mistakes, and make it concise and readable. DO NOT add conversational filler like "Here is the formatted text:". Just return the markdown.\n\nUser's raw input:\n${userText}`
+            }]
+          }]
+        })
+      });
+
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        const generatedText = data.candidates[0].content.parts[0].text.trim();
+        
+        // Append to current content
+        setEditContent(prev => {
+          const newContent = prev.trim() ? `${prev}\n\n${generatedText}` : generatedText;
+          return newContent;
+        });
+
+        // Scroll to bottom of textarea
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+          }
+        }, 100);
+      } else {
+        console.error("Unexpected Gemini response:", data);
+        alert("Failed to generate response. Check console for details.");
+      }
+    } catch (error) {
+      console.error("Gemini API Error:", error);
+      alert("Error connecting to Gemini API.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="bg-[#0a0a0a] h-full text-gray-300 font-sans flex flex-col md:flex-row border border-[#222] rounded-xl overflow-hidden m-4 md:m-8 md:mt-4">
       {/* Sidebar for Notes */}
-      <div className="w-full md:w-80 border-r border-[#222] flex flex-col h-[400px] md:h-[calc(100vh-6rem)]">
+      <div className="w-full md:w-80 border-r border-[#222] flex flex-col h-[300px] md:h-[calc(100vh-6rem)] shrink-0">
         <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
           <h2 className="font-bold text-white text-lg">Notes</h2>
           <button onClick={createNote} className="p-2 bg-[#22c55e] text-black rounded-lg hover:bg-[#16a34a] transition">
@@ -86,10 +146,10 @@ export default function Notes({ notes, setNotes }) {
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1 flex flex-col h-[600px] md:h-[calc(100vh-6rem)] bg-[#050505]">
+      <div className="flex-1 flex flex-col h-[500px] md:h-[calc(100vh-6rem)] bg-[#050505] relative">
         {activeNoteId ? (
           <>
-            <div className="p-4 border-b border-[#222] bg-[#0a0a0a] flex items-center justify-between">
+            <div className="p-4 border-b border-[#222] bg-[#0a0a0a] flex items-center justify-between shrink-0">
               <input 
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
@@ -97,12 +157,42 @@ export default function Notes({ notes, setNotes }) {
                 placeholder="Note Title"
               />
             </div>
+            
             <textarea 
+              ref={textareaRef}
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="flex-1 bg-transparent p-6 text-gray-300 outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
+              className="flex-1 bg-transparent p-6 pb-24 text-gray-300 outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
               placeholder="Start typing your notes here..."
             />
+
+            {/* AI Input Wrapper */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#1e1e1e] border border-[#333] rounded-full shadow-2xl p-2 flex items-center gap-2">
+              <div className="pl-3 text-purple-400">
+                <Sparkles size={18} />
+              </div>
+              <form onSubmit={handleAiSubmit} className="flex-1 flex items-center">
+                <input 
+                  type="text"
+                  value={aiInput}
+                  onChange={(e) => setAiInput(e.target.value)}
+                  disabled={isGenerating}
+                  placeholder="Jot down rough notes, Gemini will format them..."
+                  className="w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-500 disabled:opacity-50"
+                />
+                <button 
+                  type="submit"
+                  disabled={isGenerating || !aiInput.trim()}
+                  className={`p-2 rounded-full flex items-center justify-center transition-colors ${
+                    isGenerating || !aiInput.trim() 
+                      ? 'bg-[#333] text-gray-500' 
+                      : 'bg-white text-black hover:bg-gray-200'
+                  }`}
+                >
+                  {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                </button>
+              </form>
+            </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-600 flex-col gap-4">
