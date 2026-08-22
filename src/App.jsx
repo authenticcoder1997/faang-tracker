@@ -67,7 +67,7 @@ function App() {
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium text-left ${
                 activeTab === tab.id
                   ? 'bg-[#222] text-white border border-[#333]'
-                  : 'text-gray-400 hover:bg-[#1a1a1a] hover:text-gray-200'
+                  : 'text-gray-400 border border-transparent hover:bg-[#1a1a1a] hover:text-gray-200'
               }`}
             >
               <span className={activeTab === tab.id ? 'text-white' : 'text-gray-500'}>{tab.icon}</span>
