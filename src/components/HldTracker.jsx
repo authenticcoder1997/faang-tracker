@@ -65,15 +65,13 @@ export default function HldTracker({ items, setItems }) {
         {/* Table */}
         <div className="w-full">
           <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
-            <div className="col-span-8 pl-4">Interview Question</div>
-            <div className="col-span-2">Difficulty ↑</div>
+            <div className="col-span-10 pl-6">Interview Question</div>
             <div className="col-span-2 text-center">Solved</div>
           </div>
 
           {items.map((item, idx) => (
             <div key={item.id} className="grid grid-cols-12 items-center py-4 border-b border-gray-700/50 hover:bg-[#334155]/30 transition-colors">
-              <div className="col-span-8 flex items-center gap-3 pl-2">
-                <ChevronDown size={16} className="text-gray-500 cursor-pointer" />
+              <div className="col-span-10 flex items-center gap-3 pl-6">
                 <a 
                   href={item.url} 
                   target="_blank" 
@@ -82,11 +80,6 @@ export default function HldTracker({ items, setItems }) {
                 >
                   {item.title}
                 </a>
-              </div>
-              <div className="col-span-2">
-                <span className={`text-sm ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
-                  {item.difficulty}
-                </span>
               </div>
               <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                 {item.completed ? (

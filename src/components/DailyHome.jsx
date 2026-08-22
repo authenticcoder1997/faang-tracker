@@ -70,7 +70,13 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
         
         {/* Date Selector */}
         <div className="bg-[#141414] border border-gray-800 rounded-lg p-3 flex items-center gap-3 w-full sm:w-auto">
-          <label htmlFor="date-selector" className="text-sm font-medium text-gray-300 whitespace-nowrap">
+          <button 
+            onClick={() => setSelectedDayIndex(initialIndex)}
+            className="px-3 py-1.5 bg-[#1a1a1a] border border-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded hover:bg-gray-800 transition-colors"
+          >
+            Today
+          </button>
+          <label htmlFor="date-selector" className="text-sm font-medium text-gray-300 whitespace-nowrap hidden sm:block">
             Select Date:
           </label>
           <select 

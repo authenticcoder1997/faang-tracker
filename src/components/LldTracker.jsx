@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, BookOpen, PlayCircle, History, Gamepad2, Search, Database, Settings2, AppWindow, Network, MessageSquare, CreditCard, ShoppingCart, Wrench } from 'lucide-react';
+import { ChevronDown, ChevronRight, BookOpen, PlayCircle, History, Gamepad2, Search, Database, Settings2, AppWindow, Network, MessageSquare, CreditCard, ShoppingCart, Wrench, CheckCircle2, Circle } from 'lucide-react';
 
 export default function LldTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -110,12 +110,9 @@ export default function LldTracker({ items, setItems }) {
           {/* Header Row */}
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">#</div>
-            <div className="col-span-4">Section / Problem</div>
-            <div className="col-span-1 text-center">Difficulty</div>
-            <div className="col-span-1 text-center">Learn</div>
-            <div className="col-span-1 text-center">Simulation</div>
-            <div className="col-span-2 text-center">Action</div>
-            <div className="col-span-2 text-center">History</div>
+            <div className="col-span-7">Section / Problem</div>
+            <div className="col-span-2 text-center">Difficulty</div>
+            <div className="col-span-2 text-center">Solved</div>
           </div>
 
           {/* Sections */}
@@ -151,14 +148,13 @@ export default function LldTracker({ items, setItems }) {
                   {!isCollapsed && sectionItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
                       <div className="col-span-1"></div>
-                      <div className="col-span-4 flex items-center gap-3">
+                      <div className="col-span-7 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors">
                           {item.title}
                         </a>
-                        {item.completed && <span className="bg-[#22c55e]/20 text-[#22c55e] text-[10px] px-2 py-0.5 rounded-full font-medium">In Progress</span>}
                       </div>
-                      <div className="col-span-1 text-center">
+                      <div className="col-span-2 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           item.difficulty === 'Easy' ? 'text-[#22c55e]' : 
                           item.difficulty === 'Medium' ? 'text-[#eab308]' : 
@@ -167,57 +163,12 @@ export default function LldTracker({ items, setItems }) {
                           {item.difficulty}
                         </span>
                       </div>
-                      {/* Learn - links to the article on Algomaster */}
-                      <div className="col-span-1 flex justify-center">
-                        <a 
-                          href={item.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          aria-label={`Read the ${item.title} article`}
-                          className="p-1 rounded-md hover:bg-gray-800 transition-colors"
-                        >
-                          <BookOpen size={16} className="text-gray-400 hover:text-white cursor-pointer" />
-                        </a>
-                      </div>
-                      {/* Simulation - opens the article page with code walkthrough & animations */}
-                      <div className="col-span-1 flex justify-center">
-                        <a 
-                          href={item.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          aria-label={`${item.title} simulation`}
-                          className="p-1 rounded-md hover:bg-gray-800 transition-colors"
-                        >
-                          <PlayCircle size={16} className="text-gray-400 hover:text-white cursor-pointer" />
-                        </a>
-                      </div>
-                      {/* Action - opens AI-powered practice session on Algomaster */}
-                      <div className="col-span-2 flex justify-center">
-                        <a
-                          href={`https://algomaster.io/interview/low-level-design`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => { if (!item.completed) toggleItem(item.id); }}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer no-underline ${
-                            item.completed 
-                              ? 'bg-[#22c55e]/20 text-[#22c55e] hover:bg-[#22c55e]/30 border border-[#22c55e]/30' 
-                              : 'bg-[#22c55e] text-black hover:bg-[#4ade80]'
-                          }`}
-                        >
-                          {item.completed ? '+ New' : '▶ Start'}
-                        </a>
-                      </div>
-                      {/* History */}
-                      <div className="col-span-2 flex justify-center">
+                      {/* Solved Checkbox */}
+                      <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                         {item.completed ? (
-                          <button 
-                            onClick={() => toggleItem(item.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#06b6d4] text-black rounded-md text-xs font-semibold hover:bg-[#22d3ee] transition-colors"
-                          >
-                            <History size={12} /> History
-                          </button>
+                          <CheckCircle2 size={24} className="text-[#22c55e]" />
                         ) : (
-                          <span className="text-gray-600">-</span>
+                          <Circle size={24} className="text-gray-500 hover:text-[#22c55e] transition-colors" />
                         )}
                       </div>
                     </div>
