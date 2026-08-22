@@ -179,10 +179,10 @@ export default function LldTracker({ items, setItems }) {
                           <BookOpen size={16} className="text-gray-400 hover:text-white cursor-pointer" />
                         </a>
                       </div>
-                      {/* Simulation - links to Algomaster interactive simulation */}
+                      {/* Simulation - opens the article page with code walkthrough & animations */}
                       <div className="col-span-1 flex justify-center">
                         <a 
-                          href={`https://algomaster.io/interview/low-level-design`} 
+                          href={item.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           aria-label={`${item.title} simulation`}
@@ -191,23 +191,29 @@ export default function LldTracker({ items, setItems }) {
                           <PlayCircle size={16} className="text-gray-400 hover:text-white cursor-pointer" />
                         </a>
                       </div>
-                      {/* Action */}
+                      {/* Action - opens AI-powered practice session on Algomaster */}
                       <div className="col-span-2 flex justify-center">
-                        <button 
-                          onClick={() => toggleItem(item.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                        <a
+                          href={`https://algomaster.io/interview/low-level-design`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => { if (!item.completed) toggleItem(item.id); }}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer no-underline ${
                             item.completed 
                               ? 'bg-[#22c55e]/20 text-[#22c55e] hover:bg-[#22c55e]/30 border border-[#22c55e]/30' 
                               : 'bg-[#22c55e] text-black hover:bg-[#4ade80]'
                           }`}
                         >
                           {item.completed ? '+ New' : '▶ Start'}
-                        </button>
+                        </a>
                       </div>
                       {/* History */}
                       <div className="col-span-2 flex justify-center">
                         {item.completed ? (
-                          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-[#06b6d4] text-black rounded-md text-xs font-semibold hover:bg-[#22d3ee] transition-colors">
+                          <button 
+                            onClick={() => toggleItem(item.id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#06b6d4] text-black rounded-md text-xs font-semibold hover:bg-[#22d3ee] transition-colors"
+                          >
                             <History size={12} /> History
                           </button>
                         ) : (
