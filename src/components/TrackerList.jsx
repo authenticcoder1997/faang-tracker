@@ -103,13 +103,25 @@ export default function TrackerList({ title, items, setItems }) {
                   )}
                 </button>
                 <div className="flex flex-col truncate">
-                  <span className={`font-medium truncate transition-colors ${
-                    item.completed 
-                      ? 'text-gray-500 dark:text-gray-400 line-through' 
-                      : 'text-gray-800 dark:text-gray-200'
-                  }`}>
-                    {item.title}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-medium truncate transition-colors ${
+                      item.completed 
+                        ? 'text-gray-500 dark:text-gray-400 line-through' 
+                        : 'text-gray-800 dark:text-gray-200'
+                    }`}>
+                      {item.title}
+                    </span>
+                    {item.difficulty && (
+                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                        item.difficulty.toLowerCase() === 'easy' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                        item.difficulty.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        item.difficulty.toLowerCase() === 'hard' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                      }`}>
+                        {item.difficulty}
+                      </span>
+                    )}
+                  </div>
                   {item.url && (
                     <a 
                       href={item.url} 
