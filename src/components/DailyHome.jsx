@@ -1,31 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Calendar, Check, ExternalLink, Sparkles, CheckCircle } from "lucide-react";
 import { DSA_SECTIONS_LIST } from "../data/dsaTopics";
 
 export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setActiveTab }) {
-  // Calculate section matching today's date
+  // Helper to map index (0-39) to date string (31 Jul - 8 Sep)
+  const getDateForIndex = (index) => {
+    if (index === 0) return "31 Jul";
+    if (index <= 31) return `${index} Aug`;
+    return `${index - 31} Sep`;
+  };
+
+  // Calculate default today's index
   const now = new Date();
   const todayDay = now.getDate();
-  const todayMonth = now.toLocaleString("en-US", { month: "short" }); // e.g. "Aug"
-  const formattedToday = `${String(todayDay).padStart(2, "0")} ${todayMonth}`;
+  const todayMonth = now.toLocaleString("en-US", { month: "short" });
 
-  // Find index: 31 Jul is Day 0, 1 Aug is Day 1, 22 Aug is Day 22, etc.
-  let todaySectionIndex = 22; // default 22 Aug
-  if (todayMonth === "Jul" && todayDay === 31) todaySectionIndex = 0;
-  else if (todayMonth === "Aug") todaySectionIndex = todayDay; // Aug 1 -> 1 ... Aug 22 -> 22
-  else if (todayMonth === "Sep") todaySectionIndex = 31 + todayDay; // Sep 1 -> 32
+  let initialIndex = 22; // default
+  if (todayMonth === "Jul" && todayDay === 31) initialIndex = 0;
+  else if (todayMonth === "Aug") initialIndex = todayDay;
+  else if (todayMonth === "Sep") initialIndex = 31 + todayDay;
+  
+  if (initialIndex < 0 || initialIndex >= 40) initialIndex = 22; // fallback
 
-  if (todaySectionIndex < 0 || todaySectionIndex >= DSA_SECTIONS_LIST.length) {
-    todaySectionIndex = 22; // fallback to active August day
-  }
+  const [selectedDayIndex, setSelectedDayIndex] = useState(initialIndex);
+  
+  const formattedSelectedDate = getDateForIndex(selectedDayIndex);
+  const selectedSectionName = DSA_SECTIONS_LIST[selectedDayIndex]?.name || DSA_SECTIONS_LIST[0].name;
 
-  const todaySectionName = DSA_SECTIONS_LIST[todaySectionIndex]?.name || DSA_SECTIONS_LIST[0].name;
-  const todayDsaQuestions = dsa.filter(i => i.section === todaySectionName);
+  const todayDsaQuestions = dsa.filter(i => i.section === selectedSectionName);
   const todayDsaCompleted = todayDsaQuestions.filter(i => i.completed).length;
 
-  // LLD 1 daily & HLD 1 daily
-  const nextLld = lld.filter(i => !i.completed).slice(0, 1);
-  const nextHld = hld.filter(i => !i.completed).slice(0, 1);
+  // LLD and HLD mapped to the day index (Day 0 gets 0th problem, etc.)
+  const nextLld = lld[selectedDayIndex] ? [lld[selectedDayIndex]] : [];
+  const nextHld = hld[selectedDayIndex] ? [hld[selectedDayIndex]] : [];
 
   const toggleDsa = (id) => {
     if (!setDsa) return;
@@ -49,13 +56,34 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto font-sans">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-green-500 font-semibold text-sm mb-1">
-          <Calendar size={16} />
-          <span>Today: {formattedToday} • Day {todaySectionIndex + 1} of 40</span>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-green-500 font-semibold text-sm mb-2">
+            <Calendar size={16} />
+            <span>Viewing: Day {selectedDayIndex + 1} of 40</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Home</h1>
+          <p className="text-gray-400 text-sm">Focus on today's scheduled DSA questions, 1 LLD system, and 1 HLD breakdown.</p>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Home</h1>
-        <p className="text-gray-400 text-sm">Focus on today's scheduled DSA questions, 1 LLD system, and 1 HLD breakdown.</p>
+        
+        {/* Date Selector */}
+        <div className="bg-[#141414] border border-gray-800 rounded-lg p-3 flex items-center gap-3 w-full sm:w-auto">
+          <label htmlFor="date-selector" className="text-sm font-medium text-gray-300 whitespace-nowrap">
+            Select Date:
+          </label>
+          <select 
+            id="date-selector"
+            value={selectedDayIndex}
+            onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
+            className="bg-[#1a1a1a] border border-gray-700 text-white text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full p-2 outline-none cursor-pointer"
+          >
+            {Array.from({ length: 40 }).map((_, idx) => (
+              <option key={idx} value={idx}>
+                {getDateForIndex(idx)} (Day {idx + 1})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Progress Cards */}
@@ -104,9 +132,9 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
               <Target size={20} className="text-green-500" />
               <div>
                 <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  Today's DSA Questions: <span className="text-green-400">{todaySectionName}</span>
+                  DSA Questions: <span className="text-green-400">{selectedSectionName}</span>
                 </h2>
-                <p className="text-xs text-gray-400">Scheduled for {formattedToday} • {todayDsaCompleted}/{todayDsaQuestions.length} completed</p>
+                <p className="text-xs text-gray-400">Scheduled for {formattedSelectedDate} • {todayDsaCompleted}/{todayDsaQuestions.length} completed</p>
               </div>
             </div>
             <button 
