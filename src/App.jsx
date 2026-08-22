@@ -98,11 +98,17 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 min-h-screen">
-        <div key={activeTab} className="animate-tab-change h-full">
-          {activeTab === 'dashboard' && <DailyHome dsa={dsa} lld={lld} hld={hld} setDsa={setDsa} setLld={setLld} setHld={setHld} setActiveTab={setActiveTab} />}
-          {activeTab === 'dsa' && <DsaTracker items={dsa} setItems={setDsa} />}
-          {activeTab === 'lld' && <LldTracker items={lld} setItems={setLld} />}
-          {activeTab === 'hld' && <HldTracker items={hld} setItems={setHld} />}
+        <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
+          <DailyHome dsa={dsa} lld={lld} hld={hld} setDsa={setDsa} setLld={setLld} setHld={setHld} setActiveTab={setActiveTab} />
+        </div>
+        <div className={activeTab === 'dsa' ? 'block' : 'hidden'}>
+          <DsaTracker items={dsa} setItems={setDsa} />
+        </div>
+        <div className={activeTab === 'lld' ? 'block' : 'hidden'}>
+          <LldTracker items={lld} setItems={setLld} />
+        </div>
+        <div className={activeTab === 'hld' ? 'block' : 'hidden'}>
+          <HldTracker items={hld} setItems={setHld} />
         </div>
       </main>
     </div>
