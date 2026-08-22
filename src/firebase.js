@@ -1,13 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
+// Note: Firebase Web SDK config is designed to be public and shipped to the client.
+// Security is handled by Firestore Security Rules, not by hiding the API key.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyD19EOEBlOIW-hgafiCfXLw0SLnFBmrDoQ",
+  authDomain: "faang-tracker-db.firebaseapp.com",
+  projectId: "faang-tracker-db",
+  storageBucket: "faang-tracker-db.firebasestorage.app",
+  messagingSenderId: "759936923591",
+  appId: "1:759936923591:web:5e44b5846f7c2850d70be2"
 };
 
 const app = initializeApp(firebaseConfig);
