@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
 export function useLocalStorage(key, initialValue) {
-  // Get from local storage then parse stored json or return initialValue
   const readValue = () => {
     if (typeof window === 'undefined') {
       return initialValue;
@@ -9,7 +8,23 @@ export function useLocalStorage(key, initialValue) {
 
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        const parsed = JSON.parse(item);
+        
+        // Smart merge for arrays of objects with 'id' (like our trackers)
+        if (Array.isArray(parsed) && Array.isArray(initialValue) && initialValue.length > 0 && initialValue[0].id) {
+           return initialValue.map(initItem => {
+             const cachedItem = parsed.find(p => p.id === initItem.id);
+             if (cachedItem) {
+                // Keep the fresh source-of-truth data, but restore user's completion state
+                return { ...initItem, completed: cachedItem.completed };
+             }
+             return initItem;
+           });
+        }
+        return parsed;
+      }
+      return initialValue;
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
       return initialValue;
