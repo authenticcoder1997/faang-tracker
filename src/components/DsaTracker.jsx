@@ -42,17 +42,6 @@ export default function DsaTracker({ items, setItems }) {
           </div>
         </div>
 
-        {/* Banner */}
-        <div className="bg-[#112a1c] border border-[#1e4a31] rounded-xl p-4 mb-8 flex items-center gap-4">
-          <div className="bg-green-500/20 p-2 rounded-lg">
-            <Sparkles size={20} className="text-green-500" />
-          </div>
-          <div>
-            <h2 className="text-white font-semibold">Goodbye Roadmaps. <span className="text-green-500">Hello Planly.</span></h2>
-            <p className="text-gray-400 text-xs sm:text-sm">Roadmaps will retire this September, making way for Planly, a better way to learn.</p>
-          </div>
-        </div>
-
         {/* Accordion Sections */}
         <div className="space-y-2 sm:space-y-4">
           {DSA_SECTIONS_LIST.map((secObj, idx) => {

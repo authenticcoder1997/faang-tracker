@@ -1,198 +1,407 @@
 export const lldTopics = [
   {
-    "id": "lld-4",
+    "id": "lld-1",
     "title": "Design Tic Tac Toe",
     "section": "Games & Puzzles",
     "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-tic-tac-toe"
-  },
-  {
-    "id": "lld-5",
-    "title": "Design Snake and Ladder",
-    "section": "Games & Puzzles",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-snake-and-ladder"
-  },
-  {
-    "id": "lld-16",
-    "title": "Design Chess Game",
-    "section": "Games & Puzzles",
-    "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-chess-game"
-  },
-  {
-    "id": "lld-6",
-    "title": "Design LRU Cache",
-    "section": "Data Structures & Search",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-lru-cache"
-  },
-  {
-    "id": "lld-6b",
-    "title": "Design Bloom Filter",
-    "section": "Data Structures & Search",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-bloom-filter"
-  },
-  {
-    "id": "lld-6c",
-    "title": "Design Search Autocomplete System",
-    "section": "Data Structures & Search",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-search-autocomplete"
-  },
-  {
-    "id": "lld-6d",
-    "title": "Design Simple Search Engine",
-    "section": "Data Structures & Search",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-search-engine"
-  },
-  {
-    "id": "lld-7",
-    "title": "Design ATM",
-    "section": "Managing States",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-atm"
-  },
-  {
-    "id": "lld-8",
-    "title": "Design Vending Machine",
-    "section": "Managing States",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-vending-machine"
-  },
-  {
-    "id": "lld-9",
-    "title": "Design Elevator System",
-    "section": "Managing States",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-elevator-system"
-  },
-  {
-    "id": "lld-10",
-    "title": "Design Traffic Control System",
-    "section": "Managing States",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-traffic-control-system"
-  },
-  {
-    "id": "lld-19",
-    "title": "Design Coffee Vending Machine",
-    "section": "Managing States",
-    "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-coffee-vending-machine"
-  },
-  {
-    "id": "lld-1",
-    "title": "Design Parking Lot",
-    "section": "Management Systems",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-parking-lot"
+    "description": "Design an extensible 2-player or n-player N x N grid Tic Tac Toe game with move validation and winning conditions.",
+    "url": "https://algomaster.io/learn/lld/design-tic-tac-toe",
+    "completed": false
   },
   {
     "id": "lld-2",
-    "title": "Design Task Management System",
-    "section": "Management Systems",
+    "title": "Design Snake and Ladder Game",
+    "section": "Games & Puzzles",
     "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-task-management-system"
+    "description": "Design multiplayer board game with variable board size, snakes, ladders, dice strategies, and turn management.",
+    "url": "https://algomaster.io/learn/lld/design-snake-and-ladder",
+    "completed": false
+  },
+  {
+    "id": "lld-3",
+    "title": "Design Minesweeper Game",
+    "section": "Games & Puzzles",
+    "difficulty": "Medium",
+    "description": "Design grid-based minesweeper game with mine generation, cell reveal, flag toggling, and cascading empty reveal.",
+    "url": "https://algomaster.io/learn/lld/design-minesweeper",
+    "completed": false
+  },
+  {
+    "id": "lld-4",
+    "title": "Design Chess Game",
+    "section": "Games & Puzzles",
+    "difficulty": "Hard",
+    "description": "Comprehensive object-oriented model for Chess with Piece rules, Board state, Move validation, and Check/Checkmate detection.",
+    "url": "https://algomaster.io/learn/lld/design-chess-game",
+    "completed": false
+  },
+  {
+    "id": "lld-5",
+    "title": "Design LRU Cache",
+    "section": "Data Structures & Search",
+    "difficulty": "Easy",
+    "description": "Design in-memory Least Recently Used cache with O(1) get and put operations using Hash Map and Doubly Linked List.",
+    "url": "https://algomaster.io/learn/lld/design-lru-cache",
+    "completed": false
+  },
+  {
+    "id": "lld-6",
+    "title": "Design Bloom Filter",
+    "section": "Data Structures & Search",
+    "difficulty": "Easy",
+    "description": "Space-efficient probabilistic data structure for set membership testing with configurable hash functions.",
+    "url": "https://algomaster.io/learn/lld/design-bloom-filter",
+    "completed": false
+  },
+  {
+    "id": "lld-7",
+    "title": "Design Search Autocomplete System",
+    "section": "Data Structures & Search",
+    "difficulty": "Easy",
+    "description": "Trie-based search autocomplete engine with top-k prefix matching, frequency tracking, and fast caching.",
+    "url": "https://algomaster.io/learn/lld/design-search-autocomplete",
+    "completed": false
+  },
+  {
+    "id": "lld-8",
+    "title": "Design Simple Search Engine",
+    "section": "Data Structures & Search",
+    "difficulty": "Medium",
+    "description": "Inverted index search engine with document tokenization, ranking algorithms (TF-IDF), and phrase query support.",
+    "url": "https://algomaster.io/learn/lld/design-search-engine",
+    "completed": false
+  },
+  {
+    "id": "lld-9",
+    "title": "Design ATM",
+    "section": "Managing States",
+    "difficulty": "Medium",
+    "description": "State machine based Automated Teller Machine handling card authentication, cash dispense, deposit, and balance checks.",
+    "url": "https://algomaster.io/learn/lld/design-atm",
+    "completed": false
+  },
+  {
+    "id": "lld-10",
+    "title": "Design Vending Machine",
+    "section": "Managing States",
+    "difficulty": "Medium",
+    "description": "State pattern architecture for item selection, cash/coin insertion, change return, and out-of-stock handling.",
+    "url": "https://algomaster.io/learn/lld/design-vending-machine",
+    "completed": false
   },
   {
     "id": "lld-11",
-    "title": "Design Inventory Management System",
-    "section": "Management Systems",
+    "title": "Design Elevator System",
+    "section": "Managing States",
     "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-inventory-management-system"
+    "description": "Multi-elevator scheduling algorithm handling internal/external requests, optimal dispatching, and direction states.",
+    "url": "https://algomaster.io/learn/lld/design-elevator-system",
+    "completed": false
   },
   {
     "id": "lld-12",
+    "title": "Design Traffic Control System",
+    "section": "Managing States",
+    "difficulty": "Medium",
+    "description": "Dynamic traffic light state controller with timer transitions, emergency vehicle overrides, and sensor inputs.",
+    "url": "https://algomaster.io/learn/lld/design-traffic-control-system",
+    "completed": false
+  },
+  {
+    "id": "lld-13",
+    "title": "Design Coffee Vending Machine",
+    "section": "Managing States",
+    "difficulty": "Hard",
+    "description": "Customizable beverage maker using Decorator and Factory patterns for coffee types, ingredients, and inventory tracking.",
+    "url": "https://algomaster.io/learn/lld/design-coffee-vending-machine",
+    "completed": false
+  },
+  {
+    "id": "lld-14",
+    "title": "Design Parking Lot",
+    "section": "Management Systems",
+    "difficulty": "Easy",
+    "description": "Multi-floor parking lot supporting different vehicle types (compact, large, EV), ticket generation, and fee calculation.",
+    "url": "https://algomaster.io/learn/lld/design-parking-lot",
+    "completed": false
+  },
+  {
+    "id": "lld-15",
+    "title": "Design Task Management System",
+    "section": "Management Systems",
+    "difficulty": "Easy",
+    "description": "Jira/Trello-like task management system with boards, lists, task assignments, status workflows, and activity logs.",
+    "url": "https://algomaster.io/learn/lld/design-task-management-system",
+    "completed": false
+  },
+  {
+    "id": "lld-16",
+    "title": "Design Inventory Management System",
+    "section": "Management Systems",
+    "difficulty": "Medium",
+    "description": "Warehouse inventory management tracking product stock, SKU catalog, stock alerts, and reservation holds.",
+    "url": "https://algomaster.io/learn/lld/design-inventory-management-system",
+    "completed": false
+  },
+  {
+    "id": "lld-17",
     "title": "Design Library Management System",
     "section": "Management Systems",
     "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-library-management-system"
+    "description": "Book lending and catalog system with barcode tracking, member management, reservations, and fine computation.",
+    "url": "https://algomaster.io/learn/lld/design-library-management-system",
+    "completed": false
   },
   {
     "id": "lld-18",
     "title": "Design Restaurant Management System",
     "section": "Management Systems",
+    "difficulty": "Hard",
+    "description": "Table booking, kitchen order ticketing (KOT), billing, and menu customization system.",
+    "url": "https://algomaster.io/learn/lld/design-restaurant-management-system",
+    "completed": false
+  },
+  {
+    "id": "lld-19",
+    "title": "Design Stack Overflow",
+    "section": "Social & Content Platforms",
     "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-restaurant-management-system"
+    "description": "Q&A platform with question posting, answers, voting/reputation system, badges, tagging, and search.",
+    "url": "https://algomaster.io/learn/lld/design-stack-overflow",
+    "completed": false
   },
   {
     "id": "lld-20",
-    "title": "Design Stack Overflow",
-    "section": "Management Systems",
-    "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-stack-overflow"
-  },
-  {
-    "id": "lld-3",
-    "title": "Design Notification System",
-    "section": "Platforms & Networks",
-    "difficulty": "Easy",
-    "url": "https://algomaster.io/learn/lld/design-notification-system"
-  },
-  {
-    "id": "lld-14",
     "title": "Design a Social Network",
-    "section": "Platforms & Networks",
+    "section": "Social & Content Platforms",
     "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-social-network"
-  },
-  {
-    "id": "lld-15",
-    "title": "Design Learning Platform",
-    "section": "Platforms & Networks",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-learning-platform"
-  },
-  {
-    "id": "lld-17",
-    "title": "Design Online Shopping Cart",
-    "section": "Platforms & Networks",
-    "difficulty": "Medium",
-    "url": "https://algomaster.io/learn/lld/design-shopping-cart"
+    "description": "User graph connections (follow/friend), profile management, privacy controls, and activity feeds.",
+    "url": "https://algomaster.io/learn/lld/design-social-network",
+    "completed": false
   },
   {
     "id": "lld-21",
-    "title": "Design Cricinfo",
-    "section": "Platforms & Networks",
-    "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-cricinfo"
+    "title": "Design Learning Platform",
+    "section": "Social & Content Platforms",
+    "difficulty": "Medium",
+    "description": "Course management platform (like Coursera/Udemy) with video modules, quizzes, progress tracking, and certificates.",
+    "url": "https://algomaster.io/learn/lld/design-learning-platform",
+    "completed": false
   },
   {
     "id": "lld-22",
-    "title": "Design LinkedIn",
-    "section": "Platforms & Networks",
+    "title": "Design Cricinfo",
+    "section": "Social & Content Platforms",
     "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-linkedin"
+    "description": "Live ball-by-ball cricket commentary system with scorecards, match states, tournament statistics, and alerts.",
+    "url": "https://algomaster.io/learn/lld/design-cricinfo",
+    "completed": false
   },
   {
     "id": "lld-23",
-    "title": "Design Spotify",
-    "section": "Platforms & Networks",
+    "title": "Design LinkedIn",
+    "section": "Social & Content Platforms",
     "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-spotify"
+    "description": "Professional social network with user connections, career histories, job postings, search, and invitations.",
+    "url": "https://algomaster.io/learn/lld/design-linkedin",
+    "completed": false
   },
   {
     "id": "lld-24",
-    "title": "Design Ride Sharing App (Uber)",
-    "section": "Platforms & Networks",
+    "title": "Design Spotify",
+    "section": "Social & Content Platforms",
     "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-uber"
+    "description": "Music streaming service modeling tracks, playlists, artists, playback queues, and offline synchronization.",
+    "url": "https://algomaster.io/learn/lld/design-spotify",
+    "completed": false
   },
   {
     "id": "lld-25",
-    "title": "Design Food Delivery App",
-    "section": "Platforms & Networks",
-    "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-online-food-delivery-service"
+    "title": "Design Notification System",
+    "section": "Communication & Messaging",
+    "difficulty": "Easy",
+    "description": "Multi-channel notification dispatcher supporting Email, SMS, and Push with template rendering and priority queuing.",
+    "url": "https://algomaster.io/learn/lld/design-notification-system",
+    "completed": false
   },
   {
     "id": "lld-26",
+    "title": "Design Pub Sub System",
+    "section": "Communication & Messaging",
+    "difficulty": "Medium",
+    "description": "In-memory Publisher-Subscriber messaging bus with topic subscriptions, message filtering, and async dispatching.",
+    "url": "https://algomaster.io/learn/lld/design-pub-sub",
+    "completed": false
+  },
+  {
+    "id": "lld-27",
     "title": "Design Chat Application",
-    "section": "Platforms & Networks",
+    "section": "Communication & Messaging",
+    "difficulty": "Medium",
+    "description": "One-on-one and group chat system with message history, status indicators (sent/delivered/read), and attachments.",
+    "url": "https://algomaster.io/learn/lld/design-chat-application",
+    "completed": false
+  },
+  {
+    "id": "lld-28",
+    "title": "Design Splitwise",
+    "section": "Financial & Payment Systems",
+    "difficulty": "Medium",
+    "description": "Expense sharing app supporting equal, exact, and percentage splits, debt simplification, and group settlements.",
+    "url": "https://algomaster.io/learn/lld/design-splitwise",
+    "completed": false
+  },
+  {
+    "id": "lld-29",
+    "title": "Design Payment Gateway",
+    "section": "Financial & Payment Systems",
+    "difficulty": "Medium",
+    "description": "Idempotent payment transaction orchestrator handling multiple payment methods, retries, and webhook callbacks.",
+    "url": "https://algomaster.io/learn/lld/design-payment-gateway",
+    "completed": false
+  },
+  {
+    "id": "lld-30",
+    "title": "Design Online Stock Exchange",
+    "section": "Financial & Payment Systems",
     "difficulty": "Hard",
-    "url": "https://algomaster.io/learn/lld/design-chat-application"
+    "description": "High-throughput electronic order matching engine supporting limit/market orders, order book, and trade execution.",
+    "url": "https://algomaster.io/learn/lld/design-online-stock-exchange",
+    "completed": false
+  },
+  {
+    "id": "lld-31",
+    "title": "Design Amazon",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "E-commerce platform modeling product catalog, shopping cart, checkout pipeline, order lifecycle, and payments.",
+    "url": "https://algomaster.io/learn/lld/design-amazon",
+    "completed": false
+  },
+  {
+    "id": "lld-32",
+    "title": "Design Movie Booking System",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "BookMyShow-style cinema seat reservation with real-time seat lock, screening schedules, and booking concurrency.",
+    "url": "https://algomaster.io/learn/lld/design-movie-booking-system",
+    "completed": false
+  },
+  {
+    "id": "lld-33",
+    "title": "Design Online Auction System",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "Real-time bidding platform with reserve price, bid increments, auto-bidding, and countdown timer extensions.",
+    "url": "https://algomaster.io/learn/lld/design-online-auction-system",
+    "completed": false
+  },
+  {
+    "id": "lld-34",
+    "title": "Design Online Food Delivery Service",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "DoorDash/Swiggy-style platform connecting customers, restaurants, delivery partners, and live order tracking.",
+    "url": "https://algomaster.io/learn/lld/design-online-food-delivery-service",
+    "completed": false
+  },
+  {
+    "id": "lld-35",
+    "title": "Design Ride Hailing Service",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "Uber/Lyft LLD with rider requests, driver matching algorithms, fare estimation, and trip state management.",
+    "url": "https://algomaster.io/learn/lld/design-uber",
+    "completed": false
+  },
+  {
+    "id": "lld-36",
+    "title": "Design Amazon Locker",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Medium",
+    "description": "Self-service package delivery hub with locker allocation algorithms, PIN access, and expiration handling.",
+    "url": "https://algomaster.io/learn/lld/design-amazon-locker",
+    "completed": false
+  },
+  {
+    "id": "lld-37",
+    "title": "Design Shopping Cart",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Medium",
+    "description": "Flexible shopping cart supporting promotional coupons, discounts, bundle rules, and price recalculation.",
+    "url": "https://algomaster.io/learn/lld/design-shopping-cart",
+    "completed": false
+  },
+  {
+    "id": "lld-38",
+    "title": "Design Car Rental System",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "Vehicle fleet reservation with vehicle types, rental duration, pickup/drop-off locations, and damage waivers.",
+    "url": "https://algomaster.io/learn/lld/design-car-rental-system",
+    "completed": false
+  },
+  {
+    "id": "lld-39",
+    "title": "Design Meeting Scheduler",
+    "section": "E-commerce & Booking Systems",
+    "difficulty": "Hard",
+    "description": "Calendar meeting room scheduler checking attendee availability, conflicting invites, and recurring meeting rules.",
+    "url": "https://algomaster.io/learn/lld/design-meeting-room-scheduler",
+    "completed": false
+  },
+  {
+    "id": "lld-40",
+    "title": "Design URL Shortener",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Medium",
+    "description": "Low-level system for custom alias and hash generation, redirect handling, and click telemetry.",
+    "url": "https://algomaster.io/learn/lld/design-url-shortener",
+    "completed": false
+  },
+  {
+    "id": "lld-41",
+    "title": "Design Logging Framework",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Medium",
+    "description": "Extensible logging library (like Log4j) supporting multiple log levels, appenders (Console, File), and formatting.",
+    "url": "https://algomaster.io/learn/lld/design-logging-framework",
+    "completed": false
+  },
+  {
+    "id": "lld-42",
+    "title": "Design Rate Limiter",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Medium",
+    "description": "Token bucket, sliding window, and fixed window rate limiter implementations with configurable client policies.",
+    "url": "https://algomaster.io/learn/lld/design-rate-limiter",
+    "completed": false
+  },
+  {
+    "id": "lld-43",
+    "title": "Design In Memory File System",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Hard",
+    "description": "Hierarchical file system with files, directories, path traversal, read/write permissions, and disk space calculation.",
+    "url": "https://algomaster.io/learn/lld/design-in-memory-file-system",
+    "completed": false
+  },
+  {
+    "id": "lld-44",
+    "title": "Design Version Control System",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Hard",
+    "description": "Mini Git implementation modeling blobs, trees, commits, branches, and commit history graphs.",
+    "url": "https://algomaster.io/learn/lld/design-version-control-system",
+    "completed": false
+  },
+  {
+    "id": "lld-45",
+    "title": "Design Task Scheduler",
+    "section": "Developer Tools & Infrastructure",
+    "difficulty": "Hard",
+    "description": "Thread-pool based asynchronous cron and delay task scheduler with priority queue execution.",
+    "url": "https://algomaster.io/learn/lld/design-task-scheduler",
+    "completed": false
   }
 ];

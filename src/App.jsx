@@ -23,9 +23,9 @@ function App() {
     });
   };
 
-  const [dsa, setDsa] = useLocalStorage('faang-tracker-dsa-v7', dsaTopics, mergeData);
-  const [lld, setLld] = useLocalStorage('faang-tracker-lld-v7', lldTopics, mergeData);
-  const [hld, setHld] = useLocalStorage('faang-tracker-hld-v7', hldTopics, mergeData);
+  const [dsa, setDsa] = useLocalStorage('faang-tracker-dsa-v8', dsaTopics, mergeData);
+  const [lld, setLld] = useLocalStorage('faang-tracker-lld-v8', lldTopics, mergeData);
+  const [hld, setHld] = useLocalStorage('faang-tracker-hld-v8', hldTopics, mergeData);
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -41,10 +41,10 @@ function App() {
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Daily Work', icon: <LayoutDashboard size={18} /> },
-    { id: 'dsa', label: 'DSA (Planly)', icon: <BookOpen size={18} /> },
-    { id: 'lld', label: 'LLD (Algomaster)', icon: <Layers size={18} /> },
-    { id: 'hld', label: 'HLD (HelloInterview)', icon: <Monitor size={18} /> },
+    { id: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
+    { id: 'dsa', label: 'DSA', icon: <BookOpen size={18} /> },
+    { id: 'lld', label: 'LLD', icon: <Layers size={18} /> },
+    { id: 'hld', label: 'HLD', icon: <Monitor size={18} /> },
   ];
 
   return (
