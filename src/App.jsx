@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, BookOpen, Layers, Monitor, RefreshCw, GitBranch } from 'lucide-react';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import { useCloudStorage } from './hooks/useCloudStorage';
 import DailyHome from './components/DailyHome';
 import DsaTracker from './components/DsaTracker';
 import LldTracker from './components/LldTracker';
@@ -12,30 +12,25 @@ import { hldTopics } from './data/hldTopics';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  const mergeData = (stored, defaults) => {
-    if (!stored || stored.length === 0) return defaults;
-    return defaults.map(defaultItem => {
-      const currentStored = stored.find(d => d.id === defaultItem.id || d.url === defaultItem.url);
-      if (currentStored !== undefined) {
-        return { ...defaultItem, completed: currentStored.completed };
-      }
-      return defaultItem;
-    });
-  };
+  const docId = "my-personal-tracker";
+  
+  const [dsa, setDsa, dsaLoading] = useCloudStorage('dsa_progress', docId, dsaTopics, 'faang-tracker-dsa-v8');
+  const [lld, setLld, lldLoading] = useCloudStorage('lld_progress', docId, lldTopics, 'faang-tracker-lld-v8');
+  const [hld, setHld, hldLoading] = useCloudStorage('hld_progress', docId, hldTopics, 'faang-tracker-hld-v8');
 
-  const [dsa, setDsa] = useLocalStorage('faang-tracker-dsa-v8', dsaTopics, mergeData);
-  const [lld, setLld] = useLocalStorage('faang-tracker-lld-v8', lldTopics, mergeData);
-  const [hld, setHld] = useLocalStorage('faang-tracker-hld-v8', hldTopics, mergeData);
+  const isLoading = dsaLoading || lldLoading || hldLoading;
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
 
-  const resetProgress = () => {
+  const resetProgress = async () => {
     if (window.confirm('Reset ALL progress? This cannot be undone.')) {
-      setDsa(dsaTopics);
-      setLld(lldTopics);
-      setHld(hldTopics);
+      await Promise.all([
+        setDsa(dsaTopics),
+        setLld(lldTopics),
+        setHld(hldTopics)
+      ]);
       window.location.reload();
     }
   };
@@ -46,6 +41,14 @@ function App() {
     { id: 'lld', label: 'LLD', icon: <Layers size={18} /> },
     { id: 'hld', label: 'HLD', icon: <Monitor size={18} /> },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <RefreshCw className="animate-spin text-[#22c55e]" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex flex-col md:flex-row font-sans">
