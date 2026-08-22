@@ -20,14 +20,16 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
   else if (todayMonth === "Aug") initialIndex = todayDay;
   else if (todayMonth === "Sep") initialIndex = 31 + todayDay;
   
-  if (initialIndex < 0 || initialIndex >= 40) initialIndex = 22; // fallback
+  const totalDays = Math.max(DSA_SECTIONS_LIST.length, lld.length, hld.length);
+  
+  if (initialIndex < 0 || initialIndex >= totalDays) initialIndex = 22; // fallback
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(initialIndex);
   
   const formattedSelectedDate = getDateForIndex(selectedDayIndex);
-  const selectedSectionName = DSA_SECTIONS_LIST[selectedDayIndex]?.name || DSA_SECTIONS_LIST[0].name;
+  const selectedSectionName = DSA_SECTIONS_LIST[selectedDayIndex]?.name || null;
 
-  const todayDsaQuestions = dsa.filter(i => i.section === selectedSectionName);
+  const todayDsaQuestions = selectedSectionName ? dsa.filter(i => i.section === selectedSectionName) : [];
   const todayDsaCompleted = todayDsaQuestions.filter(i => i.completed).length;
 
   // LLD and HLD mapped to the day index (Day 0 gets 0th problem, etc.)
@@ -60,7 +62,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
         <div>
           <div className="flex items-center gap-2 text-green-500 font-semibold text-sm mb-2">
             <Calendar size={16} />
-            <span>Viewing: Day {selectedDayIndex + 1} of 40</span>
+            <span>Viewing: Day {selectedDayIndex + 1} of {totalDays}</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Home</h1>
           <p className="text-gray-400 text-sm">Focus on today's scheduled DSA questions, 1 LLD system, and 1 HLD breakdown.</p>
@@ -77,7 +79,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
             onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
             className="bg-[#1a1a1a] border border-gray-700 text-white text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full p-2 outline-none cursor-pointer"
           >
-            {Array.from({ length: 40 }).map((_, idx) => (
+            {Array.from({ length: totalDays }).map((_, idx) => (
               <option key={idx} value={idx}>
                 {getDateForIndex(idx)} (Day {idx + 1})
               </option>
@@ -132,9 +134,9 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
               <Target size={20} className="text-green-500" />
               <div>
                 <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  DSA Questions: <span className="text-green-400">{selectedSectionName}</span>
+                  DSA Questions {selectedSectionName && <><span className="text-gray-500 font-normal ml-1">for</span> <span className="text-green-400">{selectedSectionName}</span></>}
                 </h2>
-                <p className="text-xs text-gray-400">Scheduled for {formattedSelectedDate} • {todayDsaCompleted}/{todayDsaQuestions.length} completed</p>
+                <p className="text-xs text-gray-400">Scheduled for {formattedSelectedDate} {selectedSectionName && `• ${todayDsaCompleted}/${todayDsaQuestions.length} completed`}</p>
               </div>
             </div>
             <button 
@@ -145,49 +147,57 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
             </button>
           </div>
 
-          <div className="divide-y divide-gray-800/60">
-            {todayDsaQuestions.map((q, idx) => (
-              <div 
-                key={q.id} 
-                className={`p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors ${q.completed ? "bg-green-950/10" : ""}`}
-              >
-                <div className="flex items-center gap-3 min-w-0 pr-4">
-                  <button 
-                    onClick={() => toggleDsa(q.id)}
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                      q.completed ? "bg-green-500 border-green-500 text-black" : "border-gray-500 hover:border-green-400"
-                    }`}
-                    title={q.completed ? "Mark as Incomplete" : "Mark as Done"}
-                  >
-                    {q.completed && <Check size={12} strokeWidth={3} />}
-                  </button>
-                  <div className="min-w-0">
-                    <span className="text-xs text-gray-500 font-mono mr-2">#{idx + 1}</span>
+          {selectedSectionName ? (
+            <div className="divide-y divide-gray-800/60">
+              {todayDsaQuestions.map((q, idx) => (
+                <div 
+                  key={q.id} 
+                  className={`p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors ${q.completed ? "bg-green-950/10" : ""}`}
+                >
+                  <div className="flex items-center gap-3 min-w-0 pr-4">
+                    <button 
+                      onClick={() => toggleDsa(q.id)}
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                        q.completed ? "bg-green-500 border-green-500 text-black" : "border-gray-500 hover:border-green-400"
+                      }`}
+                      title={q.completed ? "Mark as Incomplete" : "Mark as Done"}
+                    >
+                      {q.completed && <Check size={12} strokeWidth={3} />}
+                    </button>
+                    <div className="min-w-0">
+                      <span className="text-xs text-gray-500 font-mono mr-2">#{idx + 1}</span>
+                      <a 
+                        href={q.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={`text-sm font-medium hover:text-green-400 transition-colors ${
+                          q.completed ? "line-through text-gray-500" : "text-gray-200"
+                        }`}
+                      >
+                        {q.title}
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <a 
                       href={q.url} 
                       target="_blank" 
                       rel="noopener noreferrer" 
-                      className={`text-sm font-medium hover:text-green-400 transition-colors ${
-                        q.completed ? "line-through text-gray-500" : "text-gray-200"
-                      }`}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-gray-800 hover:bg-green-500 hover:text-black text-gray-300 rounded transition-all"
                     >
-                      {q.title}
+                      Solve <ExternalLink size={12} />
                     </a>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <a 
-                    href={q.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-gray-800 hover:bg-green-500 hover:text-black text-gray-300 rounded transition-all"
-                  >
-                    Solve <ExternalLink size={12} />
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center bg-[#111111]">
+              <CheckCircle2 size={40} className="text-green-500 mx-auto mb-3" />
+              <p className="text-base font-semibold text-white">40-Day DSA Roadmap Complete!</p>
+              <p className="text-sm text-gray-400 mt-2">No more scheduled DSA topics for this day.</p>
+            </div>
+          )}
         </div>
 
         {/* Daily LLD & HLD Targets */}
