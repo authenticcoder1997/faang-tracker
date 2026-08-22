@@ -1,8 +1,12 @@
+// Source: HelloInterview System Design Guided Practice
+// https://www.hellointerview.com/learn/system-design/guided-practice
 export const hldTopics = [
+  // Easy (4)
   { id: 'hld-1', title: 'Bitly', difficulty: 'Easy', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly' },
   { id: 'hld-2', title: 'Dropbox', difficulty: 'Easy', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox' },
   { id: 'hld-3', title: 'Yelp', difficulty: 'Easy', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/yelp' },
   { id: 'hld-4', title: 'Local Delivery Service', difficulty: 'Easy', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/local-delivery' },
+  // Medium (18)
   { id: 'hld-5', title: 'Ticketmaster', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/ticketmaster' },
   { id: 'hld-6', title: 'Instagram', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/instagram' },
   { id: 'hld-7', title: 'FB News Feed', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed' },
@@ -18,14 +22,21 @@ export const hldTopics = [
   { id: 'hld-17', title: 'FB Live Comments', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-live-comments' },
   { id: 'hld-18', title: 'News Aggregator', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/news-aggregator' },
   { id: 'hld-19', title: 'Price Tracking Service', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/price-tracking' },
-  { id: 'hld-20', title: 'Online Chess', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/online-chess' },
-  { id: 'hld-21', title: 'ChatGPT', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/chatgpt' },
-  { id: 'hld-22', title: 'Metrics Monitoring', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/metrics-monitoring' },
-  { id: 'hld-23', title: 'Uber', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber' },
-  { id: 'hld-24', title: 'Robinhood', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/robinhood' },
-  { id: 'hld-25', title: 'Google Docs', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/google-docs' },
-  { id: 'hld-26', title: 'Web Crawler', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/web-crawler' },
-  { id: 'hld-27', title: 'Ad Click Aggregator', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator' },
-  { id: 'hld-28', title: 'FB Post Search', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-post-search' },
-  { id: 'hld-29', title: 'Payment System', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/payment-system' },
+  { id: 'hld-20', title: 'Notification System', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/notification-system' },
+  { id: 'hld-21', title: 'Online Chess', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/online-chess' },
+  { id: 'hld-22', title: 'ChatGPT', difficulty: 'Medium', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/chatgpt' },
+  // Hard (13)
+  { id: 'hld-23', title: 'YouTube Top K', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube-top-k' },
+  { id: 'hld-24', title: 'Uber', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber' },
+  { id: 'hld-25', title: 'Robinhood', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/robinhood' },
+  { id: 'hld-26', title: 'Google Docs', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/google-docs' },
+  { id: 'hld-27', title: 'Web Crawler', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/web-crawler' },
+  { id: 'hld-28', title: 'Ad Click Aggregator', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator' },
+  { id: 'hld-29', title: 'FB Post Search', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-post-search' },
+  { id: 'hld-30', title: 'Payment System', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/payment-system' },
+  { id: 'hld-31', title: 'Metrics Monitoring', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/metrics-monitoring' },
+  { id: 'hld-32', title: 'Online Chess (Hard)', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/online-chess' },
+  { id: 'hld-33', title: 'ChatGPT (Hard)', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/chatgpt' },
+  { id: 'hld-34', title: 'Live Streaming', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/live-streaming' },
+  { id: 'hld-35', title: 'Collaborative Editing', difficulty: 'Hard', url: 'https://www.hellointerview.com/learn/system-design/problem-breakdowns/collaborative-editing' },
 ];
