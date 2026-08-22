@@ -1,99 +1,151 @@
 import React from 'react';
-import { BookOpen, Layers, Monitor, Target } from 'lucide-react';
+import { BookOpen, Layers, Monitor, TrendingUp, Zap, Target } from 'lucide-react';
 
-export default function Dashboard({ dsa, lld, hld }) {
-  const getProgress = (items) => {
-    if (!items || items.length === 0) return 0;
-    const completed = items.filter(i => i.completed).length;
-    return Math.round((completed / items.length) * 100);
-  };
+export default function Dashboard({ dsa, lld, hld, setActiveTab }) {
+  const sections = [
+    {
+      id: 'dsa',
+      title: 'DSA Roadmap',
+      icon: <BookOpen size={20} />,
+      items: dsa,
+      color: 'blue',
+      description: 'Data Structures & Algorithms',
+      gradient: 'from-blue-500/20 to-blue-600/5',
+      accent: 'text-blue-400',
+      border: 'border-blue-500/20',
+      bar: 'bg-blue-400',
+    },
+    {
+      id: 'lld',
+      title: 'LLD Practice',
+      icon: <Layers size={20} />,
+      items: lld,
+      color: 'purple',
+      description: 'Low Level Design Problems',
+      gradient: 'from-purple-500/20 to-purple-600/5',
+      accent: 'text-purple-400',
+      border: 'border-purple-500/20',
+      bar: 'bg-purple-400',
+    },
+    {
+      id: 'hld',
+      title: 'System Design',
+      icon: <Monitor size={20} />,
+      items: hld,
+      color: 'green',
+      description: 'High Level System Design',
+      gradient: 'from-green-500/20 to-green-600/5',
+      accent: 'text-green-400',
+      border: 'border-green-500/20',
+      bar: 'bg-green-400',
+    },
+  ];
 
-  const dsaProgress = getProgress(dsa);
-  const lldProgress = getProgress(lld);
-  const hldProgress = getProgress(hld);
-  
-  const totalItems = (dsa?.length || 0) + (lld?.length || 0) + (hld?.length || 0);
-  const totalCompleted = 
-    (dsa?.filter(i=>i.completed).length || 0) + 
-    (lld?.filter(i=>i.completed).length || 0) + 
-    (hld?.filter(i=>i.completed).length || 0);
-    
-  const overallProgress = totalItems === 0 ? 0 : Math.round((totalCompleted / totalItems) * 100);
+  const allItems = [...dsa, ...lld, ...hld];
+  const totalCompleted = allItems.filter(i => i.completed).length;
+  const totalItems = allItems.length;
+  const overallPct = totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-5 dark:opacity-10 pointer-events-none">
-          <Target size={120} />
+    <div className="p-6 md:p-10 max-w-5xl">
+      {/* Hero */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 text-green-400 text-sm font-semibold mb-2">
+          <Zap size={16} />
+          <span>Your FAANG Preparation Hub</span>
         </div>
-        
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2 relative z-10">Overall Journey</h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-8 relative z-10">You have completed {totalCompleted} out of {totalItems} topics.</p>
-        
-        <div className="flex items-center gap-6 relative z-10">
-          <div className="flex-1">
-            <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-4 shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 h-4 rounded-full transition-all duration-1000 ease-out relative" 
-                style={{ width: `${overallProgress}%` }}
-              >
-                <div className="absolute inset-0 bg-white/20 rounded-full w-full h-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' }}></div>
-              </div>
+        <h1 className="text-3xl md:text-4xl font-black text-white mb-3">
+          Dashboard
+        </h1>
+        <p className="text-gray-400 text-base max-w-lg">
+          Track your daily study sessions across DSA, Low Level Design, and System Design. Stay consistent and crack FAANG.
+        </p>
+      </div>
+
+      {/* Overall progress card */}
+      <div className="mb-8 p-6 rounded-2xl bg-gray-900 border border-gray-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Target size={18} className="text-green-400" />
+              <span className="text-sm font-semibold text-gray-300">Overall Progress</span>
+            </div>
+            <p className="text-4xl font-black text-white">{overallPct}<span className="text-xl text-gray-500">%</span></p>
+          </div>
+          <div className="flex gap-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{totalCompleted}</p>
+              <p className="text-xs text-gray-500">Completed</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-400">{totalItems - totalCompleted}</p>
+              <p className="text-xs text-gray-500">Remaining</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-200">{totalItems}</p>
+              <p className="text-xs text-gray-500">Total</p>
             </div>
           </div>
-          <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            {overallProgress}%
-          </span>
+        </div>
+        <div className="w-full bg-gray-800 rounded-full h-3">
+          <div
+            className="bg-gradient-to-r from-green-500 to-green-400 h-3 rounded-full transition-all duration-700"
+            style={{ width: `${overallPct}%` }}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard 
-          title="DSA Progress" 
-          progress={dsaProgress} 
-          completed={dsa?.filter(i=>i.completed).length || 0}
-          total={dsa?.length || 0}
-          icon={<BookOpen size={28} className="text-blue-500" />} 
-          colorFrom="from-blue-400"
-          colorTo="to-blue-600"
-        />
-        <StatCard 
-          title="LLD Progress" 
-          progress={lldProgress} 
-          completed={lld?.filter(i=>i.completed).length || 0}
-          total={lld?.length || 0}
-          icon={<Layers size={28} className="text-purple-500" />} 
-          colorFrom="from-purple-400"
-          colorTo="to-purple-600"
-        />
-        <StatCard 
-          title="System Design" 
-          progress={hldProgress} 
-          completed={hld?.filter(i=>i.completed).length || 0}
-          total={hld?.length || 0}
-          icon={<Monitor size={28} className="text-emerald-500" />} 
-          colorFrom="from-emerald-400"
-          colorTo="to-emerald-600" 
-        />
-      </div>
-    </div>
-  );
-}
+      {/* Section cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        {sections.map(section => {
+          const completed = section.items.filter(i => i.completed).length;
+          const total = section.items.length;
+          const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+          const easy = section.items.filter(i => i.difficulty === 'Easy');
+          const medium = section.items.filter(i => i.difficulty === 'Medium');
+          const hard = section.items.filter(i => i.difficulty === 'Hard');
 
-function StatCard({ title, progress, completed, total, icon, colorFrom, colorTo }) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex flex-col items-center text-center transition-transform hover:-translate-y-1 hover:shadow-md duration-300">
-      <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 mb-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-        {icon}
+          return (
+            <button
+              key={section.id}
+              onClick={() => setActiveTab(section.id)}
+              className={`text-left p-5 rounded-xl border ${section.border} bg-gradient-to-br ${section.gradient} hover:border-opacity-50 transition-all group`}
+            >
+              <div className={`flex items-center gap-2 mb-3 ${section.accent}`}>
+                {section.icon}
+                <span className="font-semibold text-sm">{section.title}</span>
+              </div>
+              <p className="text-xs text-gray-500 mb-3">{section.description}</p>
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-2xl font-black text-white">{pct}%</span>
+                <span className="text-xs text-gray-500 font-mono">{completed}/{total}</span>
+              </div>
+              <div className="w-full bg-gray-800 rounded-full h-1.5 mb-3">
+                <div
+                  className={`${section.bar} h-1.5 rounded-full transition-all duration-500`}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="flex gap-3 text-xs">
+                <span className="text-green-400">{easy.filter(i => i.completed).length}/{easy.length} Easy</span>
+                <span className="text-yellow-400">{medium.filter(i => i.completed).length}/{medium.length} Med</span>
+                <span className="text-red-400">{hard.filter(i => i.completed).length}/{hard.length} Hard</span>
+              </div>
+            </button>
+          );
+        })}
       </div>
-      <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{completed} / {total} Completed</p>
-      <div className="text-3xl font-black text-gray-900 dark:text-white mb-5">{progress}%</div>
-      <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
-        <div 
-          className={`bg-gradient-to-r ${colorFrom} ${colorTo} h-2 rounded-full transition-all duration-1000 ease-out`} 
-          style={{ width: `${progress}%` }}
-        ></div>
+
+      {/* Motivational */}
+      <div className="p-5 rounded-xl bg-gray-900 border border-gray-800">
+        <div className="flex items-center gap-2 mb-2">
+          <TrendingUp size={16} className="text-green-400" />
+          <span className="text-sm font-semibold text-gray-300">Daily Goal</span>
+        </div>
+        <p className="text-gray-400 text-sm">
+          Aim for <span className="text-white font-semibold">2 DSA</span> + <span className="text-white font-semibold">1 LLD</span> + <span className="text-white font-semibold">1 System Design</span> problem per day.
+          At this pace you'll be ready in <span className="text-green-400 font-semibold">3 months</span>. 🚀
+        </p>
       </div>
     </div>
   );
