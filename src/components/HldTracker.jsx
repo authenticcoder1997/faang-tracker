@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, FileText, CheckCircle2, Circle, Play, RotateCcw } from 'lucide-react';
+import NoteModal from './NoteModal';
 
 export default function HldTracker({ items, setItems }) {
+  const [activeNoteItem, setActiveNoteItem] = useState(null);
   const [collapsedSections, setCollapsedSections] = useState({});
 
   const toggleItem = (id) => {
@@ -83,18 +85,14 @@ export default function HldTracker({ items, setItems }) {
                   {item.title}
                 </a>
               </div>
-              <div className="col-span-4 pr-6">
-                <input 
-                  type="text"
-                  placeholder="Add a note..."
-                  defaultValue={item.note || ''}
-                  onBlur={(e) => {
-                    if (e.target.value !== (item.note || '')) {
-                      setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
-                    }
-                  }}
-                  className="w-full bg-[#1e293b] border border-gray-600 hover:border-gray-500 focus:border-[#2dd4bf] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors outline-none"
-                />
+              <div className="col-span-4 flex items-center justify-center">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                  className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#2dd4bf] hover:bg-[#2dd4bf]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-600/50'}`}
+                  title={item.note ? "Edit Notes" : "Add Notes"}
+                >
+                  <FileText size={16} />
+                </button>
               </div>
               <div className="col-span-2 text-center">
                 <span className={`text-sm ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
@@ -112,6 +110,17 @@ export default function HldTracker({ items, setItems }) {
           ))}
         </div>
       </div>
+      <NoteModal 
+        isOpen={!!activeNoteItem}
+        onClose={() => setActiveNoteItem(null)}
+        initialNote={activeNoteItem?.note}
+        problemTitle={activeNoteItem?.title}
+        onSave={(newNote) => {
+          if (activeNoteItem && activeNoteItem.note !== newNote) {
+            setItems(items.map(i => i.id === activeNoteItem.id ? { ...i, note: newNote } : i));
+          }
+        }}
+      />
     </div>
   );
 }

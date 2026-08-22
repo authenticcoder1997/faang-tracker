@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles, FileText } from 'lucide-react';
+import NoteModal from './NoteModal';
 import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
 export default function DsaTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [activeNoteItem, setActiveNoteItem] = useState(null);
 
   const toggleItem = (id) => {
     setItems(items.map(item =>
@@ -123,18 +125,14 @@ export default function DsaTracker({ items, setItems }) {
                               {item.title}
                             </a>
                           </div>
-                          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                            <input 
-                              type="text"
-                              placeholder="Add a note..."
-                              defaultValue={item.note || ''}
-                              onBlur={(e) => {
-                                if (e.target.value !== (item.note || '')) {
-                                  setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
-                                }
-                              }}
-                              className="bg-transparent border border-gray-700/50 hover:border-gray-600 focus:border-[#22c55e]/50 rounded px-3 py-1.5 text-xs text-gray-300 w-28 sm:w-48 transition-colors outline-none"
-                            />
+                          <div className="shrink-0 flex items-center justify-center">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                              className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#22c55e] hover:bg-[#22c55e]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-700/50'}`}
+                              title={item.note ? "Edit Notes" : "Add Notes"}
+                            >
+                              <FileText size={16} />
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -147,6 +145,18 @@ export default function DsaTracker({ items, setItems }) {
         </div>
 
       </div>
+
+      <NoteModal 
+        isOpen={!!activeNoteItem}
+        onClose={() => setActiveNoteItem(null)}
+        initialNote={activeNoteItem?.note}
+        problemTitle={activeNoteItem?.title}
+        onSave={(newNote) => {
+          if (activeNoteItem && activeNoteItem.note !== newNote) {
+            setItems(items.map(i => i.id === activeNoteItem.id ? { ...i, note: newNote } : i));
+          }
+        }}
+      />
     </div>
   );
 }

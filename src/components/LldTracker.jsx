@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, BookOpen, PlayCircle, History, Gamepad2, Search, Database, Settings2, AppWindow, Network, MessageSquare, CreditCard, ShoppingCart, Wrench, CheckCircle2, Circle } from 'lucide-react';
+import { ChevronDown, ChevronRight, BookOpen, PlayCircle, History, Gamepad2, Search, Database, Settings2, AppWindow, Network, MessageSquare, CreditCard, ShoppingCart, Wrench, CheckCircle2, Circle, FileText } from 'lucide-react';
+import NoteModal from './NoteModal';
 
 export default function LldTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -7,6 +8,7 @@ export default function LldTracker({ items, setItems }) {
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [patternFilter, setPatternFilter] = useState('All');
+  const [activeNoteItem, setActiveNoteItem] = useState(null);
 
   const toggleItem = (id) => {
     setItems(items.map(item =>
@@ -221,18 +223,14 @@ export default function LldTracker({ items, setItems }) {
                           {item.title}
                         </a>
                       </div>
-                      <div className="col-span-2 pr-2">
-                        <input 
-                          type="text"
-                          placeholder="Note..."
-                          defaultValue={item.note || ''}
-                          onBlur={(e) => {
-                            if (e.target.value !== (item.note || '')) {
-                              setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
-                            }
-                          }}
-                          className="w-full bg-transparent border border-gray-700/50 hover:border-gray-600 focus:border-[#22c55e]/50 rounded px-2 py-1 text-xs text-gray-300 transition-colors outline-none"
-                        />
+                      <div className="col-span-2 flex items-center justify-center">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                          className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#22c55e] hover:bg-[#22c55e]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}
+                          title={item.note ? "Edit Notes" : "Add Notes"}
+                        >
+                          <FileText size={16} />
+                        </button>
                       </div>
                       <div className="col-span-2 text-xs text-gray-400 font-medium">
                         {item.pattern || '-'}
@@ -277,6 +275,17 @@ export default function LldTracker({ items, setItems }) {
           </div>
         </div>
       </div>
+      <NoteModal 
+        isOpen={!!activeNoteItem}
+        onClose={() => setActiveNoteItem(null)}
+        initialNote={activeNoteItem?.note}
+        problemTitle={activeNoteItem?.title}
+        onSave={(newNote) => {
+          if (activeNoteItem && activeNoteItem.note !== newNote) {
+            setItems(items.map(i => i.id === activeNoteItem.id ? { ...i, note: newNote } : i));
+          }
+        }}
+      />
     </div>
   );
 }
