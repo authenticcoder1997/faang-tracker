@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Layers, Monitor, RefreshCw, GitBranch } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Layers, Monitor, RefreshCw, GitBranch, FileText } from 'lucide-react';
 import { useCloudStorage } from './hooks/useCloudStorage';
+import { useCloudNotes } from './hooks/useCloudNotes';
 import DailyHome from './components/DailyHome';
 import DsaTracker from './components/DsaTracker';
 import LldTracker from './components/LldTracker';
 import HldTracker from './components/HldTracker';
+import Notes from './components/Notes';
 import { dsaTopics } from './data/dsaTopics';
 import { lldTopics } from './data/lldTopics';
 import { hldTopics } from './data/hldTopics';
@@ -17,8 +19,9 @@ function App() {
   const [dsa, setDsa, dsaLoading] = useCloudStorage('dsa_progress', docId, dsaTopics, 'faang-tracker-dsa-v8');
   const [lld, setLld, lldLoading] = useCloudStorage('lld_progress', docId, lldTopics, 'faang-tracker-lld-v8');
   const [hld, setHld, hldLoading] = useCloudStorage('hld_progress', docId, hldTopics, 'faang-tracker-hld-v8');
+  const [notes, setNotes, notesLoading] = useCloudNotes(docId);
 
-  const isLoading = dsaLoading || lldLoading || hldLoading;
+  const isLoading = dsaLoading || lldLoading || hldLoading || notesLoading;
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -40,6 +43,7 @@ function App() {
     { id: 'dsa', label: 'DSA', icon: <BookOpen size={18} /> },
     { id: 'lld', label: 'LLD', icon: <Layers size={18} /> },
     { id: 'hld', label: 'HLD', icon: <Monitor size={18} /> },
+    { id: 'notes', label: 'Notes', icon: <FileText size={18} /> },
   ];
 
   if (isLoading) {
@@ -109,6 +113,9 @@ function App() {
         </div>
         <div className={activeTab === 'hld' ? 'block' : 'hidden'}>
           <HldTracker items={hld} setItems={setHld} />
+        </div>
+        <div className={activeTab === 'notes' ? 'block h-full' : 'hidden'}>
+          <Notes notes={notes} setNotes={setNotes} />
         </div>
       </main>
     </div>
