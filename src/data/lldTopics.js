@@ -7,7 +7,8 @@ export const lldTopics = [
     "description": "Design an extensible 2-player or n-player N x N grid Tic Tac Toe game with move validation and winning conditions.",
     "url": "https://algomaster.io/learn/lld/design-tic-tac-toe",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy"
   },
   {
     "id": "lld-2",
@@ -17,7 +18,8 @@ export const lldTopics = [
     "description": "Design multiplayer board game with variable board size, snakes, ladders, dice strategies, and turn management.",
     "url": "https://algomaster.io/learn/lld/design-snake-and-ladder",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Singleton, Factory"
   },
   {
     "id": "lld-3",
@@ -27,7 +29,8 @@ export const lldTopics = [
     "description": "Design grid-based minesweeper game with mine generation, cell reveal, flag toggling, and cascading empty reveal.",
     "url": "https://algomaster.io/learn/lld/design-minesweeper",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-4",
@@ -37,7 +40,8 @@ export const lldTopics = [
     "description": "Comprehensive object-oriented model for Chess with Piece rules, Board state, Move validation, and Check/Checkmate detection.",
     "url": "https://algomaster.io/learn/lld/design-chess-game",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Command, Strategy"
   },
   {
     "id": "lld-5",
@@ -47,7 +51,8 @@ export const lldTopics = [
     "description": "Design in-memory Least Recently Used cache with O(1) get and put operations using Hash Map and Doubly Linked List.",
     "url": "https://algomaster.io/learn/lld/design-lru-cache",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Backtracking, Factory"
   },
   {
     "id": "lld-6",
@@ -57,7 +62,8 @@ export const lldTopics = [
     "description": "Space-efficient probabilistic data structure for set membership testing with configurable hash functions.",
     "url": "https://algomaster.io/learn/lld/design-bloom-filter",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-7",
@@ -67,7 +73,8 @@ export const lldTopics = [
     "description": "Trie-based search autocomplete engine with top-k prefix matching, frequency tracking, and fast caching.",
     "url": "https://algomaster.io/learn/lld/design-search-autocomplete",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Strategy"
   },
   {
     "id": "lld-8",
@@ -77,7 +84,8 @@ export const lldTopics = [
     "description": "Inverted index search engine with document tokenization, ranking algorithms (TF-IDF), and phrase query support.",
     "url": "https://algomaster.io/learn/lld/design-search-engine",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "State"
   },
   {
     "id": "lld-9",
@@ -87,7 +95,8 @@ export const lldTopics = [
     "description": "State machine based Automated Teller Machine handling card authentication, cash dispense, deposit, and balance checks.",
     "url": "https://algomaster.io/learn/lld/design-atm",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy"
   },
   {
     "id": "lld-10",
@@ -97,7 +106,8 @@ export const lldTopics = [
     "description": "State pattern architecture for item selection, cash/coin insertion, change return, and out-of-stock handling.",
     "url": "https://algomaster.io/learn/lld/design-vending-machine",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Chain of Responsibility"
   },
   {
     "id": "lld-11",
@@ -107,7 +117,8 @@ export const lldTopics = [
     "description": "Multi-elevator scheduling algorithm handling internal/external requests, optimal dispatching, and direction states.",
     "url": "https://algomaster.io/learn/lld/design-elevator-system",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Factory"
   },
   {
     "id": "lld-12",
@@ -117,7 +128,8 @@ export const lldTopics = [
     "description": "Dynamic traffic light state controller with timer transitions, emergency vehicle overrides, and sensor inputs.",
     "url": "https://algomaster.io/learn/lld/design-traffic-control-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer, Singleton"
   },
   {
     "id": "lld-13",
@@ -127,7 +139,8 @@ export const lldTopics = [
     "description": "Customizable beverage maker using Decorator and Factory patterns for coffee types, ingredients, and inventory tracking.",
     "url": "https://algomaster.io/learn/lld/design-coffee-vending-machine",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-14",
@@ -137,7 +150,8 @@ export const lldTopics = [
     "description": "Multi-floor parking lot supporting different vehicle types (compact, large, EV), ticket generation, and fee calculation.",
     "url": "https://algomaster.io/learn/lld/design-parking-lot",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Singleton"
   },
   {
     "id": "lld-15",
@@ -147,7 +161,8 @@ export const lldTopics = [
     "description": "Jira/Trello-like task management system with boards, lists, task assignments, status workflows, and activity logs.",
     "url": "https://algomaster.io/learn/lld/design-task-management-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Token Bucket"
   },
   {
     "id": "lld-16",
@@ -157,7 +172,8 @@ export const lldTopics = [
     "description": "Warehouse inventory management tracking product stock, SKU catalog, stock alerts, and reservation holds.",
     "url": "https://algomaster.io/learn/lld/design-inventory-management-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Singleton, Object Pool"
   },
   {
     "id": "lld-17",
@@ -167,7 +183,8 @@ export const lldTopics = [
     "description": "Book lending and catalog system with barcode tracking, member management, reservations, and fine computation.",
     "url": "https://algomaster.io/learn/lld/design-library-management-system",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Proxy"
   },
   {
     "id": "lld-18",
@@ -177,7 +194,8 @@ export const lldTopics = [
     "description": "Table booking, kitchen order ticketing (KOT), billing, and menu customization system.",
     "url": "https://algomaster.io/learn/lld/design-restaurant-management-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Composite"
   },
   {
     "id": "lld-19",
@@ -187,7 +205,8 @@ export const lldTopics = [
     "description": "Q&A platform with question posting, answers, voting/reputation system, badges, tagging, and search.",
     "url": "https://algomaster.io/learn/lld/design-stack-overflow",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Command, Priority Queue"
   },
   {
     "id": "lld-20",
@@ -197,7 +216,8 @@ export const lldTopics = [
     "description": "User graph connections (follow/friend), profile management, privacy controls, and activity feeds.",
     "url": "https://algomaster.io/learn/lld/design-social-network",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "State"
   },
   {
     "id": "lld-21",
@@ -207,7 +227,8 @@ export const lldTopics = [
     "description": "Course management platform (like Coursera/Udemy) with video modules, quizzes, progress tracking, and certificates.",
     "url": "https://algomaster.io/learn/lld/design-learning-platform",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Factory"
   },
   {
     "id": "lld-22",
@@ -217,7 +238,8 @@ export const lldTopics = [
     "description": "Live ball-by-ball cricket commentary system with scorecards, match states, tournament statistics, and alerts.",
     "url": "https://algomaster.io/learn/lld/design-cricinfo",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Strategy"
   },
   {
     "id": "lld-23",
@@ -227,7 +249,8 @@ export const lldTopics = [
     "description": "Professional social network with user connections, career histories, job postings, search, and invitations.",
     "url": "https://algomaster.io/learn/lld/design-linkedin",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Factory"
   },
   {
     "id": "lld-24",
@@ -237,7 +260,8 @@ export const lldTopics = [
     "description": "Music streaming service modeling tracks, playlists, artists, playback queues, and offline synchronization.",
     "url": "https://algomaster.io/learn/lld/design-spotify",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Factory, Observer"
   },
   {
     "id": "lld-25",
@@ -247,7 +271,8 @@ export const lldTopics = [
     "description": "Multi-channel notification dispatcher supporting Email, SMS, and Push with template rendering and priority queuing.",
     "url": "https://algomaster.io/learn/lld/design-notification-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Factory"
   },
   {
     "id": "lld-26",
@@ -257,7 +282,8 @@ export const lldTopics = [
     "description": "In-memory Publisher-Subscriber messaging bus with topic subscriptions, message filtering, and async dispatching.",
     "url": "https://algomaster.io/learn/lld/design-pub-sub",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Factory, Decorator"
   },
   {
     "id": "lld-27",
@@ -267,7 +293,8 @@ export const lldTopics = [
     "description": "One-on-one and group chat system with message history, status indicators (sent/delivered/read), and attachments.",
     "url": "https://algomaster.io/learn/lld/design-chat-application",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Concurrency, State"
   },
   {
     "id": "lld-28",
@@ -277,7 +304,8 @@ export const lldTopics = [
     "description": "Expense sharing app supporting equal, exact, and percentage splits, debt simplification, and group settlements.",
     "url": "https://algomaster.io/learn/lld/design-splitwise",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-29",
@@ -287,7 +315,8 @@ export const lldTopics = [
     "description": "Idempotent payment transaction orchestrator handling multiple payment methods, retries, and webhook callbacks.",
     "url": "https://algomaster.io/learn/lld/design-payment-gateway",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy (Settlement)"
   },
   {
     "id": "lld-30",
@@ -297,7 +326,8 @@ export const lldTopics = [
     "description": "High-throughput electronic order matching engine supporting limit/market orders, order book, and trade execution.",
     "url": "https://algomaster.io/learn/lld/design-online-stock-exchange",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer, Pub-Sub"
   },
   {
     "id": "lld-31",
@@ -307,7 +337,8 @@ export const lldTopics = [
     "description": "E-commerce platform modeling product catalog, shopping cart, checkout pipeline, order lifecycle, and payments.",
     "url": "https://algomaster.io/learn/lld/design-amazon",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Observer"
   },
   {
     "id": "lld-32",
@@ -317,7 +348,8 @@ export const lldTopics = [
     "description": "BookMyShow-style cinema seat reservation with real-time seat lock, screening schedules, and booking concurrency.",
     "url": "https://algomaster.io/learn/lld/design-movie-booking-system",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer, State"
   },
   {
     "id": "lld-33",
@@ -327,7 +359,8 @@ export const lldTopics = [
     "description": "Real-time bidding platform with reserve price, bid increments, auto-bidding, and countdown timer extensions.",
     "url": "https://algomaster.io/learn/lld/design-online-auction-system",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "Singleton"
   },
   {
     "id": "lld-34",
@@ -337,7 +370,8 @@ export const lldTopics = [
     "description": "DoorDash/Swiggy-style platform connecting customers, restaurants, delivery partners, and live order tracking.",
     "url": "https://algomaster.io/learn/lld/design-online-food-delivery-service",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Hash Functions"
   },
   {
     "id": "lld-35",
@@ -347,7 +381,8 @@ export const lldTopics = [
     "description": "Uber/Lyft LLD with rider requests, driver matching algorithms, fare estimation, and trip state management.",
     "url": "https://algomaster.io/learn/lld/design-uber",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Trie"
   },
   {
     "id": "lld-36",
@@ -357,7 +392,8 @@ export const lldTopics = [
     "description": "Self-service package delivery hub with locker allocation algorithms, PIN access, and expiration handling.",
     "url": "https://algomaster.io/learn/lld/design-amazon-locker",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "State"
   },
   {
     "id": "lld-37",
@@ -367,7 +403,8 @@ export const lldTopics = [
     "description": "Flexible shopping cart supporting promotional coupons, discounts, bundle rules, and price recalculation.",
     "url": "https://algomaster.io/learn/lld/design-shopping-cart",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Observer"
   },
   {
     "id": "lld-38",
@@ -377,7 +414,8 @@ export const lldTopics = [
     "description": "Vehicle fleet reservation with vehicle types, rental duration, pickup/drop-off locations, and damage waivers.",
     "url": "https://algomaster.io/learn/lld/design-car-rental-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-39",
@@ -387,7 +425,8 @@ export const lldTopics = [
     "description": "Calendar meeting room scheduler checking attendee availability, conflicting invites, and recurring meeting rules.",
     "url": "https://algomaster.io/learn/lld/design-meeting-room-scheduler",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "State, Factory"
   },
   {
     "id": "lld-40",
@@ -397,7 +436,8 @@ export const lldTopics = [
     "description": "Low-level system for custom alias and hash generation, redirect handling, and click telemetry.",
     "url": "https://algomaster.io/learn/lld/design-url-shortener",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Graph, Observer"
   },
   {
     "id": "lld-41",
@@ -407,7 +447,8 @@ export const lldTopics = [
     "description": "Extensible logging library (like Log4j) supporting multiple log levels, appenders (Console, File), and formatting.",
     "url": "https://algomaster.io/learn/lld/design-logging-framework",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer"
   },
   {
     "id": "lld-42",
@@ -417,7 +458,8 @@ export const lldTopics = [
     "description": "Token bucket, sliding window, and fixed window rate limiter implementations with configurable client policies.",
     "url": "https://algomaster.io/learn/lld/design-rate-limiter",
     "priority": "High",
-    "completed": false
+    "completed": false,
+    "pattern": "Proxy, Flyweight"
   },
   {
     "id": "lld-43",
@@ -427,7 +469,8 @@ export const lldTopics = [
     "description": "Hierarchical file system with files, directories, path traversal, read/write permissions, and disk space calculation.",
     "url": "https://algomaster.io/learn/lld/design-in-memory-file-system",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Observer, Strategy"
   },
   {
     "id": "lld-44",
@@ -437,7 +480,8 @@ export const lldTopics = [
     "description": "Mini Git implementation modeling blobs, trees, commits, branches, and commit history graphs.",
     "url": "https://algomaster.io/learn/lld/design-version-control-system",
     "priority": "Low",
-    "completed": false
+    "completed": false,
+    "pattern": "Strategy, Facade"
   },
   {
     "id": "lld-45",
@@ -447,6 +491,7 @@ export const lldTopics = [
     "description": "Thread-pool based asynchronous cron and delay task scheduler with priority queue execution.",
     "url": "https://algomaster.io/learn/lld/design-task-scheduler",
     "priority": "Medium",
-    "completed": false
+    "completed": false,
+    "pattern": "Command, Observer"
   }
 ];

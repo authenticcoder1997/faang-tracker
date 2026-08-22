@@ -5,6 +5,8 @@ export default function LldTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
+  const [patternFilter, setPatternFilter] = useState('All');
 
   const toggleItem = (id) => {
     setItems(items.map(item =>
@@ -12,11 +14,16 @@ export default function LldTracker({ items, setItems }) {
     ));
   };
 
-  // Filter items by search and difficulty
+  const allPatternsRaw = items.flatMap(i => (i.pattern || '').split(',').map(p => p.trim())).filter(Boolean);
+  const uniquePatterns = [...new Set(allPatternsRaw)].sort();
+
+  // Filter items by search, difficulty, priority, and pattern
   const filteredItems = items.filter(item => {
     const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDifficulty = difficultyFilter === 'All' || item.difficulty === difficultyFilter;
-    return matchesSearch && matchesDifficulty;
+    const matchesPriority = priorityFilter === 'All' || item.priority === priorityFilter;
+    const matchesPattern = patternFilter === 'All' || (item.pattern && item.pattern.includes(patternFilter));
+    return matchesSearch && matchesDifficulty && matchesPriority && matchesPattern;
   });
 
   const sections = Array.from(new Set(items.map(i => i.section)));
@@ -84,19 +91,47 @@ export default function LldTracker({ items, setItems }) {
               className="w-full bg-[#171717] border border-gray-800 rounded-md py-2 pl-9 pr-4 text-sm text-gray-200 focus:outline-none focus:border-[#22c55e]"
             />
           </div>
+          
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>Pattern:</span>
+              <select 
+                value={patternFilter}
+                onChange={(e) => setPatternFilter(e.target.value)}
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e] max-w-[150px] truncate"
+              >
+                <option>All</option>
+                {uniquePatterns.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>Priority:</span>
+              <select 
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]"
+              >
+                <option>All</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <span>Difficulty:</span>
-            <select 
-              value={difficultyFilter}
-              onChange={(e) => setDifficultyFilter(e.target.value)}
-              className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]"
-            >
-              <option>All</option>
-              <option>Easy</option>
-              <option>Medium</option>
-              <option>Hard</option>
-            </select>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>Difficulty:</span>
+              <select 
+                value={difficultyFilter}
+                onChange={(e) => setDifficultyFilter(e.target.value)}
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]"
+              >
+                <option>All</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -105,10 +140,11 @@ export default function LldTracker({ items, setItems }) {
           {/* Header Row */}
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">#</div>
-            <div className="col-span-5">Section / Problem</div>
+            <div className="col-span-4">Section / Problem</div>
+            <div className="col-span-3">Pattern</div>
             <div className="col-span-2 text-center">Priority</div>
-            <div className="col-span-2 text-center">Difficulty</div>
-            <div className="col-span-2 text-center">Solved</div>
+            <div className="col-span-1 text-center">Difficulty</div>
+            <div className="col-span-1 text-center">Solved</div>
           </div>
 
           {/* Sections */}
@@ -144,11 +180,14 @@ export default function LldTracker({ items, setItems }) {
                   {!isCollapsed && sectionItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
                       <div className="col-span-1"></div>
-                      <div className="col-span-5 flex items-center gap-3">
+                      <div className="col-span-4 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2">
                           {item.title}
                         </a>
+                      </div>
+                      <div className="col-span-3 text-xs text-gray-400 font-medium">
+                        {item.pattern || '-'}
                       </div>
                       <div className="col-span-2 text-center flex justify-center">
                         {item.priority ? (
@@ -165,7 +204,7 @@ export default function LldTracker({ items, setItems }) {
                           <span className="text-gray-500 text-xs">-</span>
                         )}
                       </div>
-                      <div className="col-span-2 text-center">
+                      <div className="col-span-1 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           item.difficulty === 'Easy' ? 'text-[#22c55e]' : 
                           item.difficulty === 'Medium' ? 'text-[#eab308]' : 
@@ -175,11 +214,11 @@ export default function LldTracker({ items, setItems }) {
                         </span>
                       </div>
                       {/* Solved Checkbox */}
-                      <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
+                      <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                         {item.completed ? (
-                          <CheckCircle2 size={24} className="text-[#22c55e]" />
+                          <CheckCircle2 size={20} className="text-[#22c55e]" />
                         ) : (
-                          <Circle size={24} className="text-gray-500 hover:text-[#22c55e] transition-colors" />
+                          <Circle size={20} className="text-gray-500 hover:text-[#22c55e] transition-colors" />
                         )}
                       </div>
                     </div>
