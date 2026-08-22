@@ -84,12 +84,7 @@ export default function LldTracker({ items, setItems }) {
               className="w-full bg-[#171717] border border-gray-800 rounded-md py-2 pl-9 pr-4 text-sm text-gray-200 focus:outline-none focus:border-[#22c55e]"
             />
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <span>Access:</span>
-            <select className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]">
-              <option>All Problems</option>
-            </select>
-          </div>
+
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <span>Difficulty:</span>
             <select 
@@ -110,7 +105,8 @@ export default function LldTracker({ items, setItems }) {
           {/* Header Row */}
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">#</div>
-            <div className="col-span-7">Section / Problem</div>
+            <div className="col-span-5">Section / Problem</div>
+            <div className="col-span-2 text-center">Priority</div>
             <div className="col-span-2 text-center">Difficulty</div>
             <div className="col-span-2 text-center">Solved</div>
           </div>
@@ -148,11 +144,24 @@ export default function LldTracker({ items, setItems }) {
                   {!isCollapsed && sectionItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
                       <div className="col-span-1"></div>
-                      <div className="col-span-7 flex items-center gap-3">
+                      <div className="col-span-5 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors">
                           {item.title}
                         </a>
+                      </div>
+                      <div className="col-span-2 text-center flex justify-center">
+                        {item.priority && item.priority !== 'Normal' ? (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                            item.priority === 'High' 
+                              ? 'text-rose-400 border-rose-400/30 bg-rose-400/10' 
+                              : 'text-blue-400 border-blue-400/30 bg-blue-400/10'
+                          }`}>
+                            {item.priority}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 text-xs">-</span>
+                        )}
                       </div>
                       <div className="col-span-2 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${

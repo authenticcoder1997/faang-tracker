@@ -1,0 +1,182 @@
+[
+  {
+    "url": "https://algomaster.io/learn/lld/design-tic-tac-toe",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-snake-and-ladder",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-minesweeper",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-chess-game",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-lru-cache",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-bloom-filter",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-search-autocomplete",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-search-engine",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-atm",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-vending-machine",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-elevator-system",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-traffic-control-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-coffee-vending-machine",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-parking-lot",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-task-management-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-inventory-management-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-library-management-system",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-restaurant-management-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-stack-overflow",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-social-network",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-learning-platform",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-cricinfo",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-linkedin",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-spotify",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-notification-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-pub-sub",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-chat-application",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-splitwise",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-payment-gateway",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-online-stock-exchange",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-amazon",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-movie-booking-system",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-online-auction-system",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-online-food-delivery-service",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-uber",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-amazon-locker",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-shopping-cart",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-car-rental-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-meeting-room-scheduler",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-url-shortener",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-logging-framework",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-rate-limiter",
+    "priority": "High"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-in-memory-file-system",
+    "priority": "Normal"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-version-control-system",
+    "priority": "Low"
+  },
+  {
+    "url": "https://algomaster.io/learn/lld/design-task-scheduler",
+    "priority": "Normal"
+  }
+]
