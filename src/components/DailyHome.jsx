@@ -3,11 +3,12 @@ import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Cale
 import { DSA_SECTIONS_LIST } from "../data/dsaTopics";
 
 export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setActiveTab }) {
-  // Helper to map index (0-39) to date string (31 Jul - 8 Sep)
   const getDateForIndex = (index) => {
     if (index === 0) return "31 Jul";
     if (index <= 31) return `${index} Aug`;
-    return `${index - 31} Sep`;
+    if (index <= 61) return `${index - 31} Sep`;
+    if (index <= 92) return `${index - 61} Oct`;
+    return `${index - 92} Nov`;
   };
 
   // Calculate default today's index
@@ -19,8 +20,13 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
   if (todayMonth === "Jul" && todayDay === 31) initialIndex = 0;
   else if (todayMonth === "Aug") initialIndex = todayDay;
   else if (todayMonth === "Sep") initialIndex = 31 + todayDay;
+  else if (todayMonth === "Oct") initialIndex = 61 + todayDay;
+  else if (todayMonth === "Nov") initialIndex = 92 + todayDay;
   
-  const totalDays = Math.max(DSA_SECTIONS_LIST.length, lld.length, hld.length);
+  const lldStartIndex = 22;
+  const hldStartIndex = 22;
+
+  const totalDays = Math.max(DSA_SECTIONS_LIST.length, lldStartIndex + lld.length, hldStartIndex + hld.length);
   
   if (initialIndex < 0 || initialIndex >= totalDays) initialIndex = 22; // fallback
 
@@ -32,9 +38,11 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
   const todayDsaQuestions = selectedSectionName ? dsa.filter(i => i.section === selectedSectionName) : [];
   const todayDsaCompleted = todayDsaQuestions.filter(i => i.completed).length;
 
-  // LLD and HLD mapped to the day index (Day 0 gets 0th problem, etc.)
-  const nextLld = lld[selectedDayIndex] ? [lld[selectedDayIndex]] : [];
-  const nextHld = hld[selectedDayIndex] ? [hld[selectedDayIndex]] : [];
+  // LLD and HLD mapped to the day index (Offset to start on Aug 22)
+  const lldIndex = selectedDayIndex - lldStartIndex;
+  const hldIndex = selectedDayIndex - hldStartIndex;
+  const nextLld = lldIndex >= 0 && lld[lldIndex] ? [lld[lldIndex]] : [];
+  const nextHld = hldIndex >= 0 && hld[hldIndex] ? [hld[hldIndex]] : [];
 
   const toggleDsa = (id) => {
     if (!setDsa) return;
@@ -274,10 +282,16 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
                     </a>
                   </div>
                 </div>
+              ) : selectedDayIndex < lldStartIndex ? (
+                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                  <Layers size={32} className="text-emerald-400 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-white">LLD Practice starts on 22 Aug!</p>
+                  <p className="text-xs text-gray-400 mt-1">Get ready to master Low-Level Design.</p>
+                </div>
               ) : (
                 <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
                   <CheckCircle2 size={32} className="text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All 45 LLD problems completed!</p>
+                  <p className="text-sm font-semibold text-white">All {lld.length} LLD problems completed!</p>
                   <p className="text-xs text-gray-400 mt-1">Awesome job mastering Low-Level Design.</p>
                 </div>
               )}
@@ -349,10 +363,16 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
                     </a>
                   </div>
                 </div>
+              ) : selectedDayIndex < hldStartIndex ? (
+                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                  <Monitor size={32} className="text-teal-400 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-white">HLD Practice starts on 22 Aug!</p>
+                  <p className="text-xs text-gray-400 mt-1">Get ready to master System Design.</p>
+                </div>
               ) : (
                 <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
                   <CheckCircle2 size={32} className="text-teal-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All 35 HLD breakdowns completed!</p>
+                  <p className="text-sm font-semibold text-white">All {hld.length} HLD breakdowns completed!</p>
                   <p className="text-xs text-gray-400 mt-1">Awesome job mastering System Design.</p>
                 </div>
               )}
