@@ -12,12 +12,14 @@ export function useCloudStorage(collectionName, documentId, initialValue, localS
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const cloudData = docSnap.data().completedIds || [];
+        const itemState = docSnap.data().itemState || {};
         
-        // Smart merge: keep fresh source-of-truth data, but restore completion state
+        // Smart merge: keep fresh source-of-truth data, but restore completion state and notes
         if (Array.isArray(initialValue) && initialValue.length > 0 && initialValue[0].id) {
           const merged = initialValue.map(initItem => ({
             ...initItem,
-            completed: cloudData.includes(initItem.id)
+            completed: itemState[initItem.id]?.completed ?? cloudData.includes(initItem.id),
+            note: itemState[initItem.id]?.note || ''
           }));
           setData(merged);
         } else {
@@ -35,14 +37,21 @@ export function useCloudStorage(collectionName, documentId, initialValue, localS
               finalData = initialValue.map(initItem => {
                  const cachedItem = parsedLocal.find(p => p.id === initItem.id || p.url === initItem.url);
                  if (cachedItem) {
-                    return { ...initItem, completed: cachedItem.completed };
+                    return { ...initItem, completed: cachedItem.completed, note: cachedItem.note || '' };
                  }
                  return initItem;
               });
               
               // Upload the migrated data to cloud in the background
               const completedIds = finalData.filter(i => i.completed).map(i => i.id);
-              setDoc(docRef, { completedIds }, { merge: true }).catch(console.error);
+              const itemState = {};
+              finalData.forEach(i => {
+                if (i.completed || i.note) {
+                  itemState[i.id] = { completed: !!i.completed };
+                  if (i.note) itemState[i.id].note = i.note;
+                }
+              });
+              setDoc(docRef, { completedIds, itemState }, { merge: true }).catch(console.error);
             }
           } catch(e) {
             console.error("Migration failed:", e);
@@ -69,8 +78,15 @@ export function useCloudStorage(collectionName, documentId, initialValue, localS
       // Save to cloud
       if (Array.isArray(valueToStore)) {
         const completedIds = valueToStore.filter(i => i.completed).map(i => i.id);
+        const itemState = {};
+        valueToStore.forEach(i => {
+          if (i.completed || i.note) {
+            itemState[i.id] = { completed: !!i.completed };
+            if (i.note) itemState[i.id].note = i.note;
+          }
+        });
         const docRef = doc(db, collectionName, documentId);
-        await setDoc(docRef, { completedIds }, { merge: true });
+        await setDoc(docRef, { completedIds, itemState }, { merge: true });
       }
     } catch (error) {
       console.error(`Error saving to cloud ${collectionName}/${documentId}:`, error);

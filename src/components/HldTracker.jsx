@@ -65,29 +65,43 @@ export default function HldTracker({ items, setItems }) {
         {/* Table */}
         <div className="w-full">
           <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
-            <div className="col-span-8 pl-6">Interview Question</div>
+            <div className="col-span-5 pl-6">Interview Question</div>
+            <div className="col-span-4">Notes</div>
             <div className="col-span-2 text-center">Difficulty</div>
-            <div className="col-span-2 text-center">Solved</div>
+            <div className="col-span-1 text-center">Solved</div>
           </div>
 
           {items.map((item, idx) => (
             <div key={item.id} className="grid grid-cols-12 items-center py-4 border-b border-gray-700/50 hover:bg-[#334155]/30 transition-colors">
-              <div className="col-span-8 flex items-center gap-3 pl-6">
+              <div className="col-span-5 flex items-center gap-3 pl-6 pr-4">
                 <a 
                   href={item.url} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-gray-200 hover:text-[#2dd4bf] transition-colors"
+                  className="text-gray-200 hover:text-[#2dd4bf] transition-colors line-clamp-2"
                 >
                   {item.title}
                 </a>
+              </div>
+              <div className="col-span-4 pr-6">
+                <input 
+                  type="text"
+                  placeholder="Add a note..."
+                  defaultValue={item.note || ''}
+                  onBlur={(e) => {
+                    if (e.target.value !== (item.note || '')) {
+                      setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
+                    }
+                  }}
+                  className="w-full bg-[#1e293b] border border-gray-600 hover:border-gray-500 focus:border-[#2dd4bf] rounded px-3 py-1.5 text-sm text-gray-300 transition-colors outline-none"
+                />
               </div>
               <div className="col-span-2 text-center">
                 <span className={`text-sm ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
                   {item.difficulty}
                 </span>
               </div>
-              <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
+              <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                 {item.completed ? (
                   <CheckCircle2 size={24} className="text-[#2dd4bf]" />
                 ) : (

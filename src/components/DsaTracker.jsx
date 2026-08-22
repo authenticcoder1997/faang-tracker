@@ -103,24 +103,39 @@ export default function DsaTracker({ items, setItems }) {
                       {sectionItems.map(item => (
                         <div 
                           key={item.id} 
-                          className="flex items-center w-full gap-x-3 px-4 sm:px-6 py-2 hover:bg-gray-800/60 transition-colors group cursor-pointer"
+                          className="flex justify-between items-center w-full gap-x-3 px-4 sm:px-6 py-2 hover:bg-gray-800/60 transition-colors group cursor-pointer"
                           onClick={() => toggleItem(item.id)}
                         >
-                          <input 
-                            readOnly 
-                            className={`border border-gray-500 h-4 w-4 rounded-full transition-colors ${item.completed ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
-                            type="checkbox" 
-                            checked={item.completed}
-                          />
-                          <a 
-                            href={item.url || '#'} 
-                            target={item.url ? "_blank" : "_self"} 
-                            rel="noopener noreferrer"
-                            className={`text-[15px] sm:text-[17px] font-medium transition-colors ${item.completed ? 'text-gray-500 line-through' : 'text-gray-400 group-hover:text-gray-200'}`}
-                            onClick={(e) => { e.stopPropagation(); }}
-                          >
-                            {item.title}
-                          </a>
+                          <div className="flex items-center gap-x-3 flex-1 min-w-0">
+                            <input 
+                              readOnly 
+                              className={`border border-gray-500 h-4 w-4 shrink-0 rounded-full transition-colors ${item.completed ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
+                              type="checkbox" 
+                              checked={item.completed}
+                            />
+                            <a 
+                              href={item.url || '#'} 
+                              target={item.url ? "_blank" : "_self"} 
+                              rel="noopener noreferrer"
+                              className={`text-[15px] sm:text-[17px] font-medium truncate transition-colors ${item.completed ? 'text-gray-500 line-through' : 'text-gray-400 group-hover:text-gray-200'}`}
+                              onClick={(e) => { e.stopPropagation(); }}
+                            >
+                              {item.title}
+                            </a>
+                          </div>
+                          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <input 
+                              type="text"
+                              placeholder="Add a note..."
+                              defaultValue={item.note || ''}
+                              onBlur={(e) => {
+                                if (e.target.value !== (item.note || '')) {
+                                  setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
+                                }
+                              }}
+                              className="bg-transparent border border-gray-700/50 hover:border-gray-600 focus:border-[#22c55e]/50 rounded px-3 py-1.5 text-xs text-gray-300 w-28 sm:w-48 transition-colors outline-none"
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>

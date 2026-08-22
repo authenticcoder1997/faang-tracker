@@ -174,8 +174,9 @@ export default function LldTracker({ items, setItems }) {
           {/* Header Row */}
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">#</div>
-            <div className="col-span-4">Section / Problem</div>
-            <div className="col-span-3">Pattern</div>
+            <div className="col-span-3">Problem</div>
+            <div className="col-span-2">Notes</div>
+            <div className="col-span-2">Pattern</div>
             <div className="col-span-2 text-center">Priority</div>
             <div className="col-span-1 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
@@ -214,13 +215,26 @@ export default function LldTracker({ items, setItems }) {
                   {!isCollapsed && sectionItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
                       <div className="col-span-1"></div>
-                      <div className="col-span-4 flex items-center gap-3">
+                      <div className="col-span-3 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2">
                           {item.title}
                         </a>
                       </div>
-                      <div className="col-span-3 text-xs text-gray-400 font-medium">
+                      <div className="col-span-2 pr-2">
+                        <input 
+                          type="text"
+                          placeholder="Note..."
+                          defaultValue={item.note || ''}
+                          onBlur={(e) => {
+                            if (e.target.value !== (item.note || '')) {
+                              setItems(items.map(i => i.id === item.id ? { ...i, note: e.target.value } : i));
+                            }
+                          }}
+                          className="w-full bg-transparent border border-gray-700/50 hover:border-gray-600 focus:border-[#22c55e]/50 rounded px-2 py-1 text-xs text-gray-300 transition-colors outline-none"
+                        />
+                      </div>
+                      <div className="col-span-2 text-xs text-gray-400 font-medium">
                         {item.pattern || '-'}
                       </div>
                       <div className="col-span-2 text-center flex justify-center">
