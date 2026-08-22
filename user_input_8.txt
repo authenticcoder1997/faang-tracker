@@ -1,6 +1,0 @@
-<USER_REQUEST>
-I HAVE LOGGEDD IN vercel do the rest of the steps in browser
-</USER_REQUEST>
-<ADDITIONAL_METADATA>
-The current local time is: 2026-08-22T17:11:36+05:30.
-</ADDITIONAL_METADATA>

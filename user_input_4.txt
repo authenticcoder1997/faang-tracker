@@ -1,6 +1,0 @@
-<USER_REQUEST>
-you do it in chrome browser
-</USER_REQUEST>
-<ADDITIONAL_METADATA>
-The current local time is: 2026-08-22T17:03:49+05:30.
-</ADDITIONAL_METADATA>
