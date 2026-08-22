@@ -51,17 +51,51 @@ export default function LldTracker({ items, setItems }) {
   };
 
   // Count completed
-  const completedCount = items.filter(i => i.completed).length;
+  const total = items.length;
+  const completed = items.filter(i => i.completed).length;
+  const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+  const easyTotal = items.filter(i => i.difficulty === 'Easy').length;
+  const easyDone = items.filter(i => i.difficulty === 'Easy' && i.completed).length;
+  const medTotal = items.filter(i => i.difficulty === 'Medium').length;
+  const medDone = items.filter(i => i.difficulty === 'Medium' && i.completed).length;
+  const hardTotal = items.filter(i => i.difficulty === 'Hard').length;
+  const hardDone = items.filter(i => i.difficulty === 'Hard' && i.completed).length;
 
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-gray-300 p-8 font-sans">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Low Level Design Practice</h1>
-          <p className="text-gray-400 text-sm mb-4">Practice for Low Level Design Interviews step-by-step with AI powered evaluation and feedback</p>
-          <a href="https://algomaster.io/interview/low-level-design" target="_blank" rel="noopener noreferrer" className="text-[#22c55e] text-sm font-medium hover:underline flex items-center gap-1">How it Works ↓</a>
+        <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Low Level Design Practice</h1>
+            <p className="text-gray-400 text-sm mb-4">Practice for Low Level Design Interviews step-by-step with AI powered evaluation and feedback</p>
+            <a href="https://algomaster.io/interview/low-level-design" target="_blank" rel="noopener noreferrer" className="text-[#22c55e] text-sm font-medium hover:underline flex items-center gap-1">How it Works ↓</a>
+          </div>
+          
+          <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800">
+            <div className="relative w-20 h-20 rounded-full bg-[#262626] flex items-center justify-center border-4 border-[#262626]">
+              <div className="absolute inset-0 rounded-full border-4 border-[#22c55e]" style={{ clipPath: `inset(${100 - pct}% 0 0 0)` }}></div>
+              <div className="text-center z-10">
+                <div className="text-lg font-bold text-white leading-none">{completed}/{total}</div>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="text-center">
+                <div className="text-[#22c55e] text-xs mb-1">Easy</div>
+                <div className="text-white font-bold">{easyDone}<span className="text-gray-500 text-sm">/{easyTotal}</span></div>
+              </div>
+              <div className="text-center">
+                <div className="text-[#eab308] text-xs mb-1">Medium</div>
+                <div className="text-white font-bold">{medDone}<span className="text-gray-500 text-sm">/{medTotal}</span></div>
+              </div>
+              <div className="text-center">
+                <div className="text-[#ef4444] text-xs mb-1">Hard</div>
+                <div className="text-white font-bold">{hardDone}<span className="text-gray-500 text-sm">/{hardTotal}</span></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Toolbar */}
@@ -69,7 +103,7 @@ export default function LldTracker({ items, setItems }) {
           <div className="flex gap-4 items-center text-sm text-gray-400">
             <span>📁 {sections.length} sections</span>
             <span>📄 {items.length} problems</span>
-            <span className="text-[#22c55e]">✓ {completedCount} completed</span>
+            <span className="text-[#22c55e]">✓ {completed} completed</span>
           </div>
           <button 
             onClick={toggleAllSections}

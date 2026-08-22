@@ -66,7 +66,7 @@ export default function DsaTracker({ items, setItems }) {
                       <input 
                         readOnly 
                         disabled 
-                        className={`border-gray-500 border-[1.3px] h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500 rounded-full ${isFullyCompleted ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
+                        className={`border-gray-400 border-2 h-4 w-4 sm:h-4 sm:w-4 text-green-500 rounded-full ${isFullyCompleted ? 'bg-green-500 border-green-500' : 'bg-[#1e1e1e]'}`} 
                         type="checkbox" 
                         checked={isFullyCompleted} 
                       />
