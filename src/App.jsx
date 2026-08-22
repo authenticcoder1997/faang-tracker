@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Layers, Monitor, Moon, Sun, RefreshCw, Github, ChevronDown, ChevronUp, ExternalLink, Check } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Layers, Monitor, Moon, Sun, RefreshCw, GitBranch, ChevronDown, ChevronUp, ExternalLink, Check } from 'lucide-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import Dashboard from './components/Dashboard';
 import { dsaTopics } from './data/dsaTopics';
@@ -115,7 +115,7 @@ function App() {
             rel="noopener noreferrer"
             className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition-colors"
           >
-            <Github size={16} />
+            <GitBranch size={16} />
             View Source
           </a>
         </div>
