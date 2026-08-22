@@ -123,7 +123,7 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-64 min-h-screen">
-        {activeTab === 'dashboard' && <DailyHome dsa={dsa} lld={lld} hld={hld} setActiveTab={setActiveTab} />}
+        {activeTab === 'dashboard' && <DailyHome dsa={dsa} lld={lld} hld={hld} setDsa={setDsa} setLld={setLld} setHld={setHld} setActiveTab={setActiveTab} />}
         {activeTab === 'dsa' && <DsaTracker items={dsa} setItems={setDsa} />}
         {activeTab === 'lld' && <LldTracker items={lld} setItems={setLld} />}
         {activeTab === 'hld' && <HldTracker items={hld} setItems={setHld} />}
