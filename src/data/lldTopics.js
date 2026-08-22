@@ -16,7 +16,7 @@ export const lldTopics = [
     "difficulty": "Easy",
     "description": "Design multiplayer board game with variable board size, snakes, ladders, dice strategies, and turn management.",
     "url": "https://algomaster.io/learn/lld/design-snake-and-ladder",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -56,7 +56,7 @@ export const lldTopics = [
     "difficulty": "Easy",
     "description": "Space-efficient probabilistic data structure for set membership testing with configurable hash functions.",
     "url": "https://algomaster.io/learn/lld/design-bloom-filter",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -66,7 +66,7 @@ export const lldTopics = [
     "difficulty": "Easy",
     "description": "Trie-based search autocomplete engine with top-k prefix matching, frequency tracking, and fast caching.",
     "url": "https://algomaster.io/learn/lld/design-search-autocomplete",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -116,7 +116,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "Dynamic traffic light state controller with timer transitions, emergency vehicle overrides, and sensor inputs.",
     "url": "https://algomaster.io/learn/lld/design-traffic-control-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -146,7 +146,7 @@ export const lldTopics = [
     "difficulty": "Easy",
     "description": "Jira/Trello-like task management system with boards, lists, task assignments, status workflows, and activity logs.",
     "url": "https://algomaster.io/learn/lld/design-task-management-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -156,7 +156,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "Warehouse inventory management tracking product stock, SKU catalog, stock alerts, and reservation holds.",
     "url": "https://algomaster.io/learn/lld/design-inventory-management-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -176,7 +176,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Table booking, kitchen order ticketing (KOT), billing, and menu customization system.",
     "url": "https://algomaster.io/learn/lld/design-restaurant-management-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -196,7 +196,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "User graph connections (follow/friend), profile management, privacy controls, and activity feeds.",
     "url": "https://algomaster.io/learn/lld/design-social-network",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -226,7 +226,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Professional social network with user connections, career histories, job postings, search, and invitations.",
     "url": "https://algomaster.io/learn/lld/design-linkedin",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -236,7 +236,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Music streaming service modeling tracks, playlists, artists, playback queues, and offline synchronization.",
     "url": "https://algomaster.io/learn/lld/design-spotify",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -246,7 +246,7 @@ export const lldTopics = [
     "difficulty": "Easy",
     "description": "Multi-channel notification dispatcher supporting Email, SMS, and Push with template rendering and priority queuing.",
     "url": "https://algomaster.io/learn/lld/design-notification-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -286,7 +286,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "Idempotent payment transaction orchestrator handling multiple payment methods, retries, and webhook callbacks.",
     "url": "https://algomaster.io/learn/lld/design-payment-gateway",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -296,7 +296,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "High-throughput electronic order matching engine supporting limit/market orders, order book, and trade execution.",
     "url": "https://algomaster.io/learn/lld/design-online-stock-exchange",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -306,7 +306,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "E-commerce platform modeling product catalog, shopping cart, checkout pipeline, order lifecycle, and payments.",
     "url": "https://algomaster.io/learn/lld/design-amazon",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -356,7 +356,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "Self-service package delivery hub with locker allocation algorithms, PIN access, and expiration handling.",
     "url": "https://algomaster.io/learn/lld/design-amazon-locker",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -366,7 +366,7 @@ export const lldTopics = [
     "difficulty": "Medium",
     "description": "Flexible shopping cart supporting promotional coupons, discounts, bundle rules, and price recalculation.",
     "url": "https://algomaster.io/learn/lld/design-shopping-cart",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -376,7 +376,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Vehicle fleet reservation with vehicle types, rental duration, pickup/drop-off locations, and damage waivers.",
     "url": "https://algomaster.io/learn/lld/design-car-rental-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -386,7 +386,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Calendar meeting room scheduler checking attendee availability, conflicting invites, and recurring meeting rules.",
     "url": "https://algomaster.io/learn/lld/design-meeting-room-scheduler",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -426,7 +426,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Hierarchical file system with files, directories, path traversal, read/write permissions, and disk space calculation.",
     "url": "https://algomaster.io/learn/lld/design-in-memory-file-system",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   },
   {
@@ -446,7 +446,7 @@ export const lldTopics = [
     "difficulty": "Hard",
     "description": "Thread-pool based asynchronous cron and delay task scheduler with priority queue execution.",
     "url": "https://algomaster.io/learn/lld/design-task-scheduler",
-    "priority": "Normal",
+    "priority": "Medium",
     "completed": false
   }
 ];

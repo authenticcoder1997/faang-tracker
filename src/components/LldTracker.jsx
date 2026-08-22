@@ -151,11 +151,13 @@ export default function LldTracker({ items, setItems }) {
                         </a>
                       </div>
                       <div className="col-span-2 text-center flex justify-center">
-                        {item.priority && item.priority !== 'Normal' ? (
+                        {item.priority ? (
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
                             item.priority === 'High' 
                               ? 'text-rose-400 border-rose-400/30 bg-rose-400/10' 
-                              : 'text-blue-400 border-blue-400/30 bg-blue-400/10'
+                              : item.priority === 'Medium'
+                              ? 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10'
+                              : 'text-green-400 border-green-400/30 bg-green-400/10'
                           }`}>
                             {item.priority}
                           </span>
