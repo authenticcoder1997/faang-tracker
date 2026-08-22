@@ -15,6 +15,11 @@ export default function DsaTracker({ items, setItems }) {
   const totalCompleted = items.filter(i => i.completed).length;
   const overallPct = items.length > 0 ? Math.round((totalCompleted / items.length) * 100) : 0;
 
+  const completedDays = sections.filter(sec => {
+    const sItems = items.filter(i => i.section === sec);
+    return sItems.length > 0 && sItems.every(i => i.completed);
+  }).length;
+
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-gray-300 p-4 sm:p-6 md:p-10 font-sans">
       <div className="max-w-4xl mx-auto">
@@ -28,7 +33,8 @@ export default function DsaTracker({ items, setItems }) {
               <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
             </div>
             <div className="flex items-center gap-2 text-green-500 text-sm font-bold sm:ml-4">
-              <Trophy size={16} /> Day {totalCompleted}/{items.length}
+              <Trophy size={16} /> Day {completedDays}/{sections.length}
+              <span className="text-gray-400 font-normal text-xs ml-1">({totalCompleted}/{items.length} problems)</span>
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-sm">

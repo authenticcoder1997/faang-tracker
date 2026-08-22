@@ -47,11 +47,11 @@ function App() {
     return merged;
   };
 
-  const [storedDsa, setDsa] = useLocalStorage('faang-tracker-dsa-v4', dsaTopics);
+  const [storedDsa, setDsa] = useLocalStorage('faang-tracker-dsa-v5', dsaTopics);
   const [storedLld, setLld] = useLocalStorage('faang-tracker-lld-v3', lldTopics);
   const [storedHld, setHld] = useLocalStorage('faang-tracker-hld-v3', hldTopics);
 
-  const dsa = mergeData(storedDsa, dsaTopics, 'faang-tracker-dsa-v4');
+  const dsa = mergeData(storedDsa, dsaTopics, 'faang-tracker-dsa-v5');
   const lld = mergeData(storedLld, lldTopics, 'faang-tracker-lld-v3');
   const hld = mergeData(storedHld, hldTopics, 'faang-tracker-hld-v3');
 
