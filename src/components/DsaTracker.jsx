@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles, FileText } from 'lucide-react';
+import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles, FileText, CheckCircle2, Circle } from 'lucide-react';
 import NoteModal from './NoteModal';
 import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
@@ -65,13 +65,13 @@ export default function DsaTracker({ items, setItems }) {
                     onClick={() => setCollapsedSections(prev => ({...prev, [section]: !isCollapsed}))}
                   >
                     <div className="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
-                      <input 
-                        readOnly 
-                        disabled 
-                        className={`border-gray-400 border-2 h-4 w-4 sm:h-4 sm:w-4 text-green-500 rounded-full ${isFullyCompleted ? 'bg-green-500 border-green-500' : 'bg-[#1e1e1e]'}`} 
-                        type="checkbox" 
-                        checked={isFullyCompleted} 
-                      />
+                      <div className="shrink-0 flex items-center justify-center">
+                        {isFullyCompleted ? (
+                          <CheckCircle2 size={18} className="text-green-500" />
+                        ) : (
+                          <Circle size={18} className="text-gray-500" />
+                        )}
+                      </div>
                       <div className="flex text-left gap-1.5 text-sm sm:text-base font-bold min-w-0">
                         <div className="font-medium truncate">{section}</div>
                         <p className="font-medium whitespace-nowrap text-gray-500">({sectionCompleted}/{sectionItems.length})</p>
@@ -109,12 +109,13 @@ export default function DsaTracker({ items, setItems }) {
                           onClick={() => toggleItem(item.id)}
                         >
                           <div className="flex items-center gap-x-3 flex-1 min-w-0">
-                            <input 
-                              readOnly 
-                              className={`border border-gray-500 h-4 w-4 shrink-0 rounded-full transition-colors ${item.completed ? 'bg-green-500 border-green-500' : 'bg-transparent'}`} 
-                              type="checkbox" 
-                              checked={item.completed}
-                            />
+                            <div className="shrink-0 flex items-center justify-center">
+                              {item.completed ? (
+                                <CheckCircle2 size={18} className="text-green-500" />
+                              ) : (
+                                <Circle size={18} className="text-gray-600 group-hover:text-green-500/70 transition-colors" />
+                              )}
+                            </div>
                             <a 
                               href={item.url || '#'} 
                               target={item.url ? "_blank" : "_self"} 
