@@ -67,7 +67,7 @@ export default function HldTracker({ items, setItems }) {
         {/* Table */}
         <div className="w-full">
           <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
-            <div className="col-span-5 pl-6">Interview Question</div>
+            <div className="col-span-2 pl-4">Date</div><div className="col-span-3">Interview Question</div>
             <div className="col-span-4 text-center">Notes</div>
             <div className="col-span-2 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
@@ -75,7 +75,7 @@ export default function HldTracker({ items, setItems }) {
 
           {items.map((item, idx) => (
             <div key={item.id} className="grid grid-cols-12 items-center py-4 border-b border-gray-700/50 hover:bg-[#334155]/30 transition-colors">
-              <div className="col-span-5 flex items-center gap-3 pl-6 pr-4">
+              <div className="col-span-2 text-xs text-gray-500 pl-4">{item.date}</div><div className="col-span-3 flex items-center gap-3 pr-4">
                 <a 
                   href={item.url} 
                   target="_blank" 

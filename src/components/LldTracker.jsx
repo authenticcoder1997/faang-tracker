@@ -175,7 +175,7 @@ export default function LldTracker({ items, setItems }) {
         <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
           {/* Header Row */}
           <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
-            <div className="col-span-1">#</div>
+            <div className="col-span-1">Date</div>
             <div className="col-span-3">Problem</div>
             <div className="col-span-2 text-center">Notes</div>
             <div className="col-span-2">Pattern</div>
@@ -216,7 +216,7 @@ export default function LldTracker({ items, setItems }) {
                   {/* Section Rows */}
                   {!isCollapsed && sectionItems.map((item) => (
                     <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
-                      <div className="col-span-1"></div>
+                      <div className="col-span-1 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
                       <div className="col-span-3 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2">
