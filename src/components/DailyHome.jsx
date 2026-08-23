@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Calendar, Check, ExternalLink, Sparkles, CheckCircle } from "lucide-react";
+import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Calendar, Check, ExternalLink, Sparkles, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { DSA_SECTIONS_LIST } from "../data/dsaTopics";
 
 export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setActiveTab }) {
@@ -11,20 +11,22 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
     return `${index - 92} Nov`;
   };
 
+  
   // Calculate default today's index
   const now = new Date();
   const todayDay = now.getDate();
-  const todayMonth = now.toLocaleString("en-US", { month: "short" });
+  const todayMonth = now.getMonth(); // 0-indexed: 6=Jul, 7=Aug, 8=Sep
 
-  let initialIndex = 22; // default
-  if (todayMonth === "Jul" && todayDay === 31) initialIndex = 0;
-  else if (todayMonth === "Aug") initialIndex = todayDay;
-  else if (todayMonth === "Sep") initialIndex = 31 + todayDay;
-  else if (todayMonth === "Oct") initialIndex = 61 + todayDay;
-  else if (todayMonth === "Nov") initialIndex = 92 + todayDay;
+  let initialIndex = 23; // fallback to 23 Aug
+  if (todayMonth === 6 && todayDay === 31) initialIndex = 0; // Jul 31
+  else if (todayMonth === 7) initialIndex = todayDay; // Aug 1-31 -> 1-31
+  else if (todayMonth === 8) initialIndex = 31 + todayDay; // Sep 1-30 -> 32-61
+  else if (todayMonth === 9) initialIndex = 61 + todayDay; // Oct
+  else if (todayMonth === 10) initialIndex = 92 + todayDay; // Nov
   
-  const lldStartIndex = 22;
-  const hldStartIndex = 22;
+  const lldStartIndex = 23;
+  const hldStartIndex = 23;
+
 
   const totalDays = Math.max(DSA_SECTIONS_LIST.length, lldStartIndex + lld.length, hldStartIndex + hld.length);
   
@@ -76,30 +78,47 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
           <p className="text-gray-400 text-sm">Focus on today's scheduled DSA questions, 1 LLD system, and 1 HLD breakdown.</p>
         </div>
         
+        
         {/* Date Selector */}
-        <div className="bg-[#141414] border border-gray-800 rounded-lg p-3 flex items-center gap-3 w-full sm:w-auto">
+        <div className="bg-[#141414] border border-gray-800 rounded-lg p-2 flex items-center gap-2 w-full sm:w-auto">
           <button 
             onClick={() => setSelectedDayIndex(initialIndex)}
-            className="px-3 py-1.5 bg-[#1a1a1a] border border-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded hover:bg-gray-800 transition-colors"
+            className="px-3 py-1.5 bg-[#1a1a1a] border border-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded hover:bg-gray-800 transition-colors hidden sm:block"
           >
             Today
           </button>
-          <label htmlFor="date-selector" className="text-sm font-medium text-gray-300 whitespace-nowrap hidden sm:block">
-            Select Date:
-          </label>
+          
+          <button 
+            onClick={() => setSelectedDayIndex(prev => Math.max(0, prev - 1))}
+            disabled={selectedDayIndex <= 0}
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded disabled:opacity-30 transition-colors"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
           <select 
             id="date-selector"
             value={selectedDayIndex}
             onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
-            className="bg-[#1a1a1a] border border-gray-700 text-white text-sm rounded-md focus:ring-green-500 focus:border-green-500 block w-full p-2 outline-none cursor-pointer"
+            className="bg-transparent text-white text-sm focus:ring-0 focus:border-0 block w-full outline-none cursor-pointer text-center appearance-none"
+            style={{ textAlignLast: 'center' }}
           >
             {Array.from({ length: totalDays }).map((_, idx) => (
-              <option key={idx} value={idx}>
-                {getDateForIndex(idx)} (Day {idx + 1})
+              <option key={idx} value={idx} className="bg-[#1a1a1a]">
+                {getDateForIndex(idx)}
               </option>
             ))}
           </select>
+
+          <button 
+            onClick={() => setSelectedDayIndex(prev => Math.min(totalDays - 1, prev + 1))}
+            disabled={selectedDayIndex >= totalDays - 1}
+            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded disabled:opacity-30 transition-colors"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
+
       </div>
 
       {/* Progress Cards */}
@@ -285,7 +304,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
               ) : selectedDayIndex < lldStartIndex ? (
                 <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
                   <Layers size={32} className="text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">LLD Practice starts on 22 Aug!</p>
+                  <p className="text-sm font-semibold text-white">LLD Practice starts on 23 Aug!</p>
                   <p className="text-xs text-gray-400 mt-1">Get ready to master Low-Level Design.</p>
                 </div>
               ) : (
@@ -366,7 +385,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
               ) : selectedDayIndex < hldStartIndex ? (
                 <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
                   <Monitor size={32} className="text-teal-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">HLD Practice starts on 22 Aug!</p>
+                  <p className="text-sm font-semibold text-white">HLD Practice starts on 23 Aug!</p>
                   <p className="text-xs text-gray-400 mt-1">Get ready to master System Design.</p>
                 </div>
               ) : (
