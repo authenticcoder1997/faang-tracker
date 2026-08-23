@@ -48,7 +48,7 @@ export default function Dashboard({ dsa, lld, hld, setActiveTab }) {
   const overallPct = totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
 
 
-  const [currentDateObj, setCurrentDateObj] = useState(new Date(2026, 7, 23)); // Default to 23 Aug
+  const [currentDateObj, setCurrentDateObj] = useState(new Date());
 
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const formatViewDate = (dObj) => {
