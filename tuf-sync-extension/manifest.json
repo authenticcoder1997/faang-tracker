@@ -1,15 +1,16 @@
 {
   "manifest_version": 3,
   "name": "FAANG Tracker - TUF Sync",
-  "version": "1.0",
-  "description": "Auto-syncs your TakeUForward problem completions to your FAANG Tracker dashboard in real-time.",
+  "version": "2.0",
+  "description": "Auto-syncs your TakeUForward accepted submissions to your FAANG Tracker dashboard in real-time.",
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "https://takeuforward.org/*",
@@ -17,7 +18,7 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://takeuforward.org/plus/dsa/problems/*"],
+      "matches": ["https://takeuforward.org/plus/dsa/*"],
       "js": ["slug-map.js", "content.js"],
       "run_at": "document_idle"
     }
