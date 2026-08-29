@@ -867,6 +867,22 @@ export const dsaTopics = [
     "completed": false
   },
   {
+    "id": "dsa-88b",
+    "title": "Task Scheduler",
+    "section": "Heaps",
+    "url": "https://takeuforward.org/plus/dsa/problems/task-scheduler?subject=dsa-concept-revision",
+    "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-88c",
+    "title": "Find Median from Data Stream",
+    "section": "Heaps",
+    "url": "https://takeuforward.org/plus/dsa/problems/find-median-from-data-stream?subject=dsa-concept-revision",
+    "difficulty": "Hard",
+    "completed": false
+  },
+  {
     "id": "dsa-89",
     "title": "Preorder Traversal",
     "section": "Binary Tree I",
@@ -1672,6 +1688,22 @@ export const dsaTopics = [
     "section": "Dynamic Programming VII",
     "url": "https://takeuforward.org/plus/dsa/problems/print-longest-increasing-subsequence?subject=dsa-concept-revision",
     "difficulty": "Medium",
+    "completed": false
+  },
+  {
+    "id": "dsa-189b",
+    "title": "Edit Distance",
+    "section": "Dynamic Programming VIII",
+    "url": "https://takeuforward.org/plus/dsa/problems/edit-distance?subject=dsa-concept-revision",
+    "difficulty": "Hard",
+    "completed": false
+  },
+  {
+    "id": "dsa-189c",
+    "title": "Wildcard Pattern Matching",
+    "section": "Dynamic Programming VIII",
+    "url": "https://takeuforward.org/plus/dsa/problems/wildcard-pattern-matching?subject=dsa-concept-revision",
+    "difficulty": "Hard",
     "completed": false
   },
   {
