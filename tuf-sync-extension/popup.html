@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      background: #0a0a0a;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+    }
+    .header {
+      background: linear-gradient(135deg, #052e16, #14532d);
+      padding: 16px;
+      border-bottom: 1px solid #166534;
+    }
+    .header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #4ade80;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header p {
+      color: #86efac;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .body { padding: 14px; }
+    .status-card {
+      background: #111;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .status-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .status-value {
+      font-size: 13px;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+    .status-value.green { color: #4ade80; }
+    .status-value.gray  { color: #6b7280; }
+    .instruction {
+      background: #111;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 12px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+    .instruction strong { color: #e2e8f0; }
+    .footer {
+      padding: 10px 14px;
+      border-top: 1px solid #1f2937;
+      font-size: 10px;
+      color: #374151;
+      text-align: center;
+    }
+    a { color: #4ade80; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><div class="dot"></div>FAANG Tracker Sync</h1>
+    <p>Auto-syncing TUF completions → Firebase</p>
+  </div>
+  <div class="body">
+    <div class="status-card">
+      <div class="status-label">Status</div>
+      <div class="status-value green" id="status">● Active — watching TUF</div>
+    </div>
+    <div class="status-card">
+      <div class="status-label">Current Page</div>
+      <div class="status-value gray" id="current-page">Not on a TUF problem</div>
+    </div>
+    <div class="instruction">
+      <strong>How it works:</strong><br>
+      Open any DSA problem on <a href="https://takeuforward.org/plus/dsa-concept-revision/roadmap" target="_blank">TUF+</a>, solve it, and click <strong>"Mark as Done"</strong>. This extension automatically syncs the completion to your
+      <a href="https://faang-tracker-eight.vercel.app" target="_blank">FAANG Tracker</a> dashboard.
+    </div>
+  </div>
+  <div class="footer">FAANG Tracker &bull; TUF Sync Extension v1.0</div>
+  <script src="popup.js"></script>
+</body>
+</html>
