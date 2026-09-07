@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Calendar, Check, ExternalLink, Sparkles, CheckCircle, ChevronLeft, ChevronRight, Coffee } from "lucide-react";
+import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Lock, Calendar, Check, ExternalLink, Sparkles, CheckCircle, ChevronLeft, ChevronRight, Coffee } from "lucide-react";
 import { DSA_SECTIONS_LIST } from "../data/dsaTopics";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -34,14 +34,15 @@ function nextScheduledIndex(items, fromIndex) {
   return best;
 }
 
-export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setActiveTab }) {
+export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, setHld, setConcurrency, setActiveTab }) {
   const todayIdx = todayIndex();
 
   const totalDays = Math.max(
     todayIdx + 1,
     ...DSA_SECTIONS_LIST.map(s => (typeof s.dayIndex === "number" ? s.dayIndex : -1)),
     ...lld.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1)),
-    ...hld.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1))
+    ...hld.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1)),
+    ...concurrency.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1))
   ) + 1;
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(Math.min(Math.max(todayIdx, 0), totalDays - 1));
@@ -57,6 +58,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
 
   const nextLld = lld.filter(i => i.dayIndex === selectedDayIndex);
   const nextHld = hld.filter(i => i.dayIndex === selectedDayIndex);
+  const nextConcurrency = concurrency.filter(i => i.dayIndex === selectedDayIndex);
 
   const toggleDsa = (id) => {
     if (!setDsa) return;
@@ -73,17 +75,25 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
     setHld(hld.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
   };
 
+  const toggleConcurrency = (id) => {
+    if (!setConcurrency) return;
+    setConcurrency(concurrency.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
+  };
+
   const totalDsa = dsa.filter(i => i.completed).length;
   const totalLld = lld.filter(i => i.completed).length;
   const totalHld = hld.filter(i => i.completed).length;
+  const totalConcurrency = concurrency.filter(i => i.completed).length;
 
   const dsaAllDone = totalDsa === dsa.length;
   const lldAllDone = totalLld === lld.length;
   const hldAllDone = totalHld === hld.length;
+  const concurrencyAllDone = totalConcurrency === concurrency.length;
 
   const dsaNextIdx = nextScheduledIndex(DSA_SECTIONS_LIST, selectedDayIndex);
   const lldNextIdx = nextScheduledIndex(lld, selectedDayIndex);
   const hldNextIdx = nextScheduledIndex(hld, selectedDayIndex);
+  const concurrencyNextIdx = nextScheduledIndex(concurrency, selectedDayIndex);
 
   return (
     <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto font-sans">
@@ -95,7 +105,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
             <span>Viewing: Day {selectedDayIndex + 1} of {totalDays}</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Home</h1>
-          <p className="text-gray-400 text-sm">One track a day — DSA, LLD, or HLD on rotation, with extra reps on weekends.</p>
+          <p className="text-gray-400 text-sm">One track a day — DSA, LLD, HLD, or Concurrency on rotation, with extra reps on weekends.</p>
         </div>
 
 
@@ -142,7 +152,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
       </div>
 
       {/* Progress Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-green-500 font-semibold flex items-center gap-2"><BookOpen size={18}/> DSA</h3>
@@ -174,6 +184,17 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
             <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalHld/hld.length)*100}%` }}></div>
           </div>
           <p className="text-xs text-gray-400">HelloInterview Breakdown →</p>
+        </div>
+
+        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("concurrency")}>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-violet-400 font-semibold flex items-center gap-2"><Lock size={18}/> Concurrency</h3>
+            <span className="text-xs text-gray-500 font-mono">{totalConcurrency}/{concurrency.length}</span>
+          </div>
+          <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
+            <div className="bg-gradient-to-r from-violet-600 to-violet-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalConcurrency/concurrency.length)*100}%` }}></div>
+          </div>
+          <p className="text-xs text-gray-400">Algomaster Concurrency Practice →</p>
         </div>
       </div>
 
@@ -261,8 +282,8 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
           )}
         </div>
 
-        {/* Daily LLD & HLD Targets */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Daily LLD, HLD & Concurrency Targets */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {/* LLD */}
           <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
@@ -430,6 +451,97 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
                   <p className="text-sm font-semibold text-white">Rest day for HLD</p>
                   <p className="text-xs text-gray-400 mt-1">
                     {hldNextIdx !== null ? <>Next HLD day is <span className="text-teal-400">{formatIndex(hldNextIdx)}</span>.</> : "Nothing else scheduled."}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Concurrency */}
+          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Lock size={18} className="text-violet-400" />
+                  <h3 className="text-sm font-bold text-white">Concurrency{nextConcurrency.length > 1 ? ` (${nextConcurrency.length} today)` : ""}</h3>
+                </div>
+                <span className="text-xs bg-violet-500/10 text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded">Algomaster</span>
+              </div>
+
+              {nextConcurrency.length > 0 ? (
+                <div className="space-y-3">
+                  {nextConcurrency.map(item => (
+                    <div key={item.id} className="bg-[#161616] p-4 rounded-lg border border-gray-800">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="flex items-start gap-3">
+                          <button
+                            onClick={() => toggleConcurrency(item.id)}
+                            className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+                              item.completed ? "bg-violet-500 border-violet-500 text-black" : "border-gray-500 hover:border-violet-400"
+                            }`}
+                            title="Mark as Done"
+                          >
+                            {item.completed && <Check size={12} strokeWidth={3} />}
+                          </button>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-xs text-gray-500">{item.topic}</span>
+                              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                {item.difficulty}
+                              </span>
+                              {item.premium && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider text-amber-400 border-amber-400/30 bg-amber-400/10">
+                                  Premium
+                                </span>
+                              )}
+                            </div>
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-base font-semibold text-white hover:text-violet-400 transition-colors"
+                            >
+                              {item.title}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed bg-[#111111] p-2.5 rounded border border-gray-800/80">
+                        {item.description}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <button
+                          onClick={() => toggleConcurrency(item.id)}
+                          className="text-xs text-gray-400 hover:text-violet-400 flex items-center gap-1.5 transition-colors"
+                        >
+                          <CheckCircle size={14} /> Click checkbox when solved
+                        </button>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded hover:bg-violet-500 hover:text-black transition-all"
+                        >
+                          <Play size={12} /> Solve on Algomaster
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : concurrencyAllDone ? (
+                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                  <CheckCircle2 size={32} className="text-violet-400 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-white">All {concurrency.length} concurrency problems completed!</p>
+                  <p className="text-xs text-gray-400 mt-1">You've earned the right to say "it's not a race condition, it's a feature".</p>
+                </div>
+              ) : (
+                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                  <Coffee size={28} className="text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-white">Rest day for Concurrency</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {concurrencyNextIdx !== null ? <>Next Concurrency day is <span className="text-violet-400">{formatIndex(concurrencyNextIdx)}</span>.</> : "Nothing else scheduled."}
                   </p>
                 </div>
               )}

@@ -22,8 +22,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Singleton, Factory",
-    "date": "11 Sep",
-    "dayIndex": 42
+    "date": "12 Sep",
+    "dayIndex": 43
   },
   {
     "id": "lld-3",
@@ -35,8 +35,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "Observer",
-    "date": "14 Sep",
-    "dayIndex": 45
+    "date": "12 Sep",
+    "dayIndex": 43
   },
   {
     "id": "lld-4",
@@ -48,8 +48,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Command, Strategy",
-    "date": "17 Sep",
-    "dayIndex": 48
+    "date": "16 Sep",
+    "dayIndex": 47
   },
   {
     "id": "lld-5",
@@ -87,8 +87,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "State, Strategy",
-    "date": "23 Sep",
-    "dayIndex": 54
+    "date": "24 Sep",
+    "dayIndex": 55
   },
   {
     "id": "lld-8",
@@ -100,8 +100,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "State",
-    "date": "26 Sep",
-    "dayIndex": 57
+    "date": "28 Sep",
+    "dayIndex": 59
   },
   {
     "id": "lld-9",
@@ -113,8 +113,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Strategy",
-    "date": "26 Sep",
-    "dayIndex": 57
+    "date": "02 Oct",
+    "dayIndex": 63
   },
   {
     "id": "lld-10",
@@ -126,8 +126,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Chain of Responsibility",
-    "date": "29 Sep",
-    "dayIndex": 60
+    "date": "06 Oct",
+    "dayIndex": 67
   },
   {
     "id": "lld-11",
@@ -139,8 +139,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Strategy, Factory",
-    "date": "02 Oct",
-    "dayIndex": 63
+    "date": "10 Oct",
+    "dayIndex": 71
   },
   {
     "id": "lld-12",
@@ -152,8 +152,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Observer, Singleton",
-    "date": "05 Oct",
-    "dayIndex": 66
+    "date": "10 Oct",
+    "dayIndex": 71
   },
   {
     "id": "lld-13",
@@ -165,8 +165,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "Observer",
-    "date": "08 Oct",
-    "dayIndex": 69
+    "date": "14 Oct",
+    "dayIndex": 75
   },
   {
     "id": "lld-14",
@@ -178,8 +178,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Singleton",
-    "date": "11 Oct",
-    "dayIndex": 72
+    "date": "18 Oct",
+    "dayIndex": 79
   },
   {
     "id": "lld-15",
@@ -191,8 +191,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Strategy, Token Bucket",
-    "date": "11 Oct",
-    "dayIndex": 72
+    "date": "18 Oct",
+    "dayIndex": 79
   },
   {
     "id": "lld-16",
@@ -204,8 +204,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Singleton, Object Pool",
-    "date": "14 Oct",
-    "dayIndex": 75
+    "date": "22 Oct",
+    "dayIndex": 83
   },
   {
     "id": "lld-17",
@@ -217,8 +217,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "State, Proxy",
-    "date": "17 Oct",
-    "dayIndex": 78
+    "date": "26 Oct",
+    "dayIndex": 87
   },
   {
     "id": "lld-18",
@@ -230,8 +230,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Strategy, Composite",
-    "date": "17 Oct",
-    "dayIndex": 78
+    "date": "30 Oct",
+    "dayIndex": 91
   },
   {
     "id": "lld-19",
@@ -243,8 +243,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Command, Priority Queue",
-    "date": "20 Oct",
-    "dayIndex": 81
+    "date": "03 Nov",
+    "dayIndex": 95
   },
   {
     "id": "lld-20",
@@ -256,8 +256,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "State",
-    "date": "23 Oct",
-    "dayIndex": 84
+    "date": "07 Nov",
+    "dayIndex": 99
   },
   {
     "id": "lld-21",
@@ -269,8 +269,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "State, Factory",
-    "date": "26 Oct",
-    "dayIndex": 87
+    "date": "07 Nov",
+    "dayIndex": 99
   },
   {
     "id": "lld-22",
@@ -282,8 +282,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "State, Strategy",
-    "date": "29 Oct",
-    "dayIndex": 90
+    "date": "11 Nov",
+    "dayIndex": 103
   },
   {
     "id": "lld-23",
@@ -295,8 +295,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Strategy, Factory",
-    "date": "01 Nov",
-    "dayIndex": 93
+    "date": "15 Nov",
+    "dayIndex": 107
   },
   {
     "id": "lld-24",
@@ -308,8 +308,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Factory, Observer",
-    "date": "01 Nov",
-    "dayIndex": 93
+    "date": "15 Nov",
+    "dayIndex": 107
   },
   {
     "id": "lld-25",
@@ -321,8 +321,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Factory",
-    "date": "04 Nov",
-    "dayIndex": 96
+    "date": "19 Nov",
+    "dayIndex": 111
   },
   {
     "id": "lld-26",
@@ -334,8 +334,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Factory, Decorator",
-    "date": "07 Nov",
-    "dayIndex": 99
+    "date": "23 Nov",
+    "dayIndex": 115
   },
   {
     "id": "lld-27",
@@ -347,8 +347,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Concurrency, State",
-    "date": "07 Nov",
-    "dayIndex": 99
+    "date": "27 Nov",
+    "dayIndex": 119
   },
   {
     "id": "lld-28",
@@ -360,8 +360,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Observer",
-    "date": "10 Nov",
-    "dayIndex": 102
+    "date": "01 Dec",
+    "dayIndex": 123
   },
   {
     "id": "lld-29",
@@ -373,8 +373,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Strategy (Settlement)",
-    "date": "13 Nov",
-    "dayIndex": 105
+    "date": "05 Dec",
+    "dayIndex": 127
   },
   {
     "id": "lld-30",
@@ -386,8 +386,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Observer, Pub-Sub",
-    "date": "16 Nov",
-    "dayIndex": 108
+    "date": "05 Dec",
+    "dayIndex": 127
   },
   {
     "id": "lld-31",
@@ -399,8 +399,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Strategy, Observer",
-    "date": "19 Nov",
-    "dayIndex": 111
+    "date": "09 Dec",
+    "dayIndex": 131
   },
   {
     "id": "lld-32",
@@ -412,8 +412,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Observer, State",
-    "date": "22 Nov",
-    "dayIndex": 114
+    "date": "13 Dec",
+    "dayIndex": 135
   },
   {
     "id": "lld-33",
@@ -425,8 +425,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "Singleton",
-    "date": "22 Nov",
-    "dayIndex": 114
+    "date": "13 Dec",
+    "dayIndex": 135
   },
   {
     "id": "lld-34",
@@ -438,8 +438,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Hash Functions",
-    "date": "25 Nov",
-    "dayIndex": 117
+    "date": "17 Dec",
+    "dayIndex": 139
   },
   {
     "id": "lld-35",
@@ -451,8 +451,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Trie",
-    "date": "28 Nov",
-    "dayIndex": 120
+    "date": "21 Dec",
+    "dayIndex": 143
   },
   {
     "id": "lld-36",
@@ -464,8 +464,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "State",
-    "date": "28 Nov",
-    "dayIndex": 120
+    "date": "25 Dec",
+    "dayIndex": 147
   },
   {
     "id": "lld-37",
@@ -477,8 +477,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "State, Observer",
-    "date": "01 Dec",
-    "dayIndex": 123
+    "date": "29 Dec",
+    "dayIndex": 151
   },
   {
     "id": "lld-38",
@@ -490,8 +490,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Observer",
-    "date": "04 Dec",
-    "dayIndex": 126
+    "date": "02 Jan",
+    "dayIndex": 155
   },
   {
     "id": "lld-39",
@@ -503,8 +503,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "State, Factory",
-    "date": "07 Dec",
-    "dayIndex": 129
+    "date": "02 Jan",
+    "dayIndex": 155
   },
   {
     "id": "lld-40",
@@ -516,8 +516,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Graph, Observer",
-    "date": "10 Dec",
-    "dayIndex": 132
+    "date": "06 Jan",
+    "dayIndex": 159
   },
   {
     "id": "lld-41",
@@ -529,8 +529,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Observer",
-    "date": "13 Dec",
-    "dayIndex": 135
+    "date": "10 Jan",
+    "dayIndex": 163
   },
   {
     "id": "lld-42",
@@ -542,8 +542,8 @@ export const lldTopics = [
     "priority": "High",
     "completed": false,
     "pattern": "Proxy, Flyweight",
-    "date": "13 Dec",
-    "dayIndex": 135
+    "date": "10 Jan",
+    "dayIndex": 163
   },
   {
     "id": "lld-43",
@@ -555,8 +555,8 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Observer, Strategy",
-    "date": "16 Dec",
-    "dayIndex": 138
+    "date": "14 Jan",
+    "dayIndex": 167
   },
   {
     "id": "lld-44",
@@ -568,8 +568,8 @@ export const lldTopics = [
     "priority": "Low",
     "completed": false,
     "pattern": "Strategy, Facade",
-    "date": "19 Dec",
-    "dayIndex": 141
+    "date": "18 Jan",
+    "dayIndex": 171
   },
   {
     "id": "lld-45",
@@ -581,7 +581,7 @@ export const lldTopics = [
     "priority": "Medium",
     "completed": false,
     "pattern": "Command, Observer",
-    "date": "19 Dec",
-    "dayIndex": 141
+    "date": "22 Jan",
+    "dayIndex": 175
   }
 ];
