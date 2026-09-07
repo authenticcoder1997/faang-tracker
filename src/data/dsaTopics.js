@@ -1,163 +1,203 @@
 export const DSA_SECTIONS_LIST = [
   {
     "name": "Sorting & Arrays I",
-    "date": "31 Jul - 31 Jul"
+    "date": "31 Jul - 31 Jul",
+    "dayIndex": 0
   },
   {
     "name": "Arrays II",
-    "date": "01 Aug - 01 Aug"
+    "date": "01 Aug - 01 Aug",
+    "dayIndex": 1
   },
   {
     "name": "Array III",
-    "date": "02 Aug - 02 Aug"
+    "date": "07 Sep - 07 Sep",
+    "dayIndex": 38
   },
   {
     "name": "Arrays IV & Hashing",
-    "date": "03 Aug - 03 Aug"
+    "date": "10 Sep - 10 Sep",
+    "dayIndex": 41
   },
   {
     "name": "Binary Search I",
-    "date": "04 Aug - 04 Aug"
+    "date": "04 Aug - 04 Aug",
+    "dayIndex": 4
   },
   {
     "name": "Binary Search II",
-    "date": "05 Aug - 05 Aug"
+    "date": "13 Sep - 13 Sep",
+    "dayIndex": 44
   },
   {
     "name": "Binary Search III",
-    "date": "06 Aug - 06 Aug"
+    "date": "13 Sep - 13 Sep",
+    "dayIndex": 44
   },
   {
     "name": "Recursion I",
-    "date": "07 Aug - 07 Aug"
+    "date": "16 Sep - 16 Sep",
+    "dayIndex": 47
   },
   {
     "name": "Recursion II",
-    "date": "08 Aug - 08 Aug"
+    "date": "19 Sep - 19 Sep",
+    "dayIndex": 50
   },
   {
     "name": "Linked List I",
-    "date": "09 Aug - 09 Aug"
+    "date": "19 Sep - 19 Sep",
+    "dayIndex": 50
   },
   {
     "name": "Linked List II",
-    "date": "10 Aug - 10 Aug"
+    "date": "22 Sep - 22 Sep",
+    "dayIndex": 53
   },
   {
     "name": "Linked List III & Bit Manipulation",
-    "date": "11 Aug - 11 Aug"
+    "date": "25 Sep - 25 Sep",
+    "dayIndex": 56
   },
   {
     "name": "Greedy Algorithms",
-    "date": "12 Aug - 12 Aug"
+    "date": "12 Aug - 12 Aug",
+    "dayIndex": 12
   },
   {
     "name": "Sliding Window I",
-    "date": "13 Aug - 13 Aug"
+    "date": "13 Aug - 13 Aug",
+    "dayIndex": 13
   },
   {
     "name": "Sliding Window II",
-    "date": "14 Aug - 14 Aug"
+    "date": "28 Sep - 28 Sep",
+    "dayIndex": 59
   },
   {
     "name": "Stack and Queue I",
-    "date": "15 Aug - 15 Aug"
+    "date": "01 Oct - 01 Oct",
+    "dayIndex": 62
   },
   {
     "name": "Stack and Queue II",
-    "date": "16 Aug - 16 Aug"
+    "date": "04 Oct - 04 Oct",
+    "dayIndex": 65
   },
   {
     "name": "Heaps",
-    "date": "17 Aug - 17 Aug"
+    "date": "04 Oct - 04 Oct",
+    "dayIndex": 65
   },
   {
     "name": "Binary Tree I",
-    "date": "18 Aug - 18 Aug"
+    "date": "18 Aug - 18 Aug",
+    "dayIndex": 18
   },
   {
     "name": "Binary Tree II",
-    "date": "19 Aug - 19 Aug"
+    "date": "19 Aug - 19 Aug",
+    "dayIndex": 19
   },
   {
     "name": "Binary Tree III",
-    "date": "20 Aug - 20 Aug"
+    "date": "20 Aug - 20 Aug",
+    "dayIndex": 20
   },
   {
     "name": "Binary Tree IV",
-    "date": "21 Aug - 21 Aug"
+    "date": "21 Aug - 21 Aug",
+    "dayIndex": 21
   },
   {
     "name": "Binary Tree V and BST I",
-    "date": "22 Aug - 22 Aug"
+    "date": "07 Oct - 07 Oct",
+    "dayIndex": 68
   },
   {
     "name": "Binary Search Tree II",
-    "date": "23 Aug - 23 Aug"
+    "date": "10 Oct - 10 Oct",
+    "dayIndex": 71
   },
   {
     "name": "Graph I",
-    "date": "24 Aug - 24 Aug"
+    "date": "24 Aug - 24 Aug",
+    "dayIndex": 24
   },
   {
     "name": "Graph II",
-    "date": "25 Aug - 25 Aug"
+    "date": "10 Oct - 10 Oct",
+    "dayIndex": 71
   },
   {
     "name": "Graph III",
-    "date": "26 Aug - 26 Aug"
+    "date": "13 Oct - 13 Oct",
+    "dayIndex": 74
   },
   {
     "name": "Graph IV",
-    "date": "27 Aug - 27 Aug"
+    "date": "16 Oct - 16 Oct",
+    "dayIndex": 77
   },
   {
     "name": "Graph V",
-    "date": "28 Aug - 28 Aug"
+    "date": "19 Oct - 19 Oct",
+    "dayIndex": 80
   },
   {
     "name": "Graph VI",
-    "date": "29 Aug - 29 Aug"
+    "date": "22 Oct - 22 Oct",
+    "dayIndex": 83
   },
   {
     "name": "Graph VII and Maths",
-    "date": "30 Aug - 30 Aug"
+    "date": "25 Oct - 25 Oct",
+    "dayIndex": 86
   },
   {
     "name": "Dynamic Programming I",
-    "date": "31 Aug - 31 Aug"
+    "date": "25 Oct - 25 Oct",
+    "dayIndex": 86
   },
   {
     "name": "Dynamic Programming II",
-    "date": "01 Sep - 01 Sep"
+    "date": "28 Oct - 28 Oct",
+    "dayIndex": 89
   },
   {
     "name": "Dynamic Programming III",
-    "date": "02 Sep - 02 Sep"
+    "date": "31 Oct - 31 Oct",
+    "dayIndex": 92
   },
   {
     "name": "Dynamic Programming IV",
-    "date": "03 Sep - 03 Sep"
+    "date": "31 Oct - 31 Oct",
+    "dayIndex": 92
   },
   {
     "name": "Dynamic Programming V",
-    "date": "04 Sep - 04 Sep"
+    "date": "03 Nov - 03 Nov",
+    "dayIndex": 95
   },
   {
     "name": "Dynamic Programming VI",
-    "date": "05 Sep - 05 Sep"
+    "date": "06 Nov - 06 Nov",
+    "dayIndex": 98
   },
   {
     "name": "Dynamic Programming VII",
-    "date": "06 Sep - 06 Sep"
+    "date": "09 Nov - 09 Nov",
+    "dayIndex": 101
   },
   {
     "name": "Dynamic Programming VIII",
-    "date": "07 Sep - 07 Sep"
+    "date": "12 Nov - 12 Nov",
+    "dayIndex": 104
   },
   {
     "name": "String and Trie",
-    "date": "08 Sep - 08 Sep"
+    "date": "15 Nov - 15 Nov",
+    "dayIndex": 107
   }
 ];
 

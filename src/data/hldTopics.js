@@ -7,7 +7,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/bitly",
     "completed": false,
-    "date": "23 Aug"
+    "date": "09 Sep",
+    "dayIndex": 40
   },
   {
     "id": "hld-2",
@@ -17,7 +18,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/dropbox",
     "completed": false,
-    "date": "24 Aug"
+    "date": "12 Sep",
+    "dayIndex": 43
   },
   {
     "id": "hld-3",
@@ -27,7 +29,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/yelp",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/yelp",
     "completed": false,
-    "date": "25 Aug"
+    "date": "12 Sep",
+    "dayIndex": 43
   },
   {
     "id": "hld-4",
@@ -37,7 +40,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/gopuff",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/gopuff",
     "completed": false,
-    "date": "26 Aug"
+    "date": "15 Sep",
+    "dayIndex": 46
   },
   {
     "id": "hld-5",
@@ -47,7 +51,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ticketmaster",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/ticketmaster",
     "completed": false,
-    "date": "27 Aug"
+    "date": "18 Sep",
+    "dayIndex": 49
   },
   {
     "id": "hld-6",
@@ -57,7 +62,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/instagram",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/instagram",
     "completed": false,
-    "date": "28 Aug"
+    "date": "21 Sep",
+    "dayIndex": 52
   },
   {
     "id": "hld-7",
@@ -67,7 +73,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/fb-news-feed",
     "completed": false,
-    "date": "29 Aug"
+    "date": "24 Sep",
+    "dayIndex": 55
   },
   {
     "id": "hld-8",
@@ -77,7 +84,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/tinder",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/tinder",
     "completed": false,
-    "date": "30 Aug"
+    "date": "27 Sep",
+    "dayIndex": 58
   },
   {
     "id": "hld-9",
@@ -87,7 +95,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/leetcode",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/leetcode",
     "completed": false,
-    "date": "31 Aug"
+    "date": "27 Sep",
+    "dayIndex": 58
   },
   {
     "id": "hld-10",
@@ -97,7 +106,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/whatsapp",
     "completed": false,
-    "date": "01 Sep"
+    "date": "30 Sep",
+    "dayIndex": 61
   },
   {
     "id": "hld-11",
@@ -107,7 +117,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/strava",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/strava",
     "completed": false,
-    "date": "02 Sep"
+    "date": "03 Oct",
+    "dayIndex": 64
   },
   {
     "id": "hld-12",
@@ -117,7 +128,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-cache",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/distributed-cache",
     "completed": false,
-    "date": "03 Sep"
+    "date": "03 Oct",
+    "dayIndex": 64
   },
   {
     "id": "hld-13",
@@ -127,7 +139,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/distributed-rate-limiter",
     "completed": false,
-    "date": "04 Sep"
+    "date": "06 Oct",
+    "dayIndex": 67
   },
   {
     "id": "hld-14",
@@ -137,7 +150,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/online-auction",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/online-auction",
     "completed": false,
-    "date": "05 Sep"
+    "date": "09 Oct",
+    "dayIndex": 70
   },
   {
     "id": "hld-15",
@@ -147,7 +161,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/youtube",
     "completed": false,
-    "date": "06 Sep"
+    "date": "12 Oct",
+    "dayIndex": 73
   },
   {
     "id": "hld-16",
@@ -157,7 +172,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/job-scheduler",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/job-scheduler",
     "completed": false,
-    "date": "07 Sep"
+    "date": "15 Oct",
+    "dayIndex": 76
   },
   {
     "id": "hld-17",
@@ -167,7 +183,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-live-comments",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/fb-live-comments",
     "completed": false,
-    "date": "08 Sep"
+    "date": "18 Oct",
+    "dayIndex": 79
   },
   {
     "id": "hld-18",
@@ -177,7 +194,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/google-news",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/google-news",
     "completed": false,
-    "date": "09 Sep"
+    "date": "18 Oct",
+    "dayIndex": 79
   },
   {
     "id": "hld-19",
@@ -187,7 +205,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/camelcamelcamel",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/camelcamelcamel",
     "completed": false,
-    "date": "10 Sep"
+    "date": "21 Oct",
+    "dayIndex": 82
   },
   {
     "id": "hld-20",
@@ -197,7 +216,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/notification-system",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/notification-system",
     "completed": false,
-    "date": "11 Sep"
+    "date": "24 Oct",
+    "dayIndex": 85
   },
   {
     "id": "hld-21",
@@ -207,7 +227,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/top-k",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/top-k",
     "completed": false,
-    "date": "12 Sep"
+    "date": "24 Oct",
+    "dayIndex": 85
   },
   {
     "id": "hld-22",
@@ -217,7 +238,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/uber",
     "completed": false,
-    "date": "13 Sep"
+    "date": "27 Oct",
+    "dayIndex": 88
   },
   {
     "id": "hld-23",
@@ -227,7 +249,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/robinhood",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/robinhood",
     "completed": false,
-    "date": "14 Sep"
+    "date": "30 Oct",
+    "dayIndex": 91
   },
   {
     "id": "hld-24",
@@ -237,7 +260,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/google-docs",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/google-docs",
     "completed": false,
-    "date": "15 Sep"
+    "date": "02 Nov",
+    "dayIndex": 94
   },
   {
     "id": "hld-25",
@@ -247,7 +271,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/web-crawler",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/web-crawler",
     "completed": false,
-    "date": "16 Sep"
+    "date": "05 Nov",
+    "dayIndex": 97
   },
   {
     "id": "hld-26",
@@ -257,7 +282,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/ad-click-aggregator",
     "completed": false,
-    "date": "17 Sep"
+    "date": "08 Nov",
+    "dayIndex": 100
   },
   {
     "id": "hld-27",
@@ -267,7 +293,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-post-search",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/fb-post-search",
     "completed": false,
-    "date": "18 Sep"
+    "date": "08 Nov",
+    "dayIndex": 100
   },
   {
     "id": "hld-28",
@@ -277,7 +304,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/payment-system",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/payment-system",
     "completed": false,
-    "date": "19 Sep"
+    "date": "11 Nov",
+    "dayIndex": 103
   },
   {
     "id": "hld-29",
@@ -287,7 +315,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/metrics-monitoring",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/metrics-monitoring",
     "completed": false,
-    "date": "20 Sep"
+    "date": "14 Nov",
+    "dayIndex": 106
   },
   {
     "id": "hld-30",
@@ -297,7 +326,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/online-chess",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/online-chess",
     "completed": false,
-    "date": "21 Sep"
+    "date": "14 Nov",
+    "dayIndex": 106
   },
   {
     "id": "hld-31",
@@ -307,7 +337,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/chatgpt",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/chatgpt",
     "completed": false,
-    "date": "22 Sep"
+    "date": "17 Nov",
+    "dayIndex": 109
   },
   {
     "id": "hld-32",
@@ -317,7 +348,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/practice/system-design/new/food-review-app",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/food-review-app",
     "completed": false,
-    "date": "23 Sep"
+    "date": "20 Nov",
+    "dayIndex": 112
   },
   {
     "id": "hld-33",
@@ -327,7 +359,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/practice/system-design/new/online-game-leaderboard",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/online-game-leaderboard",
     "completed": false,
-    "date": "24 Sep"
+    "date": "23 Nov",
+    "dayIndex": 115
   },
   {
     "id": "hld-34",
@@ -337,7 +370,8 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/practice/system-design/new/donations-website",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/donations-website",
     "completed": false,
-    "date": "25 Sep"
+    "date": "26 Nov",
+    "dayIndex": 118
   },
   {
     "id": "hld-35",
@@ -347,6 +381,7 @@ export const hldTopics = [
     "url": "https://www.hellointerview.com/practice/system-design/new/github-actions",
     "practiceUrl": "https://www.hellointerview.com/practice/system-design/new/github-actions",
     "completed": false,
-    "date": "26 Sep"
+    "date": "29 Nov",
+    "dayIndex": 121
   }
 ];
