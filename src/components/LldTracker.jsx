@@ -2,6 +2,72 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, BookOpen, PlayCircle, History, Gamepad2, Search, Database, Settings2, AppWindow, Network, MessageSquare, CreditCard, ShoppingCart, Wrench, CheckCircle2, Circle, FileText } from 'lucide-react';
 import NoteModal from './NoteModal';
 
+// Design patterns that have their own page under algomaster.io/learn/lld/<slug>.
+// Not every "pattern" tag in our data is a GoF pattern (some are just underlying
+// techniques like Backtracking/Trie/Graph) - those are left as plain text.
+const PATTERN_SLUGS = {
+  'singleton': 'singleton',
+  'factory': 'factory-method',
+  'factory method': 'factory-method',
+  'abstract factory': 'abstract-factory',
+  'builder': 'builder',
+  'prototype': 'prototype',
+  'adapter': 'adapter',
+  'facade': 'facade',
+  'decorator': 'decorator',
+  'composite': 'composite',
+  'proxy': 'proxy',
+  'bridge': 'bridge',
+  'flyweight': 'flyweight',
+  'iterator': 'iterator',
+  'observer': 'observer',
+  'strategy': 'strategy',
+  'command': 'command',
+  'state': 'state',
+  'template method': 'template-method',
+  'visitor': 'visitor',
+  'mediator': 'mediator',
+  'memento': 'memento',
+  'chain of responsibility': 'chain-of-responsibility',
+};
+
+function patternSlug(name) {
+  // Normalize "Strategy (Settlement)" -> "strategy", etc.
+  const key = name.trim().toLowerCase().replace(/\s*\([^)]*\)\s*/g, '').trim();
+  return PATTERN_SLUGS[key];
+}
+
+// Renders a comma-separated pattern string as individual pieces, linking out
+// to algomaster.io/learn/lld/<pattern> for the ones that have a page there.
+function PatternTags({ pattern, className = '', linkClassName = '' }) {
+  if (!pattern) return <span className={className}>-</span>;
+  const parts = pattern.split(',').map(p => p.trim()).filter(Boolean);
+  return (
+    <span className={className}>
+      {parts.map((part, idx) => {
+        const slug = patternSlug(part);
+        return (
+          <React.Fragment key={part}>
+            {idx > 0 && ', '}
+            {slug ? (
+              <a
+                href={`https://algomaster.io/learn/lld/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className={`hover:underline underline-offset-2 ${linkClassName}`}
+                title={`View "${part}" pattern on AlgoMaster`}
+              >
+                {part}
+              </a>
+            ) : part}
+          </React.Fragment>
+        );
+      })}
+    </span>
+  );
+}
+
 export default function LldTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -236,7 +302,7 @@ export default function LldTracker({ items, setItems }) {
                         </button>
                       </div>
                       <div className="col-span-2 text-xs text-gray-400 font-medium">
-                        {item.pattern || '-'}
+                        <PatternTags pattern={item.pattern} linkClassName="text-gray-300 hover:text-[#10b981]" />
                       </div>
                       <div className="col-span-2 text-center flex justify-center">
                         {item.priority ? (
@@ -308,7 +374,7 @@ export default function LldTracker({ items, setItems }) {
                             {item.priority}
                           </span>
                         )}
-                        {item.pattern && <span className="text-gray-400">{item.pattern}</span>}
+                        {item.pattern && <PatternTags pattern={item.pattern} className="text-gray-400" linkClassName="text-gray-300 hover:text-[#10b981]" />}
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
                           className={`ml-auto p-1 rounded transition-colors ${item.note ? 'text-[#10b981]' : 'text-gray-500'}`}
