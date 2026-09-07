@@ -39,16 +39,16 @@ export default function LldTracker({ items, setItems }) {
 
   const getSectionIcon = (section) => {
     switch(section) {
-      case 'Games & Puzzles': return <Gamepad2 size={16} className="text-[#22c55e]" />;
-      case 'Data Structures & Search': return <Database size={16} className="text-[#22c55e]" />;
-      case 'Managing States': return <Settings2 size={16} className="text-[#22c55e]" />;
-      case 'Management Systems': return <AppWindow size={16} className="text-[#22c55e]" />;
-      case 'Social & Content Platforms': return <Network size={16} className="text-[#22c55e]" />;
-      case 'Communication & Messaging': return <MessageSquare size={16} className="text-[#22c55e]" />;
-      case 'Financial & Payment Systems': return <CreditCard size={16} className="text-[#22c55e]" />;
-      case 'E-commerce & Booking Systems': return <ShoppingCart size={16} className="text-[#22c55e]" />;
-      case 'Developer Tools & Infrastructure': return <Wrench size={16} className="text-[#22c55e]" />;
-      default: return <Gamepad2 size={16} className="text-[#22c55e]" />;
+      case 'Games & Puzzles': return <Gamepad2 size={16} className="text-[#10b981]" />;
+      case 'Data Structures & Search': return <Database size={16} className="text-[#10b981]" />;
+      case 'Managing States': return <Settings2 size={16} className="text-[#10b981]" />;
+      case 'Management Systems': return <AppWindow size={16} className="text-[#10b981]" />;
+      case 'Social & Content Platforms': return <Network size={16} className="text-[#10b981]" />;
+      case 'Communication & Messaging': return <MessageSquare size={16} className="text-[#10b981]" />;
+      case 'Financial & Payment Systems': return <CreditCard size={16} className="text-[#10b981]" />;
+      case 'E-commerce & Booking Systems': return <ShoppingCart size={16} className="text-[#10b981]" />;
+      case 'Developer Tools & Infrastructure': return <Wrench size={16} className="text-[#10b981]" />;
+      default: return <Gamepad2 size={16} className="text-[#10b981]" />;
     }
   };
 
@@ -73,19 +73,19 @@ export default function LldTracker({ items, setItems }) {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Low Level Design Practice</h1>
             <p className="text-gray-400 text-sm mb-4">Practice for Low Level Design Interviews step-by-step with AI powered evaluation and feedback</p>
-            <a href="https://algomaster.io/interview/low-level-design" target="_blank" rel="noopener noreferrer" className="text-[#22c55e] text-sm font-medium hover:underline flex items-center gap-1">How it Works ↓</a>
+            <a href="https://algomaster.io/interview/low-level-design" target="_blank" rel="noopener noreferrer" className="text-[#10b981] text-sm font-medium hover:underline flex items-center gap-1">How it Works ↓</a>
           </div>
           
-          <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800">
+          <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">
             <div className="relative w-20 h-20 rounded-full bg-[#262626] flex items-center justify-center border-4 border-[#262626]">
-              <div className="absolute inset-0 rounded-full border-4 border-[#22c55e]" style={{ clipPath: `inset(${100 - pct}% 0 0 0)` }}></div>
+              <div className="absolute inset-0 rounded-full border-4 border-[#10b981]" style={{ clipPath: `inset(${100 - pct}% 0 0 0)` }}></div>
               <div className="text-center z-10">
                 <div className="text-lg font-bold text-white leading-none">{completed}/{total}</div>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="text-center">
-                <div className="text-[#22c55e] text-xs mb-1">Easy</div>
+                <div className="text-[#10b981] text-xs mb-1">Easy</div>
                 <div className="text-white font-bold">{easyDone}<span className="text-gray-500 text-sm">/{easyTotal}</span></div>
               </div>
               <div className="text-center">
@@ -105,7 +105,7 @@ export default function LldTracker({ items, setItems }) {
           <div className="flex gap-4 items-center text-sm text-gray-400">
             <span>📁 {sections.length} sections</span>
             <span>📄 {items.length} problems</span>
-            <span className="text-[#22c55e]">✓ {completed} completed</span>
+            <span className="text-[#10b981]">✓ {completed} completed</span>
           </div>
           <button 
             onClick={toggleAllSections}
@@ -124,7 +124,7 @@ export default function LldTracker({ items, setItems }) {
               placeholder="Search problems..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#171717] border border-gray-800 rounded-md py-2 pl-9 pr-4 text-sm text-gray-200 focus:outline-none focus:border-[#22c55e]"
+              className="w-full bg-[#171717] border border-gray-800 rounded-md py-2 pl-9 pr-4 text-sm text-gray-200 focus:outline-none focus:border-[#10b981]"
             />
           </div>
           
@@ -134,7 +134,7 @@ export default function LldTracker({ items, setItems }) {
               <select 
                 value={patternFilter}
                 onChange={(e) => setPatternFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e] max-w-[150px] truncate"
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#10b981] max-w-[150px] truncate"
               >
                 <option>All</option>
                 {uniquePatterns.map(p => <option key={p} value={p}>{p}</option>)}
@@ -146,7 +146,7 @@ export default function LldTracker({ items, setItems }) {
               <select 
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]"
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#10b981]"
               >
                 <option>All</option>
                 <option>High</option>
@@ -160,7 +160,7 @@ export default function LldTracker({ items, setItems }) {
               <select 
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#22c55e]"
+                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#10b981]"
               >
                 <option>All</option>
                 <option>Easy</option>
@@ -174,7 +174,7 @@ export default function LldTracker({ items, setItems }) {
         {/* Table structure */}
         <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
           {/* Header Row */}
-          <div className="grid grid-cols-12 bg-[#22c55e] text-black font-semibold text-sm py-2 px-4 items-center">
+          <div className="grid grid-cols-12 bg-[#10b981] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">Date</div>
             <div className="col-span-3">Problem</div>
             <div className="col-span-2 text-center">Notes</div>
@@ -214,19 +214,19 @@ export default function LldTracker({ items, setItems }) {
                   </div>
 
                   {/* Section Rows */}
-                  {!isCollapsed && sectionItems.map((item) => (
-                    <div key={item.id} className="grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors">
+                  {!isCollapsed && sectionItems.map((item, iIdx) => (
+                    <div key={item.id} className={`grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
                       <div className="col-span-1 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
                       <div className="col-span-3 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#22c55e] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-[#10b981] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2">
                           {item.title}
                         </a>
                       </div>
                       <div className="col-span-2 flex items-center justify-center">
                         <button 
                           onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
-                          className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#22c55e] hover:bg-[#22c55e]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}
+                          className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#10b981] hover:bg-[#10b981]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}
                           title={item.note ? "Edit Notes" : "Add Notes"}
                         >
                           <FileText size={16} />
@@ -252,7 +252,7 @@ export default function LldTracker({ items, setItems }) {
                       </div>
                       <div className="col-span-1 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          item.difficulty === 'Easy' ? 'text-[#22c55e]' : 
+                          item.difficulty === 'Easy' ? 'text-[#10b981]' : 
                           item.difficulty === 'Medium' ? 'text-[#eab308]' : 
                           'text-[#ef4444]'
                         }`}>
@@ -262,9 +262,9 @@ export default function LldTracker({ items, setItems }) {
                       {/* Solved Checkbox */}
                       <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
                         {item.completed ? (
-                          <CheckCircle2 size={20} className="text-[#22c55e]" />
+                          <CheckCircle2 size={20} className="text-[#10b981]" />
                         ) : (
-                          <Circle size={20} className="text-gray-500 hover:text-[#22c55e] transition-colors" />
+                          <Circle size={20} className="text-gray-500 hover:text-[#10b981] transition-colors" />
                         )}
                       </div>
                     </div>

@@ -39,11 +39,11 @@ function App() {
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} /> },
-    { id: 'dsa', label: 'DSA', icon: <BookOpen size={18} /> },
-    { id: 'lld', label: 'LLD', icon: <Layers size={18} /> },
-    { id: 'hld', label: 'HLD', icon: <Monitor size={18} /> },
-    { id: 'notes', label: 'Notes', icon: <FileText size={18} /> },
+    { id: 'dashboard', label: 'Home', icon: <LayoutDashboard size={18} />, accent: 'text-gray-100', bar: 'bg-gray-400' },
+    { id: 'dsa', label: 'DSA', icon: <BookOpen size={18} />, accent: 'text-green-400', bar: 'bg-green-500' },
+    { id: 'lld', label: 'LLD', icon: <Layers size={18} />, accent: 'text-emerald-400', bar: 'bg-emerald-500' },
+    { id: 'hld', label: 'HLD', icon: <Monitor size={18} />, accent: 'text-teal-400', bar: 'bg-teal-500' },
+    { id: 'notes', label: 'Notes', icon: <FileText size={18} />, accent: 'text-violet-400', bar: 'bg-violet-500' },
   ];
 
   if (isLoading) {
@@ -68,13 +68,16 @@ function App() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium text-left ${
+              className={`relative w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium text-left ${
                 activeTab === tab.id
-                  ? 'bg-[#222] text-white border border-[#333]'
-                  : 'text-gray-400 border border-transparent hover:bg-[#1a1a1a] hover:text-gray-200'
+                  ? 'bg-[#1c1c1c] text-white border border-[#2a2a2a] shadow-sm'
+                  : 'text-gray-400 border border-transparent hover:bg-[#161616] hover:text-gray-200'
               }`}
             >
-              <span className={activeTab === tab.id ? 'text-white' : 'text-gray-500'}>{tab.icon}</span>
+              {activeTab === tab.id && (
+                <span className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full ${tab.bar}`} />
+              )}
+              <span className={activeTab === tab.id ? tab.accent : 'text-gray-500'}>{tab.icon}</span>
               {tab.label}
             </button>
           ))}

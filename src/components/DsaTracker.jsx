@@ -30,7 +30,7 @@ export default function DsaTracker({ items, setItems }) {
           <div className="flex items-center gap-4 sm:gap-6 flex-1">
             <span className="hidden sm:inline text-sm font-medium text-gray-400">Progress</span>
             <div className="relative w-32 sm:w-48 h-1.5 bg-gray-800 rounded-full flex items-center">
-              <div className="absolute h-1.5 bg-green-500 rounded-full transition-all duration-300" style={{ width: `${overallPct}%` }}></div>
+              <div className="absolute h-1.5 bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-300" style={{ width: `${overallPct}%` }}></div>
               <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
             </div>
             <div className="flex items-center gap-2 text-green-500 text-sm font-bold sm:ml-4">
@@ -56,7 +56,7 @@ export default function DsaTracker({ items, setItems }) {
             const dateStr = secObj.date;
 
             return (
-              <div key={section} className="w-full flex bg-[#111111] flex-col rounded-xl border border-gray-800 transition-all">
+              <div key={section} className="w-full flex bg-[#111111] flex-col rounded-xl border border-gray-800 transition-all shadow-lg shadow-black/10">
                 {/* Header */}
                 <div className="rounded-xl border border-transparent">
                   <button 
@@ -102,10 +102,10 @@ export default function DsaTracker({ items, setItems }) {
                 {!isCollapsed && (
                   <div className="text-sm text-gray-200 overflow-hidden border-t border-gray-800">
                     <div className="flex flex-col py-2 bg-[#151515] rounded-b-xl">
-                      {sectionItems.map(item => (
-                        <div 
-                          key={item.id} 
-                          className="flex justify-between items-center w-full gap-x-3 px-3 sm:px-4 py-2 hover:bg-gray-800/60 transition-colors group cursor-pointer"
+                      {sectionItems.map((item, iIdx) => (
+                        <div
+                          key={item.id}
+                          className={`flex justify-between items-center w-full gap-x-3 px-3 sm:px-4 py-2 hover:bg-gray-800/60 transition-colors group cursor-pointer ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}
                           onClick={() => toggleItem(item.id)}
                         >
                           <div className="flex items-center gap-x-3 flex-1 min-w-0">

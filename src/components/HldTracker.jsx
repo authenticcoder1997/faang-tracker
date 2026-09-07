@@ -24,27 +24,25 @@ export default function HldTracker({ items, setItems }) {
   const hardDone = items.filter(i => i.difficulty === 'Hard' && i.completed).length;
 
   return (
-    <div className="bg-[#1e293b] min-h-screen text-gray-300 p-8 font-sans">
+    <div className="bg-[#0a0a0a] min-h-screen text-gray-300 p-8 font-sans">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* Header */}
-        <div className="flex justify-between items-start mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
           <div>
-            <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
-              System Design <span className="bg-[#2dd4bf] text-[#0f172a] px-4 py-1 rounded-md text-3xl font-semibold">Guided Practice</span>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3 mb-2 flex-wrap">
+              System Design <span className="bg-[#2dd4bf] text-black px-3 py-1 rounded-md text-xl font-semibold">Guided Practice</span>
             </h1>
-            <p className="text-gray-400 text-lg">
-              Walk through common interview questions step-by-step<br/>
-              with personalized feedback.
+            <p className="text-gray-400 text-sm">
+              Walk through common interview questions step-by-step with personalized feedback.
             </p>
           </div>
-          
-          <div className="flex items-center gap-6">
-            <div className="relative w-24 h-24 rounded-full bg-[#334155] flex items-center justify-center border-4 border-[#334155]">
+
+          <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">
+            <div className="relative w-20 h-20 rounded-full bg-[#262626] flex items-center justify-center border-4 border-[#262626]">
               <div className="absolute inset-0 rounded-full border-4 border-[#2dd4bf]" style={{ clipPath: `inset(${100 - pct}% 0 0 0)` }}></div>
               <div className="text-center z-10">
-                <div className="text-xl font-bold text-white">{completed}/{total}</div>
-                <div className="text-xs text-gray-400">Completed</div>
+                <div className="text-lg font-bold text-white leading-none">{completed}/{total}</div>
               </div>
             </div>
             <div className="flex gap-4">
@@ -65,49 +63,56 @@ export default function HldTracker({ items, setItems }) {
         </div>
 
         {/* Table */}
-        <div className="w-full">
-          <div className="grid grid-cols-12 text-sm text-gray-400 border-b border-gray-700 pb-3 mb-2">
-            <div className="col-span-2 pl-4">Date</div><div className="col-span-3">Interview Question</div>
+        <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
+          <div className="grid grid-cols-12 bg-[#2dd4bf] text-black font-semibold text-sm py-2 px-4 items-center">
+            <div className="col-span-2">Date</div>
+            <div className="col-span-3">Interview Question</div>
             <div className="col-span-4 text-center">Notes</div>
             <div className="col-span-2 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
           </div>
 
-          {items.map((item, idx) => (
-            <div key={item.id} className="grid grid-cols-12 items-center py-4 border-b border-gray-700/50 hover:bg-[#334155]/30 transition-colors">
-              <div className="col-span-2 text-xs text-gray-500 pl-4">{item.date}</div><div className="col-span-3 flex items-center gap-3 pr-4">
-                <a 
-                  href={item.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-gray-200 hover:text-[#2dd4bf] transition-colors line-clamp-2"
-                >
-                  {item.title}
-                </a>
+          <div className="bg-[#0f0f0f]">
+            {items.map((item, idx) => (
+              <div
+                key={item.id}
+                className={`grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${idx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}
+              >
+                <div className="col-span-2 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
+                <div className="col-span-3 flex items-center gap-3 pr-4">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-[#2dd4bf] hover:underline underline-offset-2 text-sm transition-colors line-clamp-2"
+                  >
+                    {item.title}
+                  </a>
+                </div>
+                <div className="col-span-4 flex items-center justify-center">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                    className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#2dd4bf] hover:bg-[#2dd4bf]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}
+                    title={item.note ? "Edit Notes" : "Add Notes"}
+                  >
+                    <FileText size={16} />
+                  </button>
+                </div>
+                <div className="col-span-2 text-center">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
+                    {item.difficulty}
+                  </span>
+                </div>
+                <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
+                  {item.completed ? (
+                    <CheckCircle2 size={20} className="text-[#2dd4bf]" />
+                  ) : (
+                    <Circle size={20} className="text-gray-500 hover:text-[#2dd4bf] transition-colors" />
+                  )}
+                </div>
               </div>
-              <div className="col-span-4 flex items-center justify-center">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
-                  className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#2dd4bf] hover:bg-[#2dd4bf]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-600/50'}`}
-                  title={item.note ? "Edit Notes" : "Add Notes"}
-                >
-                  <FileText size={16} />
-                </button>
-              </div>
-              <div className="col-span-2 text-center">
-                <span className={`text-sm ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
-                  {item.difficulty}
-                </span>
-              </div>
-              <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => toggleItem(item.id)}>
-                {item.completed ? (
-                  <CheckCircle2 size={24} className="text-[#2dd4bf]" />
-                ) : (
-                  <Circle size={24} className="text-gray-500" />
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
       <NoteModal 

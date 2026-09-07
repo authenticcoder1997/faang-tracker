@@ -143,35 +143,35 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
 
       {/* Progress Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
+        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-green-500 font-semibold flex items-center gap-2"><BookOpen size={18}/> DSA</h3>
             <span className="text-xs text-gray-500 font-mono">{totalDsa}/{dsa.length}</span>
           </div>
           <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
-            <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalDsa/dsa.length)*100}%` }}></div>
+            <div className="bg-gradient-to-r from-green-600 to-green-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalDsa/dsa.length)*100}%` }}></div>
           </div>
           <p className="text-xs text-gray-400">TakeUForward Concept Revision →</p>
         </div>
 
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-all cursor-pointer" onClick={() => setActiveTab("lld")}>
+        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("lld")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-emerald-400 font-semibold flex items-center gap-2"><Layers size={18}/> LLD</h3>
             <span className="text-xs text-gray-500 font-mono">{totalLld}/{lld.length}</span>
           </div>
           <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
-            <div className="bg-emerald-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalLld/lld.length)*100}%` }}></div>
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalLld/lld.length)*100}%` }}></div>
           </div>
           <p className="text-xs text-gray-400">Algomaster 1 Daily Practice →</p>
         </div>
 
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-all cursor-pointer" onClick={() => setActiveTab("hld")}>
+        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("hld")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-teal-400 font-semibold flex items-center gap-2"><Monitor size={18}/> HLD</h3>
             <span className="text-xs text-gray-500 font-mono">{totalHld}/{hld.length}</span>
           </div>
           <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
-            <div className="bg-teal-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalHld/hld.length)*100}%` }}></div>
+            <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalHld/hld.length)*100}%` }}></div>
           </div>
           <p className="text-xs text-gray-400">HelloInterview Breakdown →</p>
         </div>
@@ -181,7 +181,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
       <div className="space-y-6">
 
         {/* DSA Today Scheduled Questions */}
-        <div className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden">
+        <div className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden shadow-lg shadow-black/20">
           <div className="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#161616]">
             <div className="flex items-center gap-2">
               <Target size={20} className="text-green-500" />
@@ -265,7 +265,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* LLD */}
-          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between">
+          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -351,7 +351,7 @@ export default function DailyHome({ dsa, lld, hld, setDsa, setLld, setHld, setAc
           </div>
 
           {/* HLD */}
-          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between">
+          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
