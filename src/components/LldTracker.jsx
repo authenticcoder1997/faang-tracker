@@ -73,7 +73,7 @@ export default function LldTracker({ items, setItems }) {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Low Level Design Practice</h1>
             <p className="text-gray-400 text-sm mb-4">Practice for Low Level Design Interviews step-by-step with AI powered evaluation and feedback</p>
-            <a href="https://algomaster.io/interview/low-level-design" target="_blank" rel="noopener noreferrer" className="text-[#10b981] text-sm font-medium hover:underline flex items-center gap-1">How it Works ↓</a>
+            <a href="https://algomaster.io/learn/lld" target="_blank" rel="noopener noreferrer" className="text-[#10b981] text-sm font-medium hover:underline flex items-center gap-1">View on Algomaster ↓</a>
           </div>
           
           <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">

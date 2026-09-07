@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "FAANG Tracker - TUF Sync",
-  "version": "2.0",
-  "description": "Auto-syncs your TakeUForward accepted submissions to your FAANG Tracker dashboard in real-time.",
+  "name": "FAANG Tracker Sync",
+  "version": "3.0",
+  "description": "Auto-syncs your TakeUForward, AlgoMaster LLD, and AlgoMaster Concurrency progress to your FAANG Tracker dashboard in real-time.",
   "icons": {
     "16": "icon.png",
     "48": "icon.png",
@@ -14,12 +14,23 @@
   ],
   "host_permissions": [
     "https://takeuforward.org/*",
+    "https://algomaster.io/*",
     "https://firestore.googleapis.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://takeuforward.org/plus/dsa/*"],
       "js": ["slug-map.js", "content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://algomaster.io/learn/lld/*"],
+      "js": ["lld-slug-map.js", "content-lld.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://algomaster.io/practice/concurrency/*"],
+      "js": ["concurrency-slug-map.js", "content-concurrency.js"],
       "run_at": "document_idle"
     }
   ],

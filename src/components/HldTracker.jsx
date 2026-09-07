@@ -33,9 +33,10 @@ export default function HldTracker({ items, setItems }) {
             <h1 className="text-3xl font-bold text-white flex items-center gap-3 mb-2 flex-wrap">
               System Design <span className="bg-[#2dd4bf] text-black px-3 py-1 rounded-md text-xl font-semibold">Guided Practice</span>
             </h1>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm mb-4">
               Walk through common interview questions step-by-step with personalized feedback.
             </p>
+            <a href="https://hellointerview.com/learn/system-design" target="_blank" rel="noopener noreferrer" className="text-[#2dd4bf] text-sm font-medium hover:underline flex items-center gap-1">View on HelloInterview ↓</a>
           </div>
 
           <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">

@@ -94,7 +94,7 @@ export default function ConcurrencyTracker({ items, setItems }) {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Concurrency Practice</h1>
             <p className="text-gray-400 text-sm mb-4">Write actual multi-threaded code for classic concurrency interview problems.</p>
-            <a href="https://algomaster.io/practice/concurrency" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline flex items-center gap-1" style={{ color: ACCENT }}>How it Works ↓</a>
+            <a href="https://algomaster.io/practice/concurrency" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline flex items-center gap-1" style={{ color: ACCENT }}>View on Algomaster ↓</a>
           </div>
 
           <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">

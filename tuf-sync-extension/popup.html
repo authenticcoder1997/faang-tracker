@@ -85,24 +85,26 @@
 <body>
   <div class="header">
     <h1><div class="dot"></div>FAANG Tracker Sync</h1>
-    <p>Auto-syncing TUF completions → Firebase</p>
+    <p>Auto-syncing TUF, LLD &amp; Concurrency → Firebase</p>
   </div>
   <div class="body">
     <div class="status-card">
       <div class="status-label">Status</div>
-      <div class="status-value green" id="status">● Active — watching TUF</div>
+      <div class="status-value green" id="status">● Active — watching 3 sites</div>
     </div>
     <div class="status-card">
       <div class="status-label">Current Page</div>
-      <div class="status-value gray" id="current-page">Not on a TUF problem</div>
+      <div class="status-value gray" id="current-page">Not on a watched site</div>
     </div>
     <div class="instruction">
       <strong>How it works:</strong><br>
-      Open any DSA problem on <a href="https://takeuforward.org/plus/dsa-concept-revision/roadmap" target="_blank">TUF+</a>, solve it, and click <strong>"Mark as Done"</strong>. This extension automatically syncs the completion to your
-      <a href="https://faang-tracker-eight.vercel.app" target="_blank">FAANG Tracker</a> dashboard.
+      <strong>DSA</strong> — solve on <a href="https://takeuforward.org/plus/dsa-concept-revision/roadmap" target="_blank">TUF+</a>, get "Accepted".<br>
+      <strong>LLD</strong> — read a chapter on <a href="https://algomaster.io/learn/lld" target="_blank">AlgoMaster LLD</a>, click "Complete".<br>
+      <strong>Concurrency</strong> — solve on <a href="https://algomaster.io/practice/concurrency" target="_blank">AlgoMaster Concurrency</a>, submit a passing solution.<br><br>
+      Each syncs automatically to your <a href="https://faang-tracker-eight.vercel.app" target="_blank">FAANG Tracker</a> dashboard. HLD isn't auto-synced yet — mark those manually in the app.
     </div>
   </div>
-  <div class="footer">FAANG Tracker &bull; TUF Sync Extension v1.0</div>
+  <div class="footer">FAANG Tracker &bull; Sync Extension v3.0</div>
   <script src="popup.js"></script>
 </body>
 </html>
