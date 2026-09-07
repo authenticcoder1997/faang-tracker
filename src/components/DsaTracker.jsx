@@ -26,10 +26,10 @@ export default function DsaTracker({ items, setItems }) {
       <div className="max-w-4xl mx-auto">
         
         {/* Top Progress Bar */}
-        <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
-          <div className="flex items-center gap-4 sm:gap-6 flex-1">
+        <div className="flex flex-wrap items-center justify-between gap-y-3 mb-8 border-b border-gray-800 pb-4">
+          <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0 flex-wrap">
             <span className="hidden sm:inline text-sm font-medium text-gray-400">Progress</span>
-            <div className="relative w-32 sm:w-48 h-1.5 bg-gray-800 rounded-full flex items-center">
+            <div className="relative w-24 sm:w-48 h-1.5 bg-gray-800 rounded-full flex items-center shrink-0">
               <div className="absolute h-1.5 bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-300" style={{ width: `${overallPct}%` }}></div>
               <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
             </div>
@@ -38,7 +38,7 @@ export default function DsaTracker({ items, setItems }) {
               <span className="text-gray-400 font-normal text-xs ml-1">({totalCompleted}/{items.length} problems)</span>
             </div>
           </div>
-          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-sm">
+          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-sm shrink-0">
             <button className="flex items-center gap-1 hover:text-gray-300"><RotateCcw size={14}/> Reset</button>
             <button className="flex items-center gap-1 hover:text-gray-300"><PauseCircle size={14}/> Pause</button>
           </div>

@@ -64,19 +64,22 @@ export default function HldTracker({ items, setItems }) {
 
         {/* Table */}
         <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
-          <div className="grid grid-cols-12 bg-[#2dd4bf] text-black font-semibold text-sm py-2 px-4 items-center">
+          <div className="hidden md:grid grid-cols-12 bg-[#2dd4bf] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-2">Date</div>
             <div className="col-span-3">Interview Question</div>
             <div className="col-span-4 text-center">Notes</div>
             <div className="col-span-2 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
           </div>
+          <div className="md:hidden bg-[#2dd4bf] text-black font-semibold text-xs py-2 px-4">
+            Breakdowns
+          </div>
 
           <div className="bg-[#0f0f0f]">
             {items.map((item, idx) => (
               <div
                 key={item.id}
-                className={`grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${idx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}
+                className={`hidden md:grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${idx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}
               >
                 <div className="col-span-2 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
                 <div className="col-span-3 flex items-center gap-3 pr-4">
@@ -109,6 +112,45 @@ export default function HldTracker({ items, setItems }) {
                   ) : (
                     <Circle size={20} className="text-gray-500 hover:text-[#2dd4bf] transition-colors" />
                   )}
+                </div>
+              </div>
+            ))}
+
+            {/* Mobile stacked cards */}
+            {items.map((item, idx) => (
+              <div
+                key={`m-${item.id}`}
+                className={`md:hidden flex flex-col gap-2 px-4 py-3 border-b border-gray-800/50 ${idx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-200 hover:text-[#2dd4bf] text-sm font-medium flex-1 min-w-0"
+                  >
+                    {item.title}
+                  </a>
+                  <div className="flex items-center gap-2 shrink-0" onClick={() => toggleItem(item.id)}>
+                    {item.completed ? (
+                      <CheckCircle2 size={20} className="text-[#2dd4bf]" />
+                    ) : (
+                      <Circle size={20} className="text-gray-500" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center flex-wrap gap-2 text-xs">
+                  <span className="text-gray-500">{item.date}</span>
+                  <span className={`font-semibold px-2 py-0.5 rounded-full ${item.difficulty === 'Easy' ? 'text-[#2dd4bf]' : item.difficulty === 'Medium' ? 'text-[#fb923c]' : 'text-[#f87171]'}`}>
+                    {item.difficulty}
+                  </span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                    className={`ml-auto p-1 rounded transition-colors ${item.note ? 'text-[#2dd4bf]' : 'text-gray-500'}`}
+                    title={item.note ? "Edit Notes" : "Add Notes"}
+                  >
+                    <FileText size={16} />
+                  </button>
                 </div>
               </div>
             ))}

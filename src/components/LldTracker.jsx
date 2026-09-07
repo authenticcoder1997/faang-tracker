@@ -173,8 +173,8 @@ export default function LldTracker({ items, setItems }) {
 
         {/* Table structure */}
         <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
-          {/* Header Row */}
-          <div className="grid grid-cols-12 bg-[#10b981] text-black font-semibold text-sm py-2 px-4 items-center">
+          {/* Header Row (desktop only - mobile uses stacked cards) */}
+          <div className="hidden md:grid grid-cols-12 bg-[#10b981] text-black font-semibold text-sm py-2 px-4 items-center">
             <div className="col-span-1">Date</div>
             <div className="col-span-3">Problem</div>
             <div className="col-span-2 text-center">Notes</div>
@@ -182,6 +182,9 @@ export default function LldTracker({ items, setItems }) {
             <div className="col-span-2 text-center">Priority</div>
             <div className="col-span-1 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
+          </div>
+          <div className="md:hidden bg-[#10b981] text-black font-semibold text-xs py-2 px-4">
+            Problems
           </div>
 
           {/* Sections */}
@@ -213,9 +216,9 @@ export default function LldTracker({ items, setItems }) {
                     </div>
                   </div>
 
-                  {/* Section Rows */}
+                  {/* Section Rows - desktop grid */}
                   {!isCollapsed && sectionItems.map((item, iIdx) => (
-                    <div key={item.id} className={`grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
+                    <div key={item.id} className={`hidden md:grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
                       <div className="col-span-1 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
                       <div className="col-span-3 flex items-center gap-3">
                         <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
@@ -224,7 +227,7 @@ export default function LldTracker({ items, setItems }) {
                         </a>
                       </div>
                       <div className="col-span-2 flex items-center justify-center">
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
                           className={`p-1.5 rounded transition-colors ${item.note ? 'text-[#10b981] hover:bg-[#10b981]/10' : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'}`}
                           title={item.note ? "Edit Notes" : "Add Notes"}
@@ -238,8 +241,8 @@ export default function LldTracker({ items, setItems }) {
                       <div className="col-span-2 text-center flex justify-center">
                         {item.priority ? (
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
-                            item.priority === 'High' 
-                              ? 'text-rose-400 border-rose-400/30 bg-rose-400/10' 
+                            item.priority === 'High'
+                              ? 'text-rose-400 border-rose-400/30 bg-rose-400/10'
                               : item.priority === 'Medium'
                               ? 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10'
                               : 'text-green-400 border-green-400/30 bg-green-400/10'
@@ -252,8 +255,8 @@ export default function LldTracker({ items, setItems }) {
                       </div>
                       <div className="col-span-1 text-center">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          item.difficulty === 'Easy' ? 'text-[#10b981]' : 
-                          item.difficulty === 'Medium' ? 'text-[#eab308]' : 
+                          item.difficulty === 'Easy' ? 'text-[#10b981]' :
+                          item.difficulty === 'Medium' ? 'text-[#eab308]' :
                           'text-[#ef4444]'
                         }`}>
                           {item.difficulty}
@@ -266,6 +269,53 @@ export default function LldTracker({ items, setItems }) {
                         ) : (
                           <Circle size={20} className="text-gray-500 hover:text-[#10b981] transition-colors" />
                         )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Section Rows - mobile stacked cards */}
+                  {!isCollapsed && sectionItems.map((item, iIdx) => (
+                    <div key={`m-${item.id}`} className={`md:hidden flex flex-col gap-2 px-4 py-3 border-b border-gray-800/50 ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-200 hover:text-[#10b981] text-sm font-medium flex-1 min-w-0">
+                          {item.title}
+                        </a>
+                        <div className="flex items-center gap-2 shrink-0" onClick={() => toggleItem(item.id)}>
+                          {item.completed ? (
+                            <CheckCircle2 size={20} className="text-[#10b981]" />
+                          ) : (
+                            <Circle size={20} className="text-gray-500" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center flex-wrap gap-2 text-xs">
+                        <span className="text-gray-500">{item.date}</span>
+                        <span className={`font-semibold px-2 py-0.5 rounded-full ${
+                          item.difficulty === 'Easy' ? 'text-[#10b981]' :
+                          item.difficulty === 'Medium' ? 'text-[#eab308]' :
+                          'text-[#ef4444]'
+                        }`}>
+                          {item.difficulty}
+                        </span>
+                        {item.priority && (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                            item.priority === 'High'
+                              ? 'text-rose-400 border-rose-400/30 bg-rose-400/10'
+                              : item.priority === 'Medium'
+                              ? 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10'
+                              : 'text-green-400 border-green-400/30 bg-green-400/10'
+                          }`}>
+                            {item.priority}
+                          </span>
+                        )}
+                        {item.pattern && <span className="text-gray-400">{item.pattern}</span>}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
+                          className={`ml-auto p-1 rounded transition-colors ${item.note ? 'text-[#10b981]' : 'text-gray-500'}`}
+                          title={item.note ? "Edit Notes" : "Add Notes"}
+                        >
+                          <FileText size={16} />
+                        </button>
                       </div>
                     </div>
                   ))}
