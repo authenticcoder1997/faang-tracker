@@ -18,7 +18,7 @@ function App() {
 
   const docId = "my-personal-tracker";
 
-  const [dsa, setDsa, dsaLoading] = useCloudStorage('dsa_progress', docId, dsaTopics, 'faang-tracker-dsa-v9');
+  const [dsa, setDsa, dsaLoading, dsaSyncError] = useCloudStorage('dsa_progress', docId, dsaTopics, 'faang-tracker-dsa-v10', 'faang-tracker-dsa-v9');
   const [lld, setLld, lldLoading] = useCloudStorage('lld_progress', docId, lldTopics, 'faang-tracker-lld-v8');
   const [hld, setHld, hldLoading] = useCloudStorage('hld_progress', docId, hldTopics, 'faang-tracker-hld-v8');
   const [concurrency, setConcurrency, concurrencyLoading] = useCloudStorage('concurrency_progress', docId, concurrencyTopics, 'faang-tracker-concurrency-v1');
@@ -118,7 +118,7 @@ function App() {
           />
         </div>
         <div className={activeTab === 'dsa' ? 'block' : 'hidden'}>
-          <DsaTracker items={dsa} setItems={setDsa} />
+          <DsaTracker items={dsa} setItems={setDsa} savingLocally={!!dsaSyncError} />
         </div>
         <div className={activeTab === 'lld' ? 'block' : 'hidden'}>
           <LldTracker items={lld} setItems={setLld} />

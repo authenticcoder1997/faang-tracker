@@ -1,97 +1,98 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { readProgressCache, saveProgressCache } from './progressCache';
 
-export function useCloudStorage(collectionName, documentId, initialValue, localStorageKey) {
-  const [data, setData] = useState(initialValue);
+function localStorageOrNull() {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function cloudFields(items) {
+  const completedIds = items.filter(item => item.completed).map(item => item.id);
+  const itemState = {};
+  items.forEach(item => {
+    if (item.completed || item.note) {
+      itemState[item.id] = { completed: !!item.completed };
+      if (item.note) itemState[item.id].note = item.note;
+    }
+  });
+  return { completedIds, itemState };
+}
+
+export function useCloudStorage(collectionName, documentId, initialValue, localStorageKey, previousLocalStorageKey) {
+  const [data, setData] = useState(() => readProgressCache(
+    initialValue, localStorageKey, previousLocalStorageKey, localStorageOrNull(),
+  ));
   const [loading, setLoading] = useState(true);
+  const [syncError, setSyncError] = useState(null);
+  const currentData = useRef(data);
+  const pendingSave = useRef(0);
+  const cloudUnavailable = useRef(false);
 
   useEffect(() => {
     const docRef = doc(db, collectionName, documentId);
-    
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    // Keep the migrated/restored progress even if the first cloud read is denied.
+    saveProgressCache(localStorageKey, currentData.current, localStorageOrNull());
+
+    const unsubscribe = onSnapshot(docRef, docSnap => {
+      if (pendingSave.current) return;
+      cloudUnavailable.current = false;
+      setSyncError(null);
       if (docSnap.exists()) {
         const cloudData = docSnap.data().completedIds || [];
         const itemState = docSnap.data().itemState || {};
-        
-        // Smart merge: keep fresh source-of-truth data, but restore completion state and notes
-        if (Array.isArray(initialValue) && initialValue.length > 0 && initialValue[0].id) {
-          const merged = initialValue.map(initItem => ({
-            ...initItem,
-            completed: itemState[initItem.id]?.completed ?? cloudData.includes(initItem.id),
-            note: itemState[initItem.id]?.note || ''
-          }));
-          setData(merged);
-        } else {
-          setData(cloudData);
-        }
-      } else {
-        // Document doesn't exist yet in cloud. Let's try migrating from localStorage!
-        const localDataRaw = typeof window !== 'undefined' ? window.localStorage.getItem(localStorageKey) : null;
-        let finalData = initialValue;
-        
-        if (localDataRaw) {
-          try {
-            const parsedLocal = JSON.parse(localDataRaw);
-            if (Array.isArray(parsedLocal) && Array.isArray(initialValue) && initialValue.length > 0 && initialValue[0].id) {
-              finalData = initialValue.map(initItem => {
-                 const cachedItem = parsedLocal.find(p => p.id === initItem.id || p.url === initItem.url);
-                 if (cachedItem) {
-                    return { ...initItem, completed: cachedItem.completed, note: cachedItem.note || '' };
-                 }
-                 return initItem;
-              });
-              
-              // Upload the migrated data to cloud in the background
-              const completedIds = finalData.filter(i => i.completed).map(i => i.id);
-              const itemState = {};
-              finalData.forEach(i => {
-                if (i.completed || i.note) {
-                  itemState[i.id] = { completed: !!i.completed };
-                  if (i.note) itemState[i.id].note = i.note;
-                }
-              });
-              setDoc(docRef, { completedIds, itemState }, { merge: true }).catch(console.error);
-            }
-          } catch(e) {
-            console.error("Migration failed:", e);
-          }
-        }
-        setData(finalData);
+        const merged = Array.isArray(initialValue) && initialValue[0]?.id
+          ? initialValue.map(item => ({
+            ...item,
+            completed: itemState[item.id]?.completed ?? cloudData.includes(item.id),
+            note: itemState[item.id]?.note || '',
+          }))
+          : cloudData;
+        currentData.current = merged;
+        setData(merged);
+        saveProgressCache(localStorageKey, merged, localStorageOrNull());
+      } else if (Array.isArray(currentData.current)) {
+        setDoc(docRef, cloudFields(currentData.current), { merge: true }).catch(error => {
+          cloudUnavailable.current = true;
+          setSyncError(error.code || 'unavailable');
+          console.error(`Error migrating ${collectionName}/${documentId}:`, error);
+        });
       }
       setLoading(false);
-    }, (error) => {
+    }, error => {
       console.error(`Error syncing ${collectionName}/${documentId}:`, error);
+      cloudUnavailable.current = true;
+      setSyncError(error.code || 'unavailable');
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, [collectionName, documentId, initialValue, localStorageKey]);
 
-  const setValue = async (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(data) : value;
-      
-      // Optimistic local update
-      setData(valueToStore);
+  const setValue = async value => {
+    const valueToStore = value instanceof Function ? value(currentData.current) : value;
+    currentData.current = valueToStore;
+    setData(valueToStore);
+    // Save before attempting the cloud write, so a rejected write loses no progress.
+    saveProgressCache(localStorageKey, valueToStore, localStorageOrNull());
+    if (cloudUnavailable.current || !Array.isArray(valueToStore)) return;
 
-      // Save to cloud
-      if (Array.isArray(valueToStore)) {
-        const completedIds = valueToStore.filter(i => i.completed).map(i => i.id);
-        const itemState = {};
-        valueToStore.forEach(i => {
-          if (i.completed || i.note) {
-            itemState[i.id] = { completed: !!i.completed };
-            if (i.note) itemState[i.id].note = i.note;
-          }
-        });
-        const docRef = doc(db, collectionName, documentId);
-        await setDoc(docRef, { completedIds, itemState }, { merge: true });
-      }
+    pendingSave.current += 1;
+    try {
+      await setDoc(doc(db, collectionName, documentId), cloudFields(valueToStore), { merge: true });
+      setSyncError(null);
     } catch (error) {
+      cloudUnavailable.current = true;
+      setSyncError(error.code || 'unavailable');
       console.error(`Error saving to cloud ${collectionName}/${documentId}:`, error);
+    } finally {
+      pendingSave.current -= 1;
     }
   };
 
-  return [data, setValue, loading];
+  return [data, setValue, loading, syncError];
 }

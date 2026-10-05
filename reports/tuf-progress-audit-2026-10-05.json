@@ -1,0 +1,1666 @@
+{
+  "checkedAt": "2026-10-05",
+  "source": "https://takeuforward.org/practice/dsa",
+  "tracker": "https://faang-tracker-eight.vercel.app/",
+  "tufSolvedCount": 64,
+  "trackerProblemsChecked": 198,
+  "previousCompletedCount": 53,
+  "confirmedCompletedCount": 64,
+  "restoredTitles": [
+    "Count Inversions",
+    "Reverse Pairs",
+    "BST iterator",
+    "Inorder successor and predecessor in BST",
+    "Two sum in BST",
+    "Number of islands",
+    "Flood fill algorithm",
+    "Rotten Oranges",
+    "Surrounded Regions",
+    "Topological sort or Kahn's algorithm",
+    "Detect a cycle in a directed graph"
+  ],
+  "problems": [
+    {
+      "completed": true,
+      "title": "Merge Sorting",
+      "url": "https://takeuforward.org/plus/dsa/problems/merge-sorting?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 1020,
+        "title": "Merge Sorting",
+        "url": "/practice/dsa/merge-sorting?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Quick Sorting",
+      "url": "https://takeuforward.org/plus/dsa/problems/quick-sorting?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 1024,
+        "title": "Quick Sorting",
+        "url": "/practice/dsa/quick-sorting?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Longest Consecutive Sequence in an Array",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-consecutive-sequence-in-an-array?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 97,
+        "title": "Longest Consecutive Sequence in an Array",
+        "url": "/practice/dsa/longest-consecutive-sequence-in-an-array?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Print the matrix in spiral manner",
+      "url": "https://takeuforward.org/plus/dsa/problems/print-the-matrix-in-spiral-manner?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 107,
+        "title": "Print the matrix in spiral manner",
+        "url": "/practice/dsa/print-the-matrix-in-spiral-manner?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Kadane's Algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/kadane's-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 12,
+        "title": "Kadane's Algorithm",
+        "url": "/practice/dsa/kadane's-algorithm?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Pascal's Triangle III",
+      "url": "https://takeuforward.org/plus/dsa/problems/pascals-triangle-iii?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 945,
+        "title": "Pascal's Triangle III",
+        "url": "/practice/dsa/pascals-triangle-iii?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Rotate matrix by 90 degrees",
+      "url": "https://takeuforward.org/plus/dsa/problems/rotate-matrix-by-90-degrees?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 70,
+        "title": "Rotate matrix by 90 degrees",
+        "url": "/practice/dsa/rotate-matrix-by-90-degrees?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Two Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/two-sum?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 1,
+        "title": "Two Sum",
+        "url": "/practice/dsa/two-sum?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "3 Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/3-sum?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 21,
+        "title": "3 Sum",
+        "url": "/practice/dsa/3-sum?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "4 Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/4-sum?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 169,
+        "title": "4 Sum",
+        "url": "/practice/dsa/4-sum?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Majority Element-I",
+      "url": "https://takeuforward.org/plus/dsa/problems/majority-element-i?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 83,
+        "title": "Majority Element-I",
+        "url": "/practice/dsa/majority-element-i?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Majority Element-II",
+      "url": "https://takeuforward.org/plus/dsa/problems/majority-element-ii?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 119,
+        "title": "Majority Element-II",
+        "url": "/practice/dsa/majority-element-ii?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Find the repeating and missing number",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-repeating-and-missing-number?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 138,
+        "title": "Find the repeating and missing number",
+        "url": "/practice/dsa/find-the-repeating-and-missing-number?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Count Inversions",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-inversions?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 131,
+        "title": "Count Inversions",
+        "url": "/practice/dsa/count-inversions?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Reverse Pairs",
+      "url": "https://takeuforward.org/plus/dsa/problems/reverse-pairs?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 152,
+        "title": "Reverse Pairs",
+        "url": "/practice/dsa/reverse-pairs?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Maximum Product Subarray in an Array",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-product-subarray-in-an-array?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Merge two sorted arrays without extra space",
+      "url": "https://takeuforward.org/plus/dsa/problems/merge-two-sorted-arrays-without-extra-space?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest subarray with sum K",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-subarray-with-sum-k?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count subarrays with given sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-subarrays-with-given-sum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count subarrays with given xor K",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-subarrays-with-given-xor-k?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": true,
+      "title": "Lower Bound",
+      "url": "https://takeuforward.org/plus/dsa/problems/lower-bound-?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 729,
+        "title": "Lower Bound",
+        "url": "/practice/dsa/lower-bound-?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Upper Bound",
+      "url": "https://takeuforward.org/plus/dsa/problems/upper-bound?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 750,
+        "title": "Upper Bound",
+        "url": "/practice/dsa/upper-bound?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Search in rotated sorted array-II",
+      "url": "https://takeuforward.org/plus/dsa/problems/search-in-rotated-sorted-array-2?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 112,
+        "title": "Search in rotated sorted array-II",
+        "url": "/practice/dsa/search-in-rotated-sorted-array-2?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Find minimum in Rotated Sorted Array",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-minimum-in-rotated-sorted-array?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 62,
+        "title": "Find minimum in Rotated Sorted Array",
+        "url": "/practice/dsa/find-minimum-in-rotated-sorted-array?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Find the smallest divisor",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-smallest-divisor?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 340,
+        "title": "Find the smallest divisor",
+        "url": "/practice/dsa/find-the-smallest-divisor?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Koko eating bananas",
+      "url": "https://takeuforward.org/plus/dsa/problems/koko-eating-bananas?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 91,
+        "title": "Koko eating bananas",
+        "url": "/practice/dsa/koko-eating-bananas?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Minimum days to make M bouquets",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-days-to-make-m-bouquets?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Aggressive Cows",
+      "url": "https://takeuforward.org/plus/dsa/problems/aggressive-cows?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Book Allocation Problem",
+      "url": "https://takeuforward.org/plus/dsa/problems/book-allocation-problem?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Median of 2 sorted arrays",
+      "url": "https://takeuforward.org/plus/dsa/problems/median-of-2-sorted-arrays?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find row with maximum 1's",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-row-with-maximum-1's?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Search in a 2D matrix",
+      "url": "https://takeuforward.org/plus/dsa/problems/search-in-a-2d-matrix?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Search in 2D matrix - II",
+      "url": "https://takeuforward.org/plus/dsa/problems/search-in-2d-matrix-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find peak element",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-peak-element?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Matrix Median",
+      "url": "https://takeuforward.org/plus/dsa/problems/matrix-median?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Power Set",
+      "url": "https://takeuforward.org/plus/dsa/problems/power-set?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Check if there exists a subsequence with sum K",
+      "url": "https://takeuforward.org/plus/dsa/problems/check-if-there-exists-a-subsequence-with-sum-k?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Combination Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/combination-sum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Combination Sum II",
+      "url": "https://takeuforward.org/plus/dsa/problems/combination-sum-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Combination Sum III",
+      "url": "https://takeuforward.org/plus/dsa/problems/combination-sum-iii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Palindrome partitioning",
+      "url": "https://takeuforward.org/plus/dsa/problems/palindrome-partitioning?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "N Queen",
+      "url": "https://takeuforward.org/plus/dsa/problems/n-queen?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Rat in a Maze",
+      "url": "https://takeuforward.org/plus/dsa/problems/rat-in-a-maze?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "M Coloring Problem",
+      "url": "https://takeuforward.org/plus/dsa/problems/m-coloring-problem?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sudoku Solver",
+      "url": "https://takeuforward.org/plus/dsa/problems/sudoko-solver?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Segregate odd and even nodes in Linked List",
+      "url": "https://takeuforward.org/plus/dsa/problems/segregate-odd-and-even-nodes-in-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sort a Linked List of 0's 1's and 2's",
+      "url": "https://takeuforward.org/plus/dsa/problems/sort-a-ll-of-0's-1's-and-2's?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find the intersection point of Y LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-intersection-point-of-y-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Reverse a LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/reverse-a-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Check if LL is palindrome or not",
+      "url": "https://takeuforward.org/plus/dsa/problems/check-if-ll-is-palindrome-or-not?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find the starting point in LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-starting-point-in-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Length of loop in LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/length-of-loop-in-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Reverse LL in group of given size K",
+      "url": "https://takeuforward.org/plus/dsa/problems/reverse-ll-in-group-of-given-size-k?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Flattening of LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/flattening-of-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sort LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/sort-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Clone a LL with random and next pointer",
+      "url": "https://takeuforward.org/plus/dsa/problems/clone-a-ll-with-random-and-next-pointer?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Delete the middle node in LL",
+      "url": "https://takeuforward.org/plus/dsa/problems/delete-the-middle-node-in-ll?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Single Number - II",
+      "url": "https://takeuforward.org/plus/dsa/problems/single-number---ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Single Number - III",
+      "url": "https://takeuforward.org/plus/dsa/problems/single-number---iii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "XOR of numbers in a given range",
+      "url": "https://takeuforward.org/plus/dsa/problems/xor-of-numbers-in-a-given-range?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": true,
+      "title": "N meetings in one room",
+      "url": "https://takeuforward.org/plus/dsa/problems/n-meetings-in-one-room?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 133,
+        "title": "N meetings in one room",
+        "url": "/practice/dsa/n-meetings-in-one-room?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Non-overlapping Intervals",
+      "url": "https://takeuforward.org/plus/dsa/problems/non-overlapping-intervals?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 89,
+        "title": "Non-overlapping Intervals",
+        "url": "/practice/dsa/non-overlapping-intervals?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Minimum number of platforms required for a railway",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-number-of-platforms-required-for-a-railway?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 150,
+        "title": "Minimum number of platforms required for a railway",
+        "url": "/practice/dsa/minimum-number-of-platforms-required-for-a-railway?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Valid Paranthesis Checker",
+      "url": "https://takeuforward.org/plus/dsa/problems/valid-paranthesis-checker?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 243,
+        "title": "Valid Paranthesis Checker",
+        "url": "/practice/dsa/valid-paranthesis-checker?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Candy",
+      "url": "https://takeuforward.org/plus/dsa/problems/candy?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 258,
+        "title": "Candy",
+        "url": "/practice/dsa/candy?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Longest Substring Without Repeating Characters",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-substring-without-repeating-characters?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 16,
+        "title": "Longest Substring Without Repeating Characters",
+        "url": "/practice/dsa/longest-substring-without-repeating-characters?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Max Consecutive Ones III",
+      "url": "https://takeuforward.org/plus/dsa/problems/max-consecutive-ones-iii?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 261,
+        "title": "Max Consecutive Ones III",
+        "url": "/practice/dsa/max-consecutive-ones-iii?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Longest Substring With At Most K Distinct Characters",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-substring-with-at-most-k-distinct-characters?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 313,
+        "title": "Longest Substring With At Most K Distinct Characters",
+        "url": "/practice/dsa/longest-substring-with-at-most-k-distinct-characters?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Longest Repeating Character Replacement",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-repeating-character-replacement?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 106,
+        "title": "Longest Repeating Character Replacement",
+        "url": "/practice/dsa/longest-repeating-character-replacement?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Fruit Into Baskets",
+      "url": "https://takeuforward.org/plus/dsa/problems/fruit-into-baskets?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 329,
+        "title": "Fruit Into Baskets",
+        "url": "/practice/dsa/fruit-into-baskets?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Maximum Points You Can Obtain from Cards",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-points-you-can-obtain-from-cards-?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Minimum Window Substring",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-window-substring-?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Number of Substrings Containing All Three Characters",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-substrings-containing-all-three-characters?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Binary Subarrays With Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/binary-subarrays-with-sum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count number of Nice subarrays",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-number-of-nice-subarrays?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Next Greater Element - 2",
+      "url": "https://takeuforward.org/plus/dsa/problems/next-greater-element---2?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Asteroid Collision",
+      "url": "https://takeuforward.org/plus/dsa/problems/asteroid-collision?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sum of Subarray Minimums",
+      "url": "https://takeuforward.org/plus/dsa/problems/sum-of-subarray-minimums?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sum of Subarray Ranges",
+      "url": "https://takeuforward.org/plus/dsa/problems/sum-of-subarray-ranges?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Remove K Digits",
+      "url": "https://takeuforward.org/plus/dsa/problems/remove-k-digits?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Implement Min Stack",
+      "url": "https://takeuforward.org/plus/dsa/problems/implement-min-stack?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Sliding Window Maximum",
+      "url": "https://takeuforward.org/plus/dsa/problems/sliding-window-maximum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Trapping Rainwater",
+      "url": "https://takeuforward.org/plus/dsa/problems/trapping-rainwater?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Largest rectangle in a histogram",
+      "url": "https://takeuforward.org/plus/dsa/problems/largest-rectangle-in-a-histogram?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "LRU Cache",
+      "url": "https://takeuforward.org/plus/dsa/problems/lru-cache?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Heap Sort",
+      "url": "https://takeuforward.org/plus/dsa/problems/heap-sort?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "K-th Largest element in an array",
+      "url": "https://takeuforward.org/plus/dsa/problems/k-th-largest-element-in-an-array?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Kth largest element in a stream of running integers",
+      "url": "https://takeuforward.org/plus/dsa/problems/kth-largest-element-in-a-stream-of-running-integers?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Task Scheduler",
+      "url": "https://takeuforward.org/plus/dsa/problems/task-scheduler?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find Median from Data Stream",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-median-from-data-stream?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": true,
+      "title": "Preorder Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/preorder-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 42,
+        "title": "Preorder Traversal",
+        "url": "/practice/dsa/preorder-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Inorder Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/inorder-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 32,
+        "title": "Inorder Traversal",
+        "url": "/practice/dsa/inorder-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Postorder Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/postorder-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 168,
+        "title": "Postorder Traversal",
+        "url": "/practice/dsa/postorder-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Level Order Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/level-order-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 4,
+        "title": "Level Order Traversal",
+        "url": "/practice/dsa/level-order-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Maximum Depth in BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-depth-in-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 18,
+        "title": "Maximum Depth in BT",
+        "url": "/practice/dsa/maximum-depth-in-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Diameter of Binary Tree",
+      "url": "https://takeuforward.org/plus/dsa/problems/diameter-of-binary-tree?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 29,
+        "title": "Diameter of Binary Tree",
+        "url": "/practice/dsa/diameter-of-binary-tree?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Maximum path sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-path-sum-?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 20,
+        "title": "Maximum path sum",
+        "url": "/practice/dsa/maximum-path-sum-?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Check for symmetrical BTs",
+      "url": "https://takeuforward.org/plus/dsa/problems/check-for-symmetrical-bts?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 105,
+        "title": "Check for symmetrical BTs",
+        "url": "/practice/dsa/check-for-symmetrical-bts?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Boundary Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/boundary-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 216,
+        "title": "Boundary Traversal",
+        "url": "/practice/dsa/boundary-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Vertical Order Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/vertical-order-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 193,
+        "title": "Vertical Order Traversal",
+        "url": "/practice/dsa/vertical-order-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Top View of BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/top-view-of-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 180,
+        "title": "Top View of BT",
+        "url": "/practice/dsa/top-view-of-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Right/Left View of BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/right-left-view-of-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 56,
+        "title": "Right/Left View of BT",
+        "url": "/practice/dsa/right-left-view-of-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Print root to leaf path in BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/print-root-to-note-path-in-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 195,
+        "title": "Print root to leaf path in BT",
+        "url": "/practice/dsa/print-root-to-leaf-path-in-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "LCA in BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/lca-in-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 88,
+        "title": "LCA in BT",
+        "url": "/practice/dsa/lca-in-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Maximum Width of BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-width-of-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 96,
+        "title": "Maximum Width of BT",
+        "url": "/practice/dsa/maximum-width-of-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Minimum time taken to burn the BT from a given Node",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-time-taken-to-burn-the-bt-from-a-given-node?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 123,
+        "title": "Minimum time taken to burn the BT from a given Node",
+        "url": "/practice/dsa/minimum-time-taken-to-burn-the-bt-from-a-given-node?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Count total nodes in a complete BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-total-nodes-in-a-complete-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 263,
+        "title": "Count total nodes in a complete BT",
+        "url": "/practice/dsa/count-total-nodes-in-a-complete-bt?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Construct a BT from Preorder and Inorder",
+      "url": "https://takeuforward.org/plus/dsa/problems/construct-a-bt-from-preorder-and-inorder?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 45,
+        "title": "Construct a BT from Preorder and Inorder",
+        "url": "/practice/dsa/construct-a-bt-from-preorder-and-inorder?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Construct a BT from Postorder and Inorder",
+      "url": "https://takeuforward.org/plus/dsa/problems/construct-a-bt-from-postorder-and-inorder?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 221,
+        "title": "Construct a BT from Postorder and Inorder",
+        "url": "/practice/dsa/construct-a-bt-from-postorder-and-inorder?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Serialize and De-serialize BT",
+      "url": "https://takeuforward.org/plus/dsa/problems/serialize-and-de-serialize-bt?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 69,
+        "title": "Serialize and De-serialize BT",
+        "url": "/practice/dsa/serialize-and-de-serialize-bt?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Morris Inorder Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/morris-inorder-traversal-?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Morris Preorder Traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/morris-preorder-traversal-?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": true,
+      "title": "LCA in BST",
+      "url": "https://takeuforward.org/plus/dsa/problems/lca-in-bst?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 55,
+        "title": "LCA in BST",
+        "url": "/practice/dsa/lca-in-bst?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Kth Smallest and Largest element in BST",
+      "url": "https://takeuforward.org/plus/dsa/problems/kth-smallest-and-largest-element-in-bst?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 33,
+        "title": "Kth Smallest and Largest element in BST",
+        "url": "/practice/dsa/kth-smallest-and-largest-element-in-bst?tab=solution"
+      }
+    },
+    {
+      "completed": true,
+      "title": "Construct a BST from a preorder traversal",
+      "url": "https://takeuforward.org/plus/dsa/problems/construct-a-bst-from-a-preorder-traversal?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 173,
+        "title": "Construct a BST from a preorder traversal",
+        "url": "/practice/dsa/construct-a-bst-from-a-preorder-traversal?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "BST iterator",
+      "url": "https://takeuforward.org/plus/dsa/problems/bst-iterator?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 230,
+        "title": "BST iterator",
+        "url": "/practice/dsa/bst-iterator?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Inorder successor and predecessor in BST",
+      "url": "https://takeuforward.org/plus/dsa/problems/inorder-successor-and-predecessor-in-bst?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 177,
+        "title": "Inorder successor and predecessor in BST",
+        "url": "/practice/dsa/inorder-successor-and-predecessor-in-bst?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Two sum in BST",
+      "url": "https://takeuforward.org/plus/dsa/problems/two-sum-in-bst?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 122,
+        "title": "Two sum in BST",
+        "url": "/practice/dsa/two-sum-in-bst?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Correct BST with two nodes swapped",
+      "url": "https://takeuforward.org/plus/dsa/problems/correct-bst-with-two-nodes-swapped?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Largest BST in Binary Tree",
+      "url": "https://takeuforward.org/plus/dsa/problems/largest-bst-in-binary-tree?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": true,
+      "title": "Traversal Techniques",
+      "url": "https://takeuforward.org/plus/dsa/problems/traversal-techniques?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 181,
+        "title": "Traversal Techniques",
+        "url": "/practice/dsa/traversal-techniques?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Number of islands",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-islands?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 5,
+        "title": "Number of islands",
+        "url": "/practice/dsa/number-of-islands?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Flood fill algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/flood-fill-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 179,
+        "title": "Flood fill algorithm",
+        "url": "/practice/dsa/flood-fill-algorithm?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Rotten Oranges",
+      "url": "https://takeuforward.org/plus/dsa/problems/rotten-oranges?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 19,
+        "title": "Rotten Oranges",
+        "url": "/practice/dsa/rotten-oranges?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Surrounded Regions",
+      "url": "https://takeuforward.org/plus/dsa/problems/surrounded-regions?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 232,
+        "title": "Surrounded Regions",
+        "url": "/practice/dsa/surrounded-regions?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Number of distinct islands",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-distinct-islands?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Bipartite graph",
+      "url": "https://takeuforward.org/plus/dsa/problems/bipartite-graph?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Topological sort or Kahn's algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/topological-sort-or-kahns-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 201,
+        "title": "Topological sort or Kahn's algorithm",
+        "url": "/practice/dsa/topological-sort-or-kahns-algorithm?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Detect a cycle in a directed graph",
+      "url": "https://takeuforward.org/plus/dsa/problems/detect-a-cycle-in-a-directed-graph?subject=dsa-concept-revision",
+      "solvedInTuf": true,
+      "tufProblem": {
+        "tufId": 192,
+        "title": "Detect a cycle in a directed graph",
+        "url": "/practice/dsa/detect-a-cycle-in-a-directed-graph?tab=solution"
+      }
+    },
+    {
+      "completed": false,
+      "title": "Find eventual safe states",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-eventual-safe-states?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Course Schedule I",
+      "url": "https://takeuforward.org/plus/dsa/problems/course-schedule-i?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Course Schedule II",
+      "url": "https://takeuforward.org/plus/dsa/problems/course-schedule-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Alien Dictionary",
+      "url": "https://takeuforward.org/plus/dsa/problems/alient-dictionary?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Shortest path in DAG",
+      "url": "https://takeuforward.org/plus/dsa/problems/shortest-path-in-dag?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Shortest path in undirected graph with unit weights",
+      "url": "https://takeuforward.org/plus/dsa/problems/shortest-path-in-undirected-graph-with-unit-weights?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Word ladder I",
+      "url": "https://takeuforward.org/plus/dsa/problems/word-ladder-i?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Word ladder II",
+      "url": "https://takeuforward.org/plus/dsa/problems/word-ladder-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Dijkstra's algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/dijkstra's-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Path with minimum effort",
+      "url": "https://takeuforward.org/plus/dsa/problems/path-with-minimum-effort?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Cheapest flight within K stops",
+      "url": "https://takeuforward.org/plus/dsa/problems/cheapest-flight-within-k-stops?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Number of ways to arrive at destination",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-ways-to-arrive-at-destination?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Bellman ford algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/bellman-ford-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Floyd warshall algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/floyd-warshall-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find the city with the smallest number of neighbors",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-city-with-the-smallest-number-of-neighbors?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Disjoint Set",
+      "url": "https://takeuforward.org/plus/dsa/problems/disjoint-set-?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Find the MST weight",
+      "url": "https://takeuforward.org/plus/dsa/problems/find-the-mst-weight?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Number of operations to make network connected",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-operations-to-make-network-connected?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Number of islands II",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-islands-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Making a large island",
+      "url": "https://takeuforward.org/plus/dsa/problems/making-a-large-island?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Kosaraju's algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/kosaraju's-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Bridges in graph",
+      "url": "https://takeuforward.org/plus/dsa/problems/bridges-in-graph?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Articulation point in graph",
+      "url": "https://takeuforward.org/plus/dsa/problems/articulation-point-in-graph?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Print all primes till N",
+      "url": "https://takeuforward.org/plus/dsa/problems/print-all-primes-till-n?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Prime factorisation of a Number",
+      "url": "https://takeuforward.org/plus/dsa/problems/prime-factorisation-of-a-number?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count primes in range L to R",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-primes-in-range-l-to-r?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Climbing stairs",
+      "url": "https://takeuforward.org/plus/dsa/problems/climbing-stairs?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Frog jump with K distances",
+      "url": "https://takeuforward.org/plus/dsa/problems/frog-jump-with-k-distances?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Maximum sum of non adjacent elements",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-sum-of-non-adjacent-elements?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "House robber",
+      "url": "https://takeuforward.org/plus/dsa/problems/house-robber?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Ninja's training",
+      "url": "https://takeuforward.org/plus/dsa/problems/ninja's-training?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Grid unique paths",
+      "url": "https://takeuforward.org/plus/dsa/problems/grid-unique-paths?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Unique paths II",
+      "url": "https://takeuforward.org/plus/dsa/problems/unique-paths-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Minimum Falling Path Sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-falling-path-sum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Triangle",
+      "url": "https://takeuforward.org/plus/dsa/problems/triangle?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Cherry pickup II",
+      "url": "https://takeuforward.org/plus/dsa/problems/cherry-pickup-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Best time to buy and sell stock",
+      "url": "https://takeuforward.org/plus/dsa/problems/best-time-to-buy-and-sell-stock?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Best time to buy and sell stock II",
+      "url": "https://takeuforward.org/plus/dsa/problems/best-time-to-buy-and-sell-stock-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Best time to buy and sell stock III",
+      "url": "https://takeuforward.org/plus/dsa/problems/best-time-to-buy-and-sell-stock-iii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Best time to buy and sell stock IV",
+      "url": "https://takeuforward.org/plus/dsa/problems/best-time-to-buy-and-sell-stock-iv?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Best time to buy and sell stock with transaction fees",
+      "url": "https://takeuforward.org/plus/dsa/problems/best-time-to-buy-and-sell-stock-with-cooldown-and-transaction-fees?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Partition a set into two subsets with minimum absolute sum difference",
+      "url": "https://takeuforward.org/plus/dsa/problems/partition-a-set-into-two-subsets-with-minimum-absolute-sum-difference?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count subsets with sum K",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-subsets-with-sum-k?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Count partitions with given difference",
+      "url": "https://takeuforward.org/plus/dsa/problems/count-partitions-with-given-difference?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "0 and 1 Knapsack",
+      "url": "https://takeuforward.org/plus/dsa/problems/0-and-1-knapsack?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Target sum",
+      "url": "https://takeuforward.org/plus/dsa/problems/target-sum?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Coin change II",
+      "url": "https://takeuforward.org/plus/dsa/problems/coin-change-ii?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Unbounded knapsack",
+      "url": "https://takeuforward.org/plus/dsa/problems/unbounded-knapsack?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Rod cutting problem",
+      "url": "https://takeuforward.org/plus/dsa/problems/rod-cutting-problem?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Minimum coins",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-coins?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest common subsequence",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-common-subsequence?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest common substring",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-common-substring?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Minimum insertions or deletions to convert string A to B",
+      "url": "https://takeuforward.org/plus/dsa/problems/minimum-insertions-or-deletions-to-convert-string-a-to-b?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Shortest common supersequence",
+      "url": "https://takeuforward.org/plus/dsa/problems/shortest-common-supersequence?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Distinct subsequences",
+      "url": "https://takeuforward.org/plus/dsa/problems/distinct-subsequences?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Edit distance",
+      "url": "https://takeuforward.org/plus/dsa/problems/edit-distance?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Wildcard matching",
+      "url": "https://takeuforward.org/plus/dsa/problems/wildcard-matching?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest Increasing Subsequence",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-increasing-subsequence?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest String Chain",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-string-chain?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest Bitonic Subsequence",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-bitonic-subsequence?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Number of Longest Increasing Subsequences",
+      "url": "https://takeuforward.org/plus/dsa/problems/number-of-longest-increasing-subsequences?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Print Longest Increasing Subsequence",
+      "url": "https://takeuforward.org/plus/dsa/problems/print-longest-increasing-subsequence?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Edit Distance",
+      "url": "https://takeuforward.org/plus/dsa/problems/edit-distance?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Wildcard Pattern Matching",
+      "url": "https://takeuforward.org/plus/dsa/problems/wildcard-pattern-matching?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Rabin Karp Algorithm",
+      "url": "https://takeuforward.org/plus/dsa/problems/rabin-karp-algorithm?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Z function",
+      "url": "https://takeuforward.org/plus/dsa/problems/z-function?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "KMP Algorithm or LPS array",
+      "url": "https://takeuforward.org/plus/dsa/problems/kmp-algorithm-or-lps-array?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Longest Word with All Prefixes",
+      "url": "https://takeuforward.org/plus/dsa/problems/longest-word-with-all-prefixes?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    },
+    {
+      "completed": false,
+      "title": "Maximum Xor with an element from an array",
+      "url": "https://takeuforward.org/plus/dsa/problems/maximum-xor-with-an-element-from-an-array?subject=dsa-concept-revision",
+      "solvedInTuf": false,
+      "tufProblem": null
+    }
+  ]
+}

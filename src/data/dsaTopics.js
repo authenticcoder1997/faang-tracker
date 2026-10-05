@@ -312,7 +312,7 @@ export const dsaTopics = [
     "section": "Array III",
     "url": "https://takeuforward.org/plus/dsa/problems/count-inversions?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-15",
@@ -320,7 +320,7 @@ export const dsaTopics = [
     "section": "Array III",
     "url": "https://takeuforward.org/plus/dsa/problems/reverse-pairs?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-16",
@@ -1022,7 +1022,7 @@ export const dsaTopics = [
     "id": "dsa-101",
     "title": "Print root to leaf path in BT",
     "section": "Binary Tree III",
-    "url": "https://takeuforward.org/plus/dsa/problems/print-root-to-note-path-in-bt?subject=dsa-concept-revision",
+    "url": "https://takeuforward.org/plus/dsa/problems/print-root-to-leaf-path-in-bt?subject=dsa-concept-revision",
     "difficulty": "Medium",
     "completed": true
   },
@@ -1128,7 +1128,7 @@ export const dsaTopics = [
     "section": "Binary Search Tree II",
     "url": "https://takeuforward.org/plus/dsa/problems/bst-iterator?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-115",
@@ -1136,7 +1136,7 @@ export const dsaTopics = [
     "section": "Binary Search Tree II",
     "url": "https://takeuforward.org/plus/dsa/problems/inorder-successor-and-predecessor-in-bst?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-116",
@@ -1144,7 +1144,7 @@ export const dsaTopics = [
     "section": "Binary Search Tree II",
     "url": "https://takeuforward.org/plus/dsa/problems/two-sum-in-bst?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-117",
@@ -1176,7 +1176,7 @@ export const dsaTopics = [
     "section": "Graph I",
     "url": "https://takeuforward.org/plus/dsa/problems/number-of-islands?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-121",
@@ -1184,7 +1184,7 @@ export const dsaTopics = [
     "section": "Graph I",
     "url": "https://takeuforward.org/plus/dsa/problems/flood-fill-algorithm?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-122",
@@ -1192,7 +1192,7 @@ export const dsaTopics = [
     "section": "Graph I",
     "url": "https://takeuforward.org/plus/dsa/problems/rotten-oranges?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-123",
@@ -1200,7 +1200,7 @@ export const dsaTopics = [
     "section": "Graph I",
     "url": "https://takeuforward.org/plus/dsa/problems/surrounded-regions?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-124",
@@ -1224,7 +1224,7 @@ export const dsaTopics = [
     "section": "Graph II",
     "url": "https://takeuforward.org/plus/dsa/problems/topological-sort-or-kahns-algorithm?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-127",
@@ -1232,7 +1232,7 @@ export const dsaTopics = [
     "section": "Graph II",
     "url": "https://takeuforward.org/plus/dsa/problems/detect-a-cycle-in-a-directed-graph?subject=dsa-concept-revision",
     "difficulty": "Medium",
-    "completed": false
+    "completed": true
   },
   {
     "id": "dsa-128",

@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, Pau
 import NoteModal from './NoteModal';
 import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
-export default function DsaTracker({ items, setItems }) {
+export default function DsaTracker({ items, setItems, savingLocally = false }) {
   const [collapsedSections, setCollapsedSections] = useState({});
   const [activeNoteItem, setActiveNoteItem] = useState(null);
 
@@ -44,6 +44,12 @@ export default function DsaTracker({ items, setItems }) {
             <button className="flex items-center gap-1 hover:text-gray-300"><PauseCircle size={14}/> Pause</button>
           </div>
         </div>
+
+        {savingLocally && (
+          <p role="status" className="text-xs text-gray-400 mb-4">
+            Progress saved on this device. Cloud sync is unavailable.
+          </p>
+        )}
 
         {/* Accordion Sections */}
         <div className="space-y-2 sm:space-y-4">
