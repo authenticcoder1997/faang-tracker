@@ -34,6 +34,8 @@ Voice task entry uses the browser’s speech recognition. Click a microphone to 
 
 Tasks and lists remain in browser storage under `faang-tracker-tasks-v1`. Study progress keeps its existing per-track storage keys and Firebase integration. Notes use the existing `faang-tracker-notes` key, including migration of older note arrays; edits save locally before cloud requests. Cloud sync waits for a confirmed server read and merges pending local notes first.
 
+Use the trash button beside a list to delete it. Tasks move to a list you choose, preserving schedules and completion history; deleting the last populated list creates an Inbox for its tasks. Empty lists can all be removed, and adding a task then creates an Inbox. The deletion notification offers Undo.
+
 Browser-local data belongs to the browser and site address where it was created. Local development and the published website have separate saved data. When cloud access is unavailable, the interface reports local saving.
 
 Important links start with the supplied Important collection, including `leetcode lists` and `Jobs Sites`. Additions and imports save under `my-space-important-bookmarks-v1` in this browser. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved screenshots captured in Chrome, including the signed-in course page. New imported websites use a domain fallback when no saved screenshot exists.

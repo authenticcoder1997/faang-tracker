@@ -26,9 +26,11 @@ import { createTaskDictation } from '../lib/taskDictation';
 import {
   completeTask,
   dateKey,
+  deleteTaskList,
   getTaskRows,
   LIST_COLORS,
   REPEAT_OPTIONS,
+  restoreTaskList,
 } from '../lib/tasks';
 
 const SMART_VIEWS = [
@@ -105,7 +107,7 @@ function TaskForm({
   const [draft, setDraft] = useState({
     title: task?.title || '',
     notes: task?.notes || '',
-    listId: task?.listId || defaultListId || lists[0].id,
+    listId: task?.listId || defaultListId || lists[0]?.id || '',
     dueDate: task ? task.dueDate || '' : defaultDate || '',
     repeat: task?.repeat || 'none',
     flagged: task?.flagged || false,
@@ -478,12 +480,90 @@ function ListForm({ list, lists, onSave, onClose }) {
   );
 }
 
+function DeleteListDialog({
+  list,
+  lists,
+  taskCount,
+  error,
+  onDelete,
+  onClose,
+}) {
+  const remaining = lists.filter((item) => item.id !== list.id);
+  const [destinationId, setDestinationId] = useState(remaining[0]?.id || '');
+  const destination =
+    remaining.find((item) => item.id === destinationId)?.id ||
+    remaining[0]?.id ||
+    '';
+  return (
+    <Modal title={`Delete ${list.name}?`} onClose={onClose}>
+      <form
+        className="space-y-5 p-6"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onDelete(destination);
+        }}
+      >
+        <p className="text-sm leading-6 text-muted">
+          {taskCount
+            ? `${taskCount} ${taskCount === 1 ? 'task belongs' : 'tasks belong'} to this list. Your tasks, schedules, and completion history will be kept.`
+            : 'This list is empty. You can undo the deletion after removing it.'}
+        </p>
+        {taskCount > 0 &&
+          (remaining.length ? (
+            <div>
+              <label
+                htmlFor="move-list-tasks"
+                className="mb-2 block text-xs font-medium text-muted"
+              >
+                Move tasks to
+              </label>
+              <select
+                id="move-list-tasks"
+                className={fieldClass}
+                value={destination}
+                onChange={(event) => setDestinationId(event.target.value)}
+              >
+                {remaining.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <p className="text-sm leading-6 text-muted">
+              Your tasks will move to a new Inbox list.
+            </p>
+          ))}
+        {error && (
+          <p role="alert" className="text-xs text-danger">
+            {error}
+          </p>
+        )}
+        <div className="flex justify-end gap-2 border-t border-line pt-5">
+          <button type="button" onClick={onClose} className="button-secondary">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="button-secondary !border-danger/30 !text-danger hover:!bg-danger/10"
+          >
+            <Trash2 size={15} /> Delete list
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export default function TaskHome({ onOpenHomework, isActive = true }) {
   const { data, updateData, error } = useTasks();
   const [view, setView] = useState('today');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [listEditor, setListEditor] = useState(null);
+  const [listDeletion, setListDeletion] = useState(null);
+  const [listDeleteError, setListDeleteError] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
   const [notice, setNotice] = useState(null);
   const [today, setToday] = useState(dateKey);
@@ -575,12 +655,24 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
       deletedAt: null,
     };
     if (
-      updateData((current) => ({
-        ...current,
-        tasks: previous
-          ? current.tasks.map((item) => (item.id === task.id ? task : item))
-          : [...current.tasks, task],
-      }))
+      updateData((current) => {
+        const list = current.lists.find((item) => item.id === task.listId) ||
+          current.lists[0] || {
+            id: crypto.randomUUID(),
+            name: 'Inbox',
+            color: LIST_COLORS[0],
+          };
+        const savedTask = { ...task, listId: list.id };
+        return {
+          ...current,
+          lists: current.lists.length ? current.lists : [list],
+          tasks: previous
+            ? current.tasks.map((item) =>
+                item.id === task.id ? savedTask : item,
+              )
+            : [...current.tasks, savedTask],
+        };
+      })
     ) {
       setTaskEditor(null);
       setNotice({ message: previous ? 'Task updated' : 'Task added' });
@@ -656,8 +748,55 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
       ),
     }));
   }
-  function openNewTask() {
-    setTaskEditor({ task: null });
+  function removeList(destinationId) {
+    let removal;
+    const saved = updateData((current) => {
+      removal = deleteTaskList(
+        current,
+        listDeletion.id,
+        destinationId,
+        crypto.randomUUID(),
+      );
+      return removal?.data || current;
+    });
+    if (!saved || !removal) {
+      setListDeleteError(
+        'The lists changed or could not be saved. Close this dialog and try again.',
+      );
+      return;
+    }
+    setListDeletion(null);
+    if (view === `list:${removal.list.id}`)
+      setView(removal.destinationId ? `list:${removal.destinationId}` : 'all');
+    setQuery('');
+    setNotice({
+      message: `${removal.list.name} list deleted${removal.taskIds.length ? ' · Tasks moved' : ''}`,
+      undo: () => {
+        if (updateData((current) => restoreTaskList(current, removal)))
+          setView(`list:${removal.list.id}`);
+      },
+    });
+  }
+  function openNewTask(voiceMode = false) {
+    if (
+      !data.lists.length &&
+      !updateData((current) =>
+        current.lists.length
+          ? current
+          : {
+              ...current,
+              lists: [
+                {
+                  id: crypto.randomUUID(),
+                  name: 'Inbox',
+                  color: LIST_COLORS[0],
+                },
+              ],
+            },
+      )
+    )
+      return;
+    setTaskEditor({ task: null, voiceMode: voiceMode === true });
   }
   function renderRow(row, isCompleted = false, isDeleted = false) {
     const list = data.lists.find((item) => item.id === row.task.listId);
@@ -763,7 +902,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
         actions={
           <>
             <button
-              onClick={() => setTaskEditor({ task: null, voiceMode: true })}
+              onClick={() => openNewTask(true)}
               className="button-secondary"
             >
               <Mic size={16} /> Voice task
@@ -824,29 +963,47 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           </div>
           <div className="mt-2 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
             {data.lists.map((list) => (
-              <button
+              <div
                 key={list.id}
-                aria-label={`${list.name} list`}
-                aria-pressed={selectedList?.id === list.id}
-                onClick={() => {
-                  setView(`list:${list.id}`);
-                  setQuery('');
-                }}
-                className={`flex w-auto shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:w-full lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-ink'}`}
+                className="group flex shrink-0 items-center lg:w-full"
               >
-                <span
-                  className="flex h-6 w-6 shrink-0 items-center justify-center"
-                  style={{
-                    color: themedAccent(list.color),
+                <button
+                  aria-label={`${list.name} list`}
+                  aria-pressed={selectedList?.id === list.id}
+                  onClick={() => {
+                    setView(`list:${list.id}`);
+                    setQuery('');
                   }}
+                  className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-ink'}`}
                 >
-                  <ListTodo size={16} />
-                </span>
-                <span className="truncate">{list.name}</span>
-                <span className="ml-auto text-xs tabular-nums text-muted">
-                  {active.filter((row) => row.task.listId === list.id).length}
-                </span>
-              </button>
+                  <span
+                    className="flex h-6 w-6 shrink-0 items-center justify-center"
+                    style={{
+                      color: themedAccent(list.color),
+                    }}
+                  >
+                    <ListTodo size={16} />
+                  </span>
+                  <span className="min-w-0 max-w-36 truncate lg:max-w-none">
+                    {list.name}
+                  </span>
+                  <span className="ml-auto text-xs tabular-nums text-muted">
+                    {active.filter((row) => row.task.listId === list.id).length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${list.name} list`}
+                  title={`Delete ${list.name} list`}
+                  onClick={() => {
+                    setListDeletion(list);
+                    setListDeleteError('');
+                  }}
+                  className="shrink-0 rounded-lg p-2 text-faint hover:bg-danger/10 hover:text-danger focus-visible:text-danger"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             ))}
           </div>
           <div className="mt-3 flex gap-1 border-t border-line pt-2 lg:mt-5 lg:block lg:space-y-1 lg:pt-4">
@@ -1033,12 +1190,24 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           voiceMode={!!taskEditor.voiceMode}
         />
       )}
-      {listEditor && (
+      {listEditor && isActive && (
         <ListForm
           list={listEditor.list}
           lists={data.lists}
           onClose={() => setListEditor(null)}
           onSave={saveList}
+        />
+      )}
+      {listDeletion && isActive && (
+        <DeleteListDialog
+          list={listDeletion}
+          lists={data.lists}
+          taskCount={
+            data.tasks.filter((task) => task.listId === listDeletion.id).length
+          }
+          error={listDeleteError}
+          onDelete={removeList}
+          onClose={() => setListDeletion(null)}
         />
       )}
       {notice && (

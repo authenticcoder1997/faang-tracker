@@ -4,10 +4,12 @@ import {
   addDays,
   completeTask,
   dateKey,
+  deleteTaskList,
   getTaskRows,
   INITIAL_TASK_DATA,
   isValidDate,
   nextOccurrence,
+  restoreTaskList,
   validateTaskData,
 } from './tasks.js';
 
@@ -122,5 +124,82 @@ test('invalid cached data is rejected without accepting missing lists or unsuppo
       ...INITIAL_TASK_DATA,
       tasks: [task({ completedDates: ['not-a-date'] })],
     }),
+  );
+});
+
+test('deleting a populated list preserves active, completed, recurring and deleted tasks after reload', () => {
+  const data = {
+    ...INITIAL_TASK_DATA,
+    tasks: [
+      task(),
+      task({ id: 'done', completed: true, notes: 'Keep this note' }),
+      task({ id: 'routine', repeat: 'daily', completedDates: ['2026-10-20'] }),
+      task({ id: 'trash', deletedAt: '2026-10-21T05:00:00Z' }),
+      task({ id: 'work-task', listId: 'work' }),
+    ],
+  };
+  const removal = deleteTaskList(data, 'personal', 'learning', 'new-inbox');
+  const restored = validateTaskData(JSON.parse(JSON.stringify(removal.data)));
+  assert.equal(
+    restored.lists.some((list) => list.id === 'personal'),
+    false,
+  );
+  assert.deepEqual(
+    restored.tasks,
+    data.tasks.map((item) =>
+      item.listId === 'personal' ? { ...item, listId: 'learning' } : item,
+    ),
+  );
+  assert.equal(data.tasks[0].listId, 'personal');
+  assert.deepEqual(restoreTaskList(restored, removal), data);
+});
+
+test('the final empty list can be deleted, saved, and restored', () => {
+  const data = { ...INITIAL_TASK_DATA, lists: [INITIAL_TASK_DATA.lists[0]] };
+  const removal = deleteTaskList(data, 'personal', '', 'new-inbox');
+  assert.deepEqual(
+    validateTaskData(JSON.parse(JSON.stringify(removal.data))).lists,
+    [],
+  );
+  assert.deepEqual(restoreTaskList(removal.data, removal), data);
+  assert.throws(() => validateTaskData({ ...removal.data, tasks: [task()] }));
+});
+
+test('deleting the last populated list moves tasks to Inbox and Undo keeps newer edits and tasks', () => {
+  const data = {
+    ...INITIAL_TASK_DATA,
+    lists: [INITIAL_TASK_DATA.lists[0]],
+    tasks: [task()],
+  };
+  const removal = deleteTaskList(data, 'personal', '', 'new-inbox');
+  assert.equal(removal.data.lists[0].name, 'Inbox');
+  assert.equal(validateTaskData(removal.data).tasks[0].listId, 'new-inbox');
+  assert.deepEqual(restoreTaskList(removal.data, removal), data);
+  const edited = {
+    ...removal.data,
+    tasks: [
+      { ...removal.data.tasks[0], notes: 'Newer notes' },
+      task({ id: 'new-task', listId: 'new-inbox' }),
+    ],
+  };
+  const undone = restoreTaskList(edited, removal);
+  assert.equal(validateTaskData(undone).lists.length, 2);
+  assert.equal(undone.tasks[0].notes, 'Newer notes');
+  assert.equal(undone.tasks[0].listId, 'personal');
+  assert.equal(undone.tasks[1].listId, 'new-inbox');
+});
+
+test('stale list deletions do not lose tasks and Undo respects later moves', () => {
+  const data = { ...INITIAL_TASK_DATA, tasks: [task()] };
+  assert.equal(deleteTaskList(data, 'missing', 'work', 'inbox'), null);
+  assert.equal(deleteTaskList(data, 'personal', 'missing', 'inbox'), null);
+  const removal = deleteTaskList(data, 'personal', 'work', 'inbox');
+  const movedAgain = {
+    ...removal.data,
+    tasks: [{ ...removal.data.tasks[0], listId: 'learning' }],
+  };
+  assert.equal(
+    restoreTaskList(movedAgain, removal).tasks[0].listId,
+    'learning',
   );
 });

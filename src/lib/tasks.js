@@ -113,6 +113,63 @@ export function getTaskRows(tasks, today = dateKey()) {
   return { active, completed, deleted };
 }
 
+export function deleteTaskList(data, listId, destinationId, inboxId) {
+  const index = data.lists.findIndex((list) => list.id === listId);
+  if (index < 0) return null;
+  const list = data.lists[index];
+  const lists = data.lists.filter((item) => item.id !== listId);
+  const taskIds = data.tasks
+    .filter((task) => task.listId === listId)
+    .map((task) => task.id);
+  let destination = lists.find((item) => item.id === destinationId);
+  let inbox = null;
+  if (taskIds.length && !lists.length) {
+    if (!inboxId || inboxId === listId) return null;
+    inbox = { id: inboxId, name: 'Inbox', color: LIST_COLORS[0] };
+    destination = inbox;
+    lists.push(inbox);
+  }
+  if (taskIds.length && !destination) return null;
+  return {
+    list,
+    index,
+    taskIds,
+    inbox,
+    destinationId: destination?.id,
+    data: {
+      ...data,
+      lists,
+      tasks: data.tasks.map((task) =>
+        task.listId === listId ? { ...task, listId: destination.id } : task,
+      ),
+    },
+  };
+}
+
+export function restoreTaskList(data, removal) {
+  if (data.lists.some((list) => list.id === removal.list.id)) return data;
+  const moved = new Set(removal.taskIds);
+  const tasks = data.tasks.map((task) =>
+    moved.has(task.id) && task.listId === removal.destinationId
+      ? { ...task, listId: removal.list.id }
+      : task,
+  );
+  const lists = [...data.lists];
+  lists.splice(Math.min(removal.index, lists.length), 0, removal.list);
+  return {
+    ...data,
+    tasks,
+    lists: lists.filter(
+      (list) =>
+        !removal.inbox ||
+        list.id !== removal.inbox.id ||
+        tasks.some((task) => task.listId === list.id) ||
+        list.name !== removal.inbox.name ||
+        list.color !== removal.inbox.color,
+    ),
+  };
+}
+
 export function validateTaskData(value) {
   if (
     value?.version !== 1 ||
@@ -121,7 +178,6 @@ export function validateTaskData(value) {
   )
     throw new Error('Unrecognized task data');
   if (
-    !value.lists.length ||
     value.lists.some(
       (list) =>
         typeof list.id !== 'string' ||
