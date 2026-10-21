@@ -10,16 +10,19 @@ import {
   ClipboardList,
   Flag,
   ListTodo,
+  Mic,
   Pencil,
   Plus,
   Repeat2,
   Search,
+  Square,
   Trash2,
   Undo2,
   X,
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { PageHeader } from './ui/Workspace';
+import { createTaskDictation } from '../lib/taskDictation';
 import {
   completeTask,
   dateKey,
@@ -97,6 +100,7 @@ function TaskForm({
   onSave,
   onDelete,
   onClose,
+  voiceMode = false,
 }) {
   const [draft, setDraft] = useState({
     title: task?.title || '',
@@ -106,12 +110,83 @@ function TaskForm({
     repeat: task?.repeat || 'none',
     flagged: task?.flagged || false,
   });
+  const recognition = useRef(null);
+  const [voice, setVoice] = useState({ status: 'idle', field: null });
+  const [voiceError, setVoiceError] = useState('');
+  const [voiceUsed, setVoiceUsed] = useState(voiceMode);
+  const [supported] = useState(
+    () => !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+  );
+  const voiceActive = voice.status !== 'idle';
+
+  useEffect(() => {
+    const stopWhenHidden = () => {
+      if (document.hidden) recognition.current?.cancel();
+    };
+    const stopOnExit = () => recognition.current?.cancel();
+    document.addEventListener('visibilitychange', stopWhenHidden);
+    window.addEventListener('pagehide', stopOnExit);
+    return () => {
+      document.removeEventListener('visibilitychange', stopWhenHidden);
+      window.removeEventListener('pagehide', stopOnExit);
+      recognition.current?.dispose();
+      recognition.current = null;
+    };
+  }, []);
+
+  function dictate(key) {
+    setVoiceUsed(true);
+    if (voiceActive) {
+      recognition.current?.stop();
+      return;
+    }
+    setVoiceError('');
+    if (!recognition.current) {
+      recognition.current = createTaskDictation({
+        Recognition: window.SpeechRecognition || window.webkitSpeechRecognition,
+        language: navigator.language || 'en-IN',
+        onTranscript: ({ field: target, value }) =>
+          setDraft((previous) => ({ ...previous, [target]: value })),
+        onStatus: setVoice,
+        onError: setVoiceError,
+      });
+    }
+    recognition.current.start({
+      field: key,
+      baseValue: draft[key],
+      maxLength: key === 'title' ? 200 : 2000,
+    });
+  }
+
+  function voiceButton(key) {
+    const active = voiceActive && voice.field === key;
+    return (
+      <button
+        type="button"
+        aria-label={active ? `Stop dictating ${key}` : `Dictate task ${key}`}
+        aria-pressed={active}
+        aria-describedby={voiceUsed ? 'task-voice-status' : undefined}
+        disabled={
+          !supported ||
+          (voiceActive && (!active || voice.status === 'stopping'))
+        }
+        onClick={() => dictate(key)}
+        className={`icon-button ${active ? 'bg-accent-soft' : ''}`}
+        style={active ? { color: 'var(--accent)' } : undefined}
+        title={active ? 'Stop dictation' : `Add ${key} by voice`}
+      >
+        {active ? <Square size={13} fill="currentColor" /> : <Mic size={15} />}
+      </button>
+    );
+  }
+
   function field(key, value) {
     setDraft((previous) => ({ ...previous, [key]: value }));
   }
   function submit(event) {
     event.preventDefault();
-    if (!draft.title.trim()) return;
+    if (voiceActive || !draft.title.trim()) return;
+    recognition.current?.cancel();
     onSave({
       ...draft,
       title: draft.title.trim(),
@@ -122,13 +197,48 @@ function TaskForm({
   return (
     <Modal title={task ? 'Task details' : 'New task'} onClose={onClose}>
       <form onSubmit={submit} className="space-y-5 p-6">
-        <div>
-          <label
-            htmlFor="task-title"
-            className="mb-2 block text-xs font-medium text-muted"
+        {voiceUsed && (
+          <div className="rounded-xl border border-line bg-accent-soft px-4 py-3.5">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Mic size={16} className="text-accent" />
+              {voiceActive ? 'Voice input' : 'Add by voice'}
+            </div>
+            <p
+              id="task-voice-status"
+              role="status"
+              aria-live="polite"
+              className="mt-1.5 text-xs leading-5 text-muted"
+            >
+              {!supported
+                ? 'Voice input is unavailable in this browser. You can still type your task, or use Chrome or Safari for dictation.'
+                : voice.status === 'starting'
+                  ? 'Connecting to your microphone… Allow microphone access if prompted.'
+                  : voice.status === 'listening'
+                    ? `Listening for your ${voice.field}… Tap the square to finish.`
+                    : voice.status === 'stopping'
+                      ? 'Finishing dictation…'
+                      : 'Tap a microphone to speak your title or notes. Review the text and choose your schedule before saving.'}
+            </p>
+          </div>
+        )}
+        {voiceError && (
+          <p
+            role="alert"
+            className="rounded-lg border border-warning/20 bg-warning/5 px-3 py-2.5 text-xs leading-5 text-warning"
           >
-            Title
-          </label>
+            {voiceError}
+          </p>
+        )}
+        <div>
+          <div className="mb-2 flex h-5 items-center justify-between">
+            <label
+              htmlFor="task-title"
+              className="text-xs font-medium text-muted"
+            >
+              Title
+            </label>
+            {voiceButton('title')}
+          </div>
           <input
             autoFocus
             id="task-title"
@@ -137,16 +247,21 @@ function TaskForm({
             placeholder="What would you like to do?"
             required
             maxLength={200}
+            readOnly={voiceActive && voice.field === 'title'}
+            aria-describedby={voiceUsed ? 'task-voice-status' : undefined}
             className={fieldClass}
           />
         </div>
         <div>
-          <label
-            htmlFor="task-notes"
-            className="mb-2 block text-xs font-medium text-muted"
-          >
-            Notes <span className="font-normal text-faint">· optional</span>
-          </label>
+          <div className="mb-2 flex h-5 items-center justify-between">
+            <label
+              htmlFor="task-notes"
+              className="text-xs font-medium text-muted"
+            >
+              Notes <span className="font-normal text-faint">· optional</span>
+            </label>
+            {voiceButton('notes')}
+          </div>
           <textarea
             id="task-notes"
             value={draft.notes}
@@ -154,6 +269,8 @@ function TaskForm({
             placeholder="Add a little more detail…"
             rows={2}
             maxLength={2000}
+            readOnly={voiceActive && voice.field === 'notes'}
+            aria-describedby={voiceUsed ? 'task-voice-status' : undefined}
             className={`${fieldClass} resize-y`}
           />
         </div>
@@ -268,7 +385,7 @@ function TaskForm({
             </button>
             <button
               type="submit"
-              disabled={!draft.title.trim()}
+              disabled={voiceActive || !draft.title.trim()}
               className="button-primary"
             >
               {task ? 'Save changes' : 'Add task'}
@@ -361,7 +478,7 @@ function ListForm({ list, lists, onSave, onClose }) {
   );
 }
 
-export default function TaskHome({ onOpenHomework }) {
+export default function TaskHome({ onOpenHomework, isActive = true }) {
   const { data, updateData, error } = useTasks();
   const [view, setView] = useState('today');
   const [query, setQuery] = useState('');
@@ -644,9 +761,17 @@ export default function TaskHome({ onOpenHomework }) {
         title="Make room for your day."
         description="Your tasks, small wins, and everyday routines — all in one place."
         actions={
-          <button onClick={openNewTask} className="button-primary">
-            <Plus size={16} /> New task
-          </button>
+          <>
+            <button
+              onClick={() => setTaskEditor({ task: null, voiceMode: true })}
+              className="button-secondary"
+            >
+              <Mic size={16} /> Voice task
+            </button>
+            <button onClick={openNewTask} className="button-primary">
+              <Plus size={16} /> New task
+            </button>
+          </>
         }
       />
       {error && (
@@ -895,7 +1020,7 @@ export default function TaskHome({ onOpenHomework }) {
           </div>
         </section>
       </div>
-      {taskEditor && (
+      {taskEditor && isActive && (
         <TaskForm
           task={taskEditor.task}
           lists={data.lists}
@@ -905,6 +1030,7 @@ export default function TaskHome({ onOpenHomework }) {
           onSave={saveTask}
           onDelete={() => deleteTask(taskEditor.task)}
           onClose={() => setTaskEditor(null)}
+          voiceMode={!!taskEditor.voiceMode}
         />
       )}
       {listEditor && (

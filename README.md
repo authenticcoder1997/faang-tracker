@@ -2,7 +2,7 @@
 
 A personal workspace for everyday tasks, study plans, and notes.
 
-- **Home:** tasks grouped into lists, with daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
+- **Home:** tasks grouped into lists, with voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
 - **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.
 - **Notes:** an open notebook editor with automatic browser saving and optional cloud sync.
@@ -26,6 +26,8 @@ node --test src/lib/*.test.js src/hooks/*.test.js
 `src/index.css` defines the shared theme tokens, page frame, typography, surfaces, and controls. `src/components/ui/Workspace.jsx` contains reusable page headers, statistics, and empty states. All four study libraries use `StudyTracker.jsx`.
 
 Theme selection follows the system appearance until a preference is saved. It persists under `my-space-theme` and applies before the first render.
+
+Voice task entry uses the browser’s speech recognition. Click a microphone to start, stop to review the text, then save the task. Microphone access is requested only after starting dictation; browsers without speech support keep the typed form available.
 
 ## Saved data
 

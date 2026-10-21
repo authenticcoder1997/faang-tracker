@@ -164,7 +164,10 @@ function App() {
       {/* Main Content */}
       <main id="workspace" className="min-w-0">
         <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
-          <TaskHome onOpenHomework={() => setActiveTab('homework')} />
+          <TaskHome
+            isActive={activeTab === 'dashboard'}
+            onOpenHomework={() => setActiveTab('homework')}
+          />
         </div>
         {isLoading && activeTab !== 'dashboard' ? (
           <div
