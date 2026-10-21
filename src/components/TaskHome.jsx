@@ -636,7 +636,7 @@ export default function TaskHome({ onOpenHomework }) {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] p-4 sm:p-6 lg:p-10">
+    <div className="mx-auto max-w-[1600px] px-4 py-7 sm:px-6 sm:py-9 lg:px-10 lg:py-11">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
         <div>
           <p className="mb-2 text-xs font-medium tracking-wide text-gray-500">
@@ -668,12 +668,12 @@ export default function TaskHome({ onOpenHomework }) {
           {error}
         </p>
       )}
-      <div className="grid min-h-[620px] grid-cols-1 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111214] lg:grid-cols-[248px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-7 lg:min-h-[calc(100dvh-275px)] lg:grid-cols-[216px_minmax(0,1fr)] lg:gap-9">
         <aside
           aria-label="Task lists"
-          className="border-b border-white/[0.07] bg-[#151618] p-4 lg:border-r lg:border-b-0 lg:p-5"
+          className="min-w-0 border-b border-white/[0.06] pb-5 lg:border-r lg:border-b-0 lg:pr-7 lg:pb-0"
         >
-          <div className="grid grid-cols-4 gap-2 lg:grid-cols-2 lg:gap-2.5">
+          <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
             {SMART_VIEWS.map((item) => {
               const Icon = item.icon;
               return (
@@ -685,24 +685,16 @@ export default function TaskHome({ onOpenHomework }) {
                   }}
                   aria-pressed={view === item.id}
                   aria-label={`${item.name} tasks`}
-                  className={`rounded-xl border p-2 text-left transition lg:p-3 ${view === item.id ? 'border-white/15 bg-white/[0.07]' : 'border-transparent bg-white/[0.025] hover:bg-white/[0.05]'}`}
+                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-white/[0.055] text-gray-100' : 'text-gray-500 hover:bg-white/[0.025] hover:text-gray-300'}`}
                 >
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <span
-                      className="flex h-6 w-6 items-center justify-center rounded-lg lg:h-7 lg:w-7"
-                      style={{
-                        backgroundColor: `${item.color}22`,
-                        color: item.color,
-                      }}
-                    >
-                      <Icon size={16} />
-                    </span>
-                    <span className="text-lg font-semibold tabular-nums text-gray-100 lg:text-xl">
-                      {counts[item.id]}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-medium text-gray-400">
-                    {item.name}
+                  <Icon
+                    size={17}
+                    style={{ color: item.color }}
+                    className="shrink-0"
+                  />
+                  <span>{item.name}</span>
+                  <span className="ml-auto pl-2 text-xs tabular-nums text-gray-500">
+                    {counts[item.id]}
                   </span>
                 </button>
               );
@@ -733,9 +725,8 @@ export default function TaskHome({ onOpenHomework }) {
                 className={`flex w-auto shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:w-full lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-white/[0.07] text-white' : 'text-gray-400 hover:bg-white/[0.035] hover:text-gray-200'}`}
               >
                 <span
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center"
                   style={{
-                    backgroundColor: `${list.color}18`,
                     color: list.color,
                   }}
                 >
@@ -785,10 +776,7 @@ export default function TaskHome({ onOpenHomework }) {
             <Plus size={15} /> Add list
           </button>
         </aside>
-        <section
-          aria-label={title}
-          className="flex min-w-0 flex-col p-5 sm:p-8 lg:p-9"
-        >
+        <section aria-label={title} className="flex min-w-0 flex-col">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.065] pb-5">
             <div className="flex items-center gap-3">
               <h2
@@ -847,8 +835,8 @@ export default function TaskHome({ onOpenHomework }) {
               ))}
             </div>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[26px] border border-blue-400/10 bg-blue-400/[0.04] text-blue-400/80">
+            <div className="flex min-h-80 flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+              <div className="mb-6 flex h-20 w-20 items-center justify-center text-blue-400/70">
                 <CircleCheck size={35} strokeWidth={1.25} />
               </div>
               <h3 className="text-lg font-semibold text-gray-200">

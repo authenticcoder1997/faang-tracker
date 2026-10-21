@@ -132,69 +132,75 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex flex-col md:flex-row font-sans">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-[#111] border-r border-[#222] md:fixed md:h-full flex flex-col z-20">
-        <div className="border-b border-[#222] p-4 md:p-6">
-          <h1 className="text-xl font-black text-white tracking-tight">
-            FAANG Tracker
-          </h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Crack Google, Meta, Amazon
-          </p>
-        </div>
-
-        <nav
-          aria-label="Main navigation"
-          className="flex gap-1 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mt-4 md:block md:flex-1 md:space-y-1"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative flex w-auto shrink-0 items-center gap-3 px-4 py-3 md:w-full rounded-lg transition-all text-sm font-medium text-left ${
-                activeTab === tab.id
-                  ? 'bg-[#1c1c1c] text-white border border-[#2a2a2a] shadow-sm'
-                  : 'text-gray-400 border border-transparent hover:bg-[#161616] hover:text-gray-200'
-              }`}
-            >
-              {activeTab === tab.id && (
-                <span
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full ${tab.bar}`}
-                />
-              )}
-              <span
-                className={activeTab === tab.id ? tab.accent : 'text-gray-500'}
+    <div className="min-h-screen bg-[#0a0a0a] font-sans text-gray-100">
+      <header className="sticky top-0 z-20 border-b border-white/[0.08] bg-[#0a0a0a]/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-8 px-4 sm:px-6 lg:px-10">
+          <div className="py-4 lg:py-5">
+            <p className="text-base font-bold tracking-tight text-white">
+              FAANG Tracker
+            </p>
+            <p className="mt-0.5 text-[11px] text-gray-500">
+              Crack Google, Meta, Amazon
+            </p>
+          </div>
+          <nav
+            aria-label="Main navigation"
+            className="order-3 flex w-full min-w-0 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:order-2 xl:w-auto xl:flex-1"
+          >
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
+                className={`relative flex shrink-0 items-center gap-2 px-3 py-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-blue-400 xl:py-7 ${
+                  activeTab === tab.id
+                    ? 'text-white'
+                    : 'text-gray-500 hover:text-gray-200'
+                }`}
               >
-                {tab.icon}
-              </span>
-              {tab.label}
+                <span
+                  className={
+                    activeTab === tab.id ? tab.accent : 'text-gray-600'
+                  }
+                >
+                  {tab.icon}
+                </span>
+                {tab.label}
+                {activeTab === tab.id && (
+                  <span
+                    className={`absolute inset-x-3 bottom-0 h-0.5 rounded-full ${tab.bar}`}
+                  />
+                )}
+              </button>
+            ))}
+          </nav>
+          <div className="order-2 ml-auto flex items-center gap-1 xl:order-3">
+            <a
+              href="https://github.com/authenticcoder1997/faang-tracker"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Source"
+              title="View source"
+              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-gray-500 hover:bg-white/5 hover:text-white"
+            >
+              <GitBranch size={15} />
+              <span className="hidden sm:inline">Source</span>
+            </a>
+            <button
+              onClick={resetProgress}
+              aria-label="Reset Progress"
+              title="Reset study progress"
+              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-gray-500 hover:bg-white/5 hover:text-red-400"
+            >
+              <RefreshCw size={15} />
+              <span className="hidden sm:inline">Reset progress</span>
             </button>
-          ))}
-        </nav>
-
-        <div className="flex gap-2 border-t border-[#222] p-2 md:block md:space-y-2 md:p-4">
-          <button
-            onClick={resetProgress}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-[#222] hover:text-red-400 transition-colors"
-          >
-            <RefreshCw size={16} />
-            Reset Progress
-          </button>
-          <a
-            href="https://github.com/authenticcoder1997/faang-tracker"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-[#222] hover:text-white transition-colors"
-          >
-            <GitBranch size={16} />
-            View Source
-          </a>
+          </div>
         </div>
-      </aside>
+      </header>
 
       {/* Main Content */}
-      <main className="min-w-0 flex-1 md:ml-64 min-h-screen">
+      <main className="min-w-0">
         <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
           <TaskHome onOpenHomework={() => setActiveTab('homework')} />
         </div>
