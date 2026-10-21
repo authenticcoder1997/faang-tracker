@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Search, CheckCircle2, Circle, FileText, Lock, Layers, Shuffle, AlertTriangle, Puzzle, BookOpen, Database, Cpu, MessageSquare } from 'lucide-react';
 import NoteModal from './NoteModal';
 
-const ACCENT = '#a78bfa'; // violet-400
+const ACCENT = 'var(--color-violet-400)';
 
 export default function ConcurrencyTracker({ items, setItems }) {
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -65,9 +65,9 @@ export default function ConcurrencyTracker({ items, setItems }) {
 
   const DifficultyBadge = ({ difficulty }) => (
     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-      difficulty === 'Easy' ? 'text-[#a78bfa]' :
-      difficulty === 'Medium' ? 'text-[#eab308]' :
-      'text-[#ef4444]'
+      difficulty === 'Easy' ? 'text-violet-400' :
+      difficulty === 'Medium' ? 'text-yellow-500' :
+      'text-red-500'
     }`}>
       {difficulty}
     </span>
@@ -79,43 +79,43 @@ export default function ConcurrencyTracker({ items, setItems }) {
         Premium
       </span>
     ) : (
-      <span className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider text-gray-400 border-gray-600/40 bg-gray-600/10">
+      <span className="text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider text-muted border-line bg-gray-600/10">
         Free
       </span>
     )
   );
 
   return (
-    <div className="bg-[#0a0a0a] min-h-screen text-gray-300 p-8 font-sans">
+    <div className="bg-canvas min-h-screen text-secondary p-8 font-sans">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Concurrency Practice</h1>
-            <p className="text-gray-400 text-sm mb-4">Write actual multi-threaded code for classic concurrency interview problems.</p>
+            <h1 className="text-3xl font-bold text-ink mb-2">Concurrency Practice</h1>
+            <p className="text-muted text-sm mb-4">Write actual multi-threaded code for classic concurrency interview problems.</p>
             <a href="https://algomaster.io/practice/concurrency" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:underline flex items-center gap-1" style={{ color: ACCENT }}>View on Algomaster ↓</a>
           </div>
 
-          <div className="flex items-center gap-6 bg-[#171717] p-4 rounded-xl border border-gray-800 shadow-lg shadow-black/20">
-            <div className="relative w-20 h-20 rounded-full bg-[#262626] flex items-center justify-center border-4 border-[#262626]">
+          <div className="flex items-center gap-6 bg-field p-4 rounded-xl border border-line shadow-lg shadow-black/20">
+            <div className="relative w-20 h-20 rounded-full bg-selected flex items-center justify-center border-4 border-line">
               <div className="absolute inset-0 rounded-full border-4" style={{ borderColor: ACCENT, clipPath: `inset(${100 - pct}% 0 0 0)` }}></div>
               <div className="text-center z-10">
-                <div className="text-lg font-bold text-white leading-none">{completed}/{total}</div>
+                <div className="text-lg font-bold text-ink leading-none">{completed}/{total}</div>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="text-center">
                 <div className="text-xs mb-1" style={{ color: ACCENT }}>Easy</div>
-                <div className="text-white font-bold">{easyDone}<span className="text-gray-500 text-sm">/{easyTotal}</span></div>
+                <div className="text-ink font-bold">{easyDone}<span className="text-muted text-sm">/{easyTotal}</span></div>
               </div>
               <div className="text-center">
-                <div className="text-[#eab308] text-xs mb-1">Medium</div>
-                <div className="text-white font-bold">{medDone}<span className="text-gray-500 text-sm">/{medTotal}</span></div>
+                <div className="text-yellow-500 text-xs mb-1">Medium</div>
+                <div className="text-ink font-bold">{medDone}<span className="text-muted text-sm">/{medTotal}</span></div>
               </div>
               <div className="text-center">
-                <div className="text-[#ef4444] text-xs mb-1">Hard</div>
-                <div className="text-white font-bold">{hardDone}<span className="text-gray-500 text-sm">/{hardTotal}</span></div>
+                <div className="text-red-500 text-xs mb-1">Hard</div>
+                <div className="text-ink font-bold">{hardDone}<span className="text-muted text-sm">/{hardTotal}</span></div>
               </div>
             </div>
           </div>
@@ -123,14 +123,14 @@ export default function ConcurrencyTracker({ items, setItems }) {
 
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 items-center justify-between">
-          <div className="flex gap-4 items-center text-sm text-gray-400 flex-wrap">
+          <div className="flex gap-4 items-center text-sm text-muted flex-wrap">
             <span>📁 {sections.length} sections</span>
             <span>📄 {items.length} problems</span>
             <span style={{ color: ACCENT }}>✓ {completed} completed</span>
           </div>
           <button
             onClick={toggleAllSections}
-            className="text-sm text-gray-400 hover:text-white flex items-center gap-1"
+            className="text-sm text-muted hover:text-ink flex items-center gap-1"
           >
             {allCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
             {allCollapsed ? 'Expand All' : 'Collapse All'}
@@ -139,35 +139,35 @@ export default function ConcurrencyTracker({ items, setItems }) {
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1 max-w-lg">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               type="text"
               placeholder="Search problems..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#171717] border border-gray-800 rounded-md py-2 pl-9 pr-4 text-sm text-gray-200 focus:outline-none focus:border-[#a78bfa]"
+              className="w-full bg-field border border-line rounded-md py-2 pl-9 pr-4 text-sm text-ink focus:outline-none focus:border-[#a78bfa]"
             />
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-muted">
               <span>Topic:</span>
               <select
                 value={topicFilter}
                 onChange={(e) => setTopicFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#a78bfa] max-w-[180px] truncate"
+                className="bg-field border border-line rounded-md py-2 px-3 text-ink focus:outline-none focus:border-[#a78bfa] max-w-[180px] truncate"
               >
                 <option>All</option>
                 {uniqueTopics.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-muted">
               <span>Access:</span>
               <select
                 value={accessFilter}
                 onChange={(e) => setAccessFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#a78bfa]"
+                className="bg-field border border-line rounded-md py-2 px-3 text-ink focus:outline-none focus:border-[#a78bfa]"
               >
                 <option>All</option>
                 <option>Free</option>
@@ -175,12 +175,12 @@ export default function ConcurrencyTracker({ items, setItems }) {
               </select>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm text-muted">
               <span>Difficulty:</span>
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="bg-[#171717] border border-gray-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-[#a78bfa]"
+                className="bg-field border border-line rounded-md py-2 px-3 text-ink focus:outline-none focus:border-[#a78bfa]"
               >
                 <option>All</option>
                 <option>Easy</option>
@@ -192,9 +192,9 @@ export default function ConcurrencyTracker({ items, setItems }) {
         </div>
 
         {/* Table structure */}
-        <div className="w-full rounded-t-md overflow-hidden border border-gray-800">
+        <div className="w-full rounded-t-md overflow-hidden border border-line">
           {/* Header Row (desktop only) */}
-          <div className="hidden md:grid grid-cols-12 text-black font-semibold text-sm py-2 px-4 items-center" style={{ backgroundColor: ACCENT }}>
+          <div className="hidden md:grid grid-cols-12 text-black font-semibold text-sm py-2 px-4 items-center" style={{ backgroundColor: '#a78bfa' }}>
             <div className="col-span-1">Date</div>
             <div className="col-span-3">Problem</div>
             <div className="col-span-2 text-center">Notes</div>
@@ -203,12 +203,12 @@ export default function ConcurrencyTracker({ items, setItems }) {
             <div className="col-span-1 text-center">Difficulty</div>
             <div className="col-span-1 text-center">Solved</div>
           </div>
-          <div className="md:hidden text-black font-semibold text-xs py-2 px-4" style={{ backgroundColor: ACCENT }}>
+          <div className="md:hidden text-black font-semibold text-xs py-2 px-4" style={{ backgroundColor: '#a78bfa' }}>
             Problems
           </div>
 
           {/* Sections */}
-          <div className="bg-[#0f0f0f]">
+          <div className="bg-surface">
             {sections.map((section, sIdx) => {
               const sectionItems = filteredItems.filter(i => i.section === section);
               const isCollapsed = collapsedSections[section];
@@ -221,15 +221,15 @@ export default function ConcurrencyTracker({ items, setItems }) {
                 <div key={section}>
                   {/* Section Header */}
                   <div
-                    className="grid grid-cols-12 bg-[#1e293b] text-gray-200 py-3 px-4 items-center cursor-pointer border-b border-gray-800/50 hover:bg-[#253347] transition-colors"
+                    className="grid grid-cols-12 bg-selected text-ink py-3 px-4 items-center cursor-pointer border-b border-line hover:bg-selected transition-colors"
                     onClick={() => setCollapsedSections(prev => ({ ...prev, [section]: !isCollapsed }))}
                   >
-                    <div className="col-span-1 text-sm text-gray-400">{sIdx + 1}</div>
+                    <div className="col-span-1 text-sm text-muted">{sIdx + 1}</div>
                     <div className="col-span-11 flex items-center gap-2 text-sm font-semibold">
                       {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
                       {getSectionIcon(section)}
-                      <span className="text-white">{section}</span>
-                      <span className="text-gray-500 font-normal text-xs ml-2">
+                      <span className="text-ink">{section}</span>
+                      <span className="text-muted font-normal text-xs ml-2">
                         ({sectionCompleted}/{allSectionItems.length} completed)
                       </span>
                     </div>
@@ -237,25 +237,25 @@ export default function ConcurrencyTracker({ items, setItems }) {
 
                   {/* Section Rows - desktop grid */}
                   {!isCollapsed && sectionItems.map((item, iIdx) => (
-                    <div key={item.id} className={`hidden md:grid grid-cols-12 items-center py-3 px-4 border-b border-gray-800/50 hover:bg-[#1a1a1a] transition-colors ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
-                      <div className="col-span-1 text-xs text-gray-500 whitespace-nowrap">{item.date}</div>
+                    <div key={item.id} className={`hidden md:grid grid-cols-12 items-center py-3 px-4 border-b border-line hover:bg-field transition-colors ${iIdx % 2 === 1 ? 'bg-hover' : ''}`}>
+                      <div className="col-span-1 text-xs text-muted whitespace-nowrap">{item.date}</div>
                       <div className="col-span-3 flex items-center gap-3">
-                        <span className="text-gray-500 font-mono text-xs">&lt;/&gt;</span>
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:underline underline-offset-2 text-sm transition-colors line-clamp-2" style={{ '--tw-text-opacity': 1 }} onMouseEnter={(e) => e.currentTarget.style.color = ACCENT} onMouseLeave={(e) => e.currentTarget.style.color = ''}>
+                        <span className="text-muted font-mono text-xs">&lt;/&gt;</span>
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline underline-offset-2 text-sm transition-colors line-clamp-2" style={{ '--tw-text-opacity': 1 }} onMouseEnter={(e) => e.currentTarget.style.color = ACCENT} onMouseLeave={(e) => e.currentTarget.style.color = ''}>
                           {item.title}
                         </a>
                       </div>
                       <div className="col-span-2 flex items-center justify-center">
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
-                          className="p-1.5 rounded transition-colors hover:bg-gray-800"
+                          className="p-1.5 rounded transition-colors hover:bg-selected"
                           style={{ color: item.note ? ACCENT : '#6b7280' }}
                           title={item.note ? "Edit Notes" : "Add Notes"}
                         >
                           <FileText size={16} />
                         </button>
                       </div>
-                      <div className="col-span-2 text-xs text-gray-400 font-medium">
+                      <div className="col-span-2 text-xs text-muted font-medium">
                         {item.topic || '-'}
                       </div>
                       <div className="col-span-2 text-center flex justify-center">
@@ -268,7 +268,7 @@ export default function ConcurrencyTracker({ items, setItems }) {
                         {item.completed ? (
                           <CheckCircle2 size={20} style={{ color: ACCENT }} />
                         ) : (
-                          <Circle size={20} className="text-gray-500 hover:text-white transition-colors" />
+                          <Circle size={20} className="text-muted hover:text-ink transition-colors" />
                         )}
                       </div>
                     </div>
@@ -276,24 +276,24 @@ export default function ConcurrencyTracker({ items, setItems }) {
 
                   {/* Section Rows - mobile stacked cards */}
                   {!isCollapsed && sectionItems.map((item, iIdx) => (
-                    <div key={`m-${item.id}`} className={`md:hidden flex flex-col gap-2 px-4 py-3 border-b border-gray-800/50 ${iIdx % 2 === 1 ? 'bg-white/[0.02]' : ''}`}>
+                    <div key={`m-${item.id}`} className={`md:hidden flex flex-col gap-2 px-4 py-3 border-b border-line ${iIdx % 2 === 1 ? 'bg-hover' : ''}`}>
                       <div className="flex items-start justify-between gap-3">
-                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-gray-200 text-sm font-medium flex-1 min-w-0">
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-ink text-sm font-medium flex-1 min-w-0">
                           {item.title}
                         </a>
                         <div className="flex items-center gap-2 shrink-0" onClick={() => toggleItem(item.id)}>
                           {item.completed ? (
                             <CheckCircle2 size={20} style={{ color: ACCENT }} />
                           ) : (
-                            <Circle size={20} className="text-gray-500" />
+                            <Circle size={20} className="text-muted" />
                           )}
                         </div>
                       </div>
                       <div className="flex items-center flex-wrap gap-2 text-xs">
-                        <span className="text-gray-500">{item.date}</span>
+                        <span className="text-muted">{item.date}</span>
                         <DifficultyBadge difficulty={item.difficulty} />
                         <AccessBadge premium={item.premium} />
-                        {item.topic && <span className="text-gray-400">{item.topic}</span>}
+                        {item.topic && <span className="text-muted">{item.topic}</span>}
                         <button
                           onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
                           className="ml-auto p-1 rounded transition-colors"

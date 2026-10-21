@@ -5,12 +5,12 @@ export default function Notes({ notes, setNotes }) {
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
-  
+
   // AI State
   const [aiInput, setAiInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  
+
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -20,9 +20,9 @@ export default function Notes({ notes, setNotes }) {
     const timer = setTimeout(() => {
       const activeNote = notes.find(n => n.id === activeNoteId);
       if (activeNote && (activeNote.title !== editTitle || activeNote.content !== editContent)) {
-        setNotes(notes.map(n => 
-          n.id === activeNoteId 
-            ? { ...n, title: editTitle, content: editContent, updatedAt: new Date().toISOString() } 
+        setNotes(notes.map(n =>
+          n.id === activeNoteId
+            ? { ...n, title: editTitle, content: editContent, updatedAt: new Date().toISOString() }
             : n
         ));
       }
@@ -88,7 +88,7 @@ export default function Notes({ notes, setNotes }) {
     const originalText = aiInput;
 
     recognition.onstart = () => setIsListening(true);
-    
+
     recognition.onresult = (event) => {
       let finalTranscript = '';
       let interimTranscript = '';
@@ -99,7 +99,7 @@ export default function Notes({ notes, setNotes }) {
           interimTranscript += event.results[i][0].transcript;
         }
       }
-      
+
       const newText = (originalText ? originalText + ' ' : '') + finalTranscript + interimTranscript;
       setAiInput(newText);
     };
@@ -119,7 +119,7 @@ export default function Notes({ notes, setNotes }) {
   const handleAiSubmit = async (e) => {
     e.preventDefault();
     if (!aiInput.trim() || isGenerating) return;
-    
+
     if (isListening) {
       recognitionRef.current?.stop();
       setIsListening(false);
@@ -133,7 +133,7 @@ export default function Notes({ notes, setNotes }) {
 
     setIsGenerating(true);
     const userText = aiInput;
-    setAiInput(''); 
+    setAiInput('');
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
@@ -151,7 +151,7 @@ export default function Notes({ notes, setNotes }) {
       const data = await response.json();
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         const generatedText = data.candidates[0].content.parts[0].text.trim();
-        
+
         setEditContent(prev => {
           const newContent = prev.trim() ? `${prev}\n\n${generatedText}` : generatedText;
           return newContent;
@@ -175,33 +175,33 @@ export default function Notes({ notes, setNotes }) {
   };
 
   return (
-    <div className="bg-[#0a0a0a] h-full text-gray-300 font-sans flex flex-col md:flex-row border border-[#222] rounded-xl overflow-hidden m-4 md:m-8 md:mt-4">
+    <div className="bg-canvas h-full text-secondary font-sans flex flex-col md:flex-row border border-line rounded-xl overflow-hidden m-4 md:m-8 md:mt-4">
       {/* Sidebar for Notes */}
-      <div className="w-full md:w-80 border-r border-[#222] flex flex-col h-[300px] md:h-[calc(100vh-6rem)] shrink-0">
-        <div className="p-4 border-b border-[#222] flex justify-between items-center bg-[#111]">
-          <h2 className="font-bold text-white text-lg">Notes</h2>
+      <div className="w-full md:w-80 border-r border-line flex flex-col h-[300px] md:h-[calc(100vh-6rem)] shrink-0">
+        <div className="p-4 border-b border-line flex justify-between items-center bg-surface">
+          <h2 className="font-bold text-ink text-lg">Notes</h2>
           <button onClick={createNote} className="p-2 bg-[#22c55e] text-black rounded-lg hover:bg-[#16a34a] transition">
             <Plus size={18} strokeWidth={2.5} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar bg-[#0f0f0f]">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar bg-surface">
           {notes.length === 0 ? (
-            <div className="text-gray-500 text-sm text-center mt-10">No notes yet. Click + to create one.</div>
+            <div className="text-muted text-sm text-center mt-10">No notes yet. Click + to create one.</div>
           ) : (
             [...notes].sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt)).map(note => (
-              <div 
-                key={note.id} 
+              <div
+                key={note.id}
                 onClick={() => openNote(note)}
-                className={`p-3 rounded-xl cursor-pointer border transition-all group ${activeNoteId === note.id ? 'bg-[#222] border-[#444]' : 'bg-[#111] border-transparent hover:bg-[#1a1a1a]'}`}
+                className={`p-3 rounded-xl cursor-pointer border transition-all group ${activeNoteId === note.id ? 'bg-selected border-line' : 'bg-surface border-transparent hover:bg-field'}`}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-semibold text-white truncate pr-2">{note.title || "Untitled"}</h3>
-                  <button onClick={(e) => { e.stopPropagation(); deleteNote(note.id); }} className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <h3 className="font-semibold text-ink truncate pr-2">{note.title || "Untitled"}</h3>
+                  <button onClick={(e) => { e.stopPropagation(); deleteNote(note.id); }} className="text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Trash2 size={14} />
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 line-clamp-2">{note.content || "No content"}</p>
-                <div className="text-[10px] text-gray-600 mt-2">
+                <p className="text-xs text-muted line-clamp-2">{note.content || "No content"}</p>
+                <div className="text-[10px] text-faint mt-2">
                   {new Date(note.updatedAt).toLocaleDateString()}
                 </div>
               </div>
@@ -211,59 +211,59 @@ export default function Notes({ notes, setNotes }) {
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1 flex flex-col h-[500px] md:h-[calc(100vh-6rem)] bg-[#050505] relative">
+      <div className="flex-1 flex flex-col h-[500px] md:h-[calc(100vh-6rem)] bg-well relative">
         {activeNoteId ? (
           <>
-            <div className="p-4 border-b border-[#222] bg-[#0a0a0a] flex items-center justify-between shrink-0">
-              <input 
+            <div className="p-4 border-b border-line bg-canvas flex items-center justify-between shrink-0">
+              <input
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="bg-transparent text-xl font-bold text-white outline-none flex-1 placeholder-gray-600"
+                className="bg-transparent text-xl font-bold text-ink outline-none flex-1 placeholder-gray-600"
                 placeholder="Note Title"
               />
             </div>
-            
-            <textarea 
+
+            <textarea
               ref={textareaRef}
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="flex-1 bg-transparent p-6 pb-24 text-gray-300 outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
+              className="flex-1 bg-transparent p-6 pb-24 text-secondary outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
               placeholder="Start typing your notes here..."
             />
 
             {/* AI Input Wrapper */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-[#1e1e1e] border border-[#333] rounded-2xl shadow-2xl p-2 px-3 flex items-center gap-3">
-              <div className="text-gray-400">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-elevated border border-line rounded-2xl shadow-2xl p-2 px-3 flex items-center gap-3">
+              <div className="text-muted">
                 <Sparkles size={20} />
               </div>
               <form onSubmit={handleAiSubmit} className="flex-1 flex items-center gap-2">
-                <input 
+                <input
                   type="text"
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
                   disabled={isGenerating}
                   placeholder={isListening ? "Listening..." : "Dictate or type rough notes, Gemini will format them..."}
-                  className={`w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-500 disabled:opacity-50 ${isListening ? 'animate-pulse text-green-400' : ''}`}
+                  className={`w-full bg-transparent border-none outline-none text-ink text-sm placeholder-gray-500 disabled:opacity-50 ${isListening ? 'animate-pulse text-green-400' : ''}`}
                 />
-                
+
                 {/* Mic Button */}
-                <button 
+                <button
                   type="button"
                   onClick={toggleListening}
-                  className={`p-2 rounded-full transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-[#333]'}`}
+                  className={`p-2 rounded-full transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-400/10' : 'text-muted hover:text-ink hover:bg-selected'}`}
                   title="Dictate Note"
                 >
                   <Mic size={18} className={isListening ? 'animate-pulse' : ''} />
                 </button>
 
                 {/* Send Button */}
-                <button 
+                <button
                   type="submit"
                   disabled={isGenerating || (!aiInput.trim() && !isListening)}
                   className={`p-2 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
                     isGenerating || (!aiInput.trim() && !isListening)
-                      ? 'bg-[#333] text-gray-500' 
-                      : 'bg-[#333] text-white hover:bg-[#444]'
+                      ? 'bg-selected text-muted'
+                      : 'bg-selected text-ink hover:bg-selected'
                   }`}
                 >
                   {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
@@ -272,7 +272,7 @@ export default function Notes({ notes, setNotes }) {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-600 flex-col gap-4">
+          <div className="flex-1 flex items-center justify-center text-faint flex-col gap-4">
             <Edit3 size={48} className="opacity-20" />
             <p>Select a note or create a new one.</p>
           </div>

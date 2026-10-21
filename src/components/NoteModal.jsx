@@ -6,7 +6,7 @@ export default function NoteModal({ isOpen, onClose, initialNote, onSave, proble
   const [aiInput, setAiInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  
+
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -26,7 +26,7 @@ export default function NoteModal({ isOpen, onClose, initialNote, onSave, proble
   const handleClose = () => {
     if (recognitionRef.current) recognitionRef.current.stop();
     setIsListening(false);
-    onSave(localNote); 
+    onSave(localNote);
     onClose();
   };
 
@@ -73,7 +73,7 @@ export default function NoteModal({ isOpen, onClose, initialNote, onSave, proble
 
     setIsGenerating(true);
     const userText = aiInput;
-    setAiInput(''); 
+    setAiInput('');
 
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`, {
@@ -102,52 +102,52 @@ export default function NoteModal({ isOpen, onClose, initialNote, onSave, proble
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-[#0a0a0a] border border-[#333] rounded-2xl w-full max-w-3xl h-[80vh] flex flex-col shadow-2xl relative overflow-hidden text-gray-300 font-sans">
-        
-        <div className="p-5 border-b border-[#222] bg-[#111] flex items-center justify-between shrink-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] backdrop-blur-sm p-4 animate-fade-in">
+      <div className="theme-modal bg-elevated border border-line rounded-2xl w-full max-w-3xl h-[80vh] flex flex-col shadow-2xl relative overflow-hidden text-secondary font-sans">
+
+        <div className="p-5 border-b border-line bg-surface flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-white mb-1">Problem Notes</h2>
-            <p className="text-xs text-gray-400 max-w-md truncate">{problemTitle}</p>
+            <h2 className="text-xl font-bold text-ink mb-1">Problem Notes</h2>
+            <p className="text-xs text-muted max-w-md truncate">{problemTitle}</p>
           </div>
-          <button onClick={handleClose} className="p-2 text-gray-400 hover:text-white hover:bg-[#333] rounded-full transition-colors">
+          <button aria-label="Close problem notes" onClick={handleClose} className="p-2 text-muted hover:text-ink hover:bg-selected rounded-full transition-colors">
             <X size={20} />
           </button>
         </div>
-        
-        <textarea 
+
+        <textarea
           ref={textareaRef}
           value={localNote}
           onChange={(e) => setLocalNote(e.target.value)}
-          className="flex-1 bg-transparent p-6 pb-28 text-gray-300 outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
+          className="flex-1 bg-transparent p-6 pb-28 text-secondary outline-none resize-none custom-scrollbar leading-relaxed text-sm md:text-base"
           placeholder={`Write your notes for "${problemTitle}" here...`}
         />
 
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-[#1e1e1e] border border-[#333] rounded-2xl shadow-2xl p-2 px-3 flex items-center gap-3">
-          <div className="text-gray-400"><Sparkles size={20} /></div>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-elevated border border-line rounded-2xl shadow-2xl p-2 px-3 flex items-center gap-3">
+          <div className="text-muted"><Sparkles size={20} /></div>
           <form onSubmit={handleAiSubmit} className="flex-1 flex items-center gap-2">
-            <input 
+            <input
               type="text"
               value={aiInput}
               onChange={(e) => setAiInput(e.target.value)}
               disabled={isGenerating}
               placeholder={isListening ? "Listening..." : "Dictate or type rough notes, Gemini will format them..."}
-              className={`w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-500 disabled:opacity-50 ${isListening ? 'animate-pulse text-green-400' : ''}`}
+              className={`w-full bg-transparent border-none outline-none text-ink text-sm placeholder-gray-500 disabled:opacity-50 ${isListening ? 'animate-pulse text-green-400' : ''}`}
             />
-            
-            <button 
+
+            <button
               type="button"
               onClick={toggleListening}
-              className={`p-2 rounded-full transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-[#333]'}`}
+              className={`p-2 rounded-full transition-colors flex-shrink-0 ${isListening ? 'text-red-400 bg-red-400/10' : 'text-muted hover:text-ink hover:bg-selected'}`}
             >
               <Mic size={18} className={isListening ? 'animate-pulse' : ''} />
             </button>
 
-            <button 
+            <button
               type="submit"
               disabled={isGenerating || (!aiInput.trim() && !isListening)}
               className={`p-2 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
-                isGenerating || (!aiInput.trim() && !isListening) ? 'bg-[#333] text-gray-500' : 'bg-[#333] text-white hover:bg-[#444]'
+                isGenerating || (!aiInput.trim() && !isListening) ? 'bg-selected text-muted' : 'bg-selected text-ink hover:bg-selected'
               }`}
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}

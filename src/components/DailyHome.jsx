@@ -104,16 +104,16 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
             <Calendar size={16} />
             <span>Viewing: Day {selectedDayIndex + 1} of {totalDays}</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Homework</h1>
-          <p className="text-gray-400 text-sm">One track a day — DSA, LLD, HLD, or Concurrency on rotation, with extra reps on weekends.</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-ink mb-2">Homework</h1>
+          <p className="text-muted text-sm">One track a day — DSA, LLD, HLD, or Concurrency on rotation, with extra reps on weekends.</p>
         </div>
 
 
         {/* Date Selector */}
-        <div className="bg-[#141414] border border-gray-800 rounded-lg p-2 flex items-center gap-2 w-full sm:w-auto">
+        <div className="bg-surface border border-line rounded-lg p-2 flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setSelectedDayIndex(todayIdx)}
-            className="px-3 py-1.5 bg-[#1a1a1a] border border-gray-700 text-gray-300 hover:text-white text-xs font-semibold rounded hover:bg-gray-800 transition-colors hidden sm:block"
+            className="px-3 py-1.5 bg-field border border-line text-secondary hover:text-ink text-xs font-semibold rounded hover:bg-selected transition-colors hidden sm:block"
           >
             Today
           </button>
@@ -121,7 +121,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
           <button
             onClick={() => setSelectedDayIndex(prev => Math.max(0, prev - 1))}
             disabled={selectedDayIndex <= 0}
-            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded disabled:opacity-30 transition-colors"
+            className="p-1.5 text-muted hover:text-ink hover:bg-selected rounded disabled:opacity-30 transition-colors"
           >
             <ChevronLeft size={18} />
           </button>
@@ -130,11 +130,11 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
             id="date-selector"
             value={selectedDayIndex}
             onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
-            className="bg-transparent text-white text-sm focus:ring-0 focus:border-0 block w-full outline-none cursor-pointer text-center appearance-none"
+            className="bg-transparent text-ink text-sm focus:ring-0 focus:border-0 block w-full outline-none cursor-pointer text-center appearance-none"
             style={{ textAlignLast: 'center' }}
           >
             {Array.from({ length: totalDays }).map((_, idx) => (
-              <option key={idx} value={idx} className="bg-[#1a1a1a]">
+              <option key={idx} value={idx} className="bg-field">
                 {formatIndex(idx)}
               </option>
             ))}
@@ -143,7 +143,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
           <button
             onClick={() => setSelectedDayIndex(prev => Math.min(totalDays - 1, prev + 1))}
             disabled={selectedDayIndex >= totalDays - 1}
-            className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded disabled:opacity-30 transition-colors"
+            className="p-1.5 text-muted hover:text-ink hover:bg-selected rounded disabled:opacity-30 transition-colors"
           >
             <ChevronRight size={18} />
           </button>
@@ -153,48 +153,48 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
 
       {/* Progress Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
+        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-green-500 font-semibold flex items-center gap-2"><BookOpen size={18}/> DSA</h3>
-            <span className="text-xs text-gray-500 font-mono">{totalDsa}/{dsa.length}</span>
+            <span className="text-xs text-muted font-mono">{totalDsa}/{dsa.length}</span>
           </div>
-          <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
+          <div className="w-full bg-surface rounded-full h-2 mb-2">
             <div className="bg-gradient-to-r from-green-600 to-green-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalDsa/dsa.length)*100}%` }}></div>
           </div>
-          <p className="text-xs text-gray-400">TakeUForward Concept Revision →</p>
+          <p className="text-xs text-muted">TakeUForward Concept Revision →</p>
         </div>
 
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("lld")}>
+        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("lld")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-emerald-400 font-semibold flex items-center gap-2"><Layers size={18}/> LLD</h3>
-            <span className="text-xs text-gray-500 font-mono">{totalLld}/{lld.length}</span>
+            <span className="text-xs text-muted font-mono">{totalLld}/{lld.length}</span>
           </div>
-          <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
+          <div className="w-full bg-surface rounded-full h-2 mb-2">
             <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalLld/lld.length)*100}%` }}></div>
           </div>
-          <p className="text-xs text-gray-400">Algomaster 1 Daily Practice →</p>
+          <p className="text-xs text-muted">Algomaster 1 Daily Practice →</p>
         </div>
 
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("hld")}>
+        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("hld")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-teal-400 font-semibold flex items-center gap-2"><Monitor size={18}/> HLD</h3>
-            <span className="text-xs text-gray-500 font-mono">{totalHld}/{hld.length}</span>
+            <span className="text-xs text-muted font-mono">{totalHld}/{hld.length}</span>
           </div>
-          <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
+          <div className="w-full bg-surface rounded-full h-2 mb-2">
             <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalHld/hld.length)*100}%` }}></div>
           </div>
-          <p className="text-xs text-gray-400">HelloInterview Breakdown →</p>
+          <p className="text-xs text-muted">HelloInterview Breakdown →</p>
         </div>
 
-        <div className="bg-[#141414] border border-gray-800 rounded-xl p-5 hover:border-gray-700 hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("concurrency")}>
+        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("concurrency")}>
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-violet-400 font-semibold flex items-center gap-2"><Lock size={18}/> Concurrency</h3>
-            <span className="text-xs text-gray-500 font-mono">{totalConcurrency}/{concurrency.length}</span>
+            <span className="text-xs text-muted font-mono">{totalConcurrency}/{concurrency.length}</span>
           </div>
-          <div className="w-full bg-gray-900 rounded-full h-2 mb-2">
+          <div className="w-full bg-surface rounded-full h-2 mb-2">
             <div className="bg-gradient-to-r from-violet-600 to-violet-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalConcurrency/concurrency.length)*100}%` }}></div>
           </div>
-          <p className="text-xs text-gray-400">Algomaster Concurrency Practice →</p>
+          <p className="text-xs text-muted">Algomaster Concurrency Practice →</p>
         </div>
       </div>
 
@@ -202,15 +202,15 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
       <div className="space-y-6">
 
         {/* DSA Today Scheduled Questions */}
-        <div className="bg-[#111111] border border-gray-800 rounded-xl overflow-hidden shadow-lg shadow-black/20">
-          <div className="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#161616]">
+        <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-lg shadow-black/20">
+          <div className="p-5 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-field">
             <div className="flex items-center gap-2">
               <Target size={20} className="text-green-500" />
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                  DSA Questions {selectedSectionNames.length > 0 && <><span className="text-gray-500 font-normal ml-1">for</span> <span className="text-green-400">{selectedSectionNames.join(" & ")}</span></>}
+                <h2 className="text-base sm:text-lg font-bold text-ink flex items-center gap-2">
+                  DSA Questions {selectedSectionNames.length > 0 && <><span className="text-muted font-normal ml-1">for</span> <span className="text-green-400">{selectedSectionNames.join(" & ")}</span></>}
                 </h2>
-                <p className="text-xs text-gray-400">Scheduled for {formattedSelectedDate} {selectedSectionNames.length > 0 && `• ${todayDsaCompleted}/${todayDsaQuestions.length} completed`}</p>
+                <p className="text-xs text-muted">Scheduled for {formattedSelectedDate} {selectedSectionNames.length > 0 && `• ${todayDsaCompleted}/${todayDsaQuestions.length} completed`}</p>
               </div>
             </div>
             <button
@@ -222,30 +222,30 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
           </div>
 
           {todayDsaQuestions.length > 0 ? (
-            <div className="divide-y divide-gray-800/60">
+            <div className="divide-y divide-line">
               {todayDsaQuestions.map((q, idx) => (
                 <div
                   key={q.id}
-                  className={`p-4 flex items-center justify-between hover:bg-gray-800/40 transition-colors ${q.completed ? "bg-green-950/10" : ""}`}
+                  className={`p-4 flex items-center justify-between hover:bg-selected transition-colors ${q.completed ? "bg-green-950/10" : ""}`}
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-4">
                     <button
                       onClick={() => toggleDsa(q.id)}
                       className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                        q.completed ? "bg-green-500 border-green-500 text-black" : "border-gray-500 hover:border-green-400"
+                        q.completed ? "bg-green-500 border-green-500 text-on-success" : "border-line hover:border-green-400"
                       }`}
                       title={q.completed ? "Mark as Incomplete" : "Mark as Done"}
                     >
                       {q.completed && <Check size={12} strokeWidth={3} />}
                     </button>
                     <div className="min-w-0">
-                      <span className="text-xs text-gray-500 font-mono mr-2">#{idx + 1}</span>
+                      <span className="text-xs text-muted font-mono mr-2">#{idx + 1}</span>
                       <a
                         href={q.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`text-sm font-medium hover:text-green-400 transition-colors ${
-                          q.completed ? "line-through text-gray-500" : "text-gray-200"
+                          q.completed ? "line-through text-muted" : "text-ink"
                         }`}
                       >
                         {q.title}
@@ -257,7 +257,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                       href={q.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-gray-800 hover:bg-green-500 hover:text-black text-gray-300 rounded transition-all"
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-selected hover:bg-green-500 hover:text-on-success text-secondary rounded transition-all"
                     >
                       Solve <ExternalLink size={12} />
                     </a>
@@ -266,16 +266,16 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
               ))}
             </div>
           ) : dsaAllDone ? (
-            <div className="p-8 text-center bg-[#111111]">
+            <div className="p-8 text-center bg-surface">
               <CheckCircle2 size={40} className="text-green-500 mx-auto mb-3" />
-              <p className="text-base font-semibold text-white">DSA Roadmap Complete!</p>
-              <p className="text-sm text-gray-400 mt-2">All {dsa.length} problems solved. Legendary.</p>
+              <p className="text-base font-semibold text-ink">DSA Roadmap Complete!</p>
+              <p className="text-sm text-muted mt-2">All {dsa.length} problems solved. Legendary.</p>
             </div>
           ) : (
-            <div className="p-8 text-center bg-[#111111]">
-              <Coffee size={32} className="text-gray-600 mx-auto mb-3" />
-              <p className="text-base font-semibold text-white">Rest day for DSA</p>
-              <p className="text-sm text-gray-400 mt-2">
+            <div className="p-8 text-center bg-surface">
+              <Coffee size={32} className="text-faint mx-auto mb-3" />
+              <p className="text-base font-semibold text-ink">Rest day for DSA</p>
+              <p className="text-sm text-muted mt-2">
                 {dsaNextIdx !== null ? <>Next DSA day is <span className="text-green-400">{formatIndex(dsaNextIdx)}</span>.</> : "Nothing else scheduled."}
               </p>
             </div>
@@ -286,12 +286,12 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
           {/* LLD */}
-          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
+          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Layers size={18} className="text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white">LLD Practice{nextLld.length > 1 ? ` (${nextLld.length} today)` : ""}</h3>
+                  <h3 className="text-sm font-bold text-ink">LLD Practice{nextLld.length > 1 ? ` (${nextLld.length} today)` : ""}</h3>
                 </div>
                 <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">Algomaster</span>
               </div>
@@ -299,13 +299,13 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
               {nextLld.length > 0 ? (
                 <div className="space-y-3">
                   {nextLld.map(item => (
-                    <div key={item.id} className="bg-[#161616] p-4 rounded-lg border border-gray-800">
+                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex items-start gap-3">
                           <button
                             onClick={() => toggleLld(item.id)}
                             className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-emerald-500 border-emerald-500 text-black" : "border-gray-500 hover:border-emerald-400"
+                              item.completed ? "bg-emerald-500 border-emerald-500 text-on-success" : "border-line hover:border-emerald-400"
                             }`}
                             title="Mark as Done"
                           >
@@ -313,7 +313,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           </button>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-gray-500">{item.section}</span>
+                              <span className="text-xs text-muted">{item.section}</span>
                               <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                 {item.difficulty}
                               </span>
@@ -322,7 +322,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                               href={item.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-base font-semibold text-white hover:text-emerald-400 transition-colors"
+                              className="text-base font-semibold text-ink hover:text-emerald-400 transition-colors"
                             >
                               {item.title}
                             </a>
@@ -330,14 +330,14 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed bg-[#111111] p-2.5 rounded border border-gray-800/80">
+                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
                         {item.description}
                       </p>
 
                       <div className="flex items-center justify-between pt-1">
                         <button
                           onClick={() => toggleLld(item.id)}
-                          className="text-xs text-gray-400 hover:text-emerald-400 flex items-center gap-1.5 transition-colors"
+                          className="text-xs text-muted hover:text-emerald-400 flex items-center gap-1.5 transition-colors"
                         >
                           <CheckCircle size={14} /> Click checkbox when solved
                         </button>
@@ -345,7 +345,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500 hover:text-black transition-all"
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500 hover:text-on-success transition-all"
                         >
                           <Play size={12} /> Solve on Algomaster
                         </a>
@@ -354,16 +354,16 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                   ))}
                 </div>
               ) : lldAllDone ? (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
                   <CheckCircle2 size={32} className="text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All {lld.length} LLD problems completed!</p>
-                  <p className="text-xs text-gray-400 mt-1">Awesome job mastering Low-Level Design.</p>
+                  <p className="text-sm font-semibold text-ink">All {lld.length} LLD problems completed!</p>
+                  <p className="text-xs text-muted mt-1">Awesome job mastering Low-Level Design.</p>
                 </div>
               ) : (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
-                  <Coffee size={28} className="text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">Rest day for LLD</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
+                  <Coffee size={28} className="text-faint mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-ink">Rest day for LLD</p>
+                  <p className="text-xs text-muted mt-1">
                     {lldNextIdx !== null ? <>Next LLD day is <span className="text-emerald-400">{formatIndex(lldNextIdx)}</span>.</> : "Nothing else scheduled."}
                   </p>
                 </div>
@@ -372,12 +372,12 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
           </div>
 
           {/* HLD */}
-          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
+          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Monitor size={18} className="text-teal-400" />
-                  <h3 className="text-sm font-bold text-white">HLD Breakdown{nextHld.length > 1 ? ` (${nextHld.length} today)` : ""}</h3>
+                  <h3 className="text-sm font-bold text-ink">HLD Breakdown{nextHld.length > 1 ? ` (${nextHld.length} today)` : ""}</h3>
                 </div>
                 <span className="text-xs bg-teal-500/10 text-teal-400 border border-teal-500/20 px-2 py-0.5 rounded">HelloInterview</span>
               </div>
@@ -385,13 +385,13 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
               {nextHld.length > 0 ? (
                 <div className="space-y-3">
                   {nextHld.map(item => (
-                    <div key={item.id} className="bg-[#161616] p-4 rounded-lg border border-gray-800">
+                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex items-start gap-3">
                           <button
                             onClick={() => toggleHld(item.id)}
                             className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-teal-500 border-teal-500 text-black" : "border-gray-500 hover:border-teal-400"
+                              item.completed ? "bg-teal-500 border-teal-500 text-on-success" : "border-line hover:border-teal-400"
                             }`}
                             title="Mark as Done"
                           >
@@ -399,7 +399,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           </button>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-gray-500">{item.section || "Breakdown"}</span>
+                              <span className="text-xs text-muted">{item.section || "Breakdown"}</span>
                               <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
                                 {item.difficulty}
                               </span>
@@ -408,7 +408,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                               href={item.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-base font-semibold text-white hover:text-teal-400 transition-colors"
+                              className="text-base font-semibold text-ink hover:text-teal-400 transition-colors"
                             >
                               {item.title}
                             </a>
@@ -416,14 +416,14 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed bg-[#111111] p-2.5 rounded border border-gray-800/80">
+                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
                         {item.description}
                       </p>
 
                       <div className="flex items-center justify-between pt-1">
                         <button
                           onClick={() => toggleHld(item.id)}
-                          className="text-xs text-gray-400 hover:text-teal-400 flex items-center gap-1.5 transition-colors"
+                          className="text-xs text-muted hover:text-teal-400 flex items-center gap-1.5 transition-colors"
                         >
                           <CheckCircle size={14} /> Click checkbox when read
                         </button>
@@ -431,7 +431,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-teal-500/20 text-teal-400 border border-teal-500/30 rounded hover:bg-teal-500 hover:text-black transition-all"
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-teal-500/20 text-teal-400 border border-teal-500/30 rounded hover:bg-teal-500 hover:text-on-success transition-all"
                         >
                           <Play size={12} /> Read on HelloInterview
                         </a>
@@ -440,16 +440,16 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                   ))}
                 </div>
               ) : hldAllDone ? (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
                   <CheckCircle2 size={32} className="text-teal-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All {hld.length} HLD breakdowns completed!</p>
-                  <p className="text-xs text-gray-400 mt-1">Awesome job mastering System Design.</p>
+                  <p className="text-sm font-semibold text-ink">All {hld.length} HLD breakdowns completed!</p>
+                  <p className="text-xs text-muted mt-1">Awesome job mastering System Design.</p>
                 </div>
               ) : (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
-                  <Coffee size={28} className="text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">Rest day for HLD</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
+                  <Coffee size={28} className="text-faint mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-ink">Rest day for HLD</p>
+                  <p className="text-xs text-muted mt-1">
                     {hldNextIdx !== null ? <>Next HLD day is <span className="text-teal-400">{formatIndex(hldNextIdx)}</span>.</> : "Nothing else scheduled."}
                   </p>
                 </div>
@@ -458,12 +458,12 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
           </div>
 
           {/* Concurrency */}
-          <div className="bg-[#111111] border border-gray-800 rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
+          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Lock size={18} className="text-violet-400" />
-                  <h3 className="text-sm font-bold text-white">Concurrency{nextConcurrency.length > 1 ? ` (${nextConcurrency.length} today)` : ""}</h3>
+                  <h3 className="text-sm font-bold text-ink">Concurrency{nextConcurrency.length > 1 ? ` (${nextConcurrency.length} today)` : ""}</h3>
                 </div>
                 <span className="text-xs bg-violet-500/10 text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded">Algomaster</span>
               </div>
@@ -471,13 +471,13 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
               {nextConcurrency.length > 0 ? (
                 <div className="space-y-3">
                   {nextConcurrency.map(item => (
-                    <div key={item.id} className="bg-[#161616] p-4 rounded-lg border border-gray-800">
+                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div className="flex items-start gap-3">
                           <button
                             onClick={() => toggleConcurrency(item.id)}
                             className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-violet-500 border-violet-500 text-black" : "border-gray-500 hover:border-violet-400"
+                              item.completed ? "bg-violet-500 border-violet-500 text-on-success" : "border-line hover:border-violet-400"
                             }`}
                             title="Mark as Done"
                           >
@@ -485,7 +485,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           </button>
                           <div>
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="text-xs text-gray-500">{item.topic}</span>
+                              <span className="text-xs text-muted">{item.topic}</span>
                               <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
                                 {item.difficulty}
                               </span>
@@ -499,7 +499,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                               href={item.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-base font-semibold text-white hover:text-violet-400 transition-colors"
+                              className="text-base font-semibold text-ink hover:text-violet-400 transition-colors"
                             >
                               {item.title}
                             </a>
@@ -507,14 +507,14 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed bg-[#111111] p-2.5 rounded border border-gray-800/80">
+                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
                         {item.description}
                       </p>
 
                       <div className="flex items-center justify-between pt-1">
                         <button
                           onClick={() => toggleConcurrency(item.id)}
-                          className="text-xs text-gray-400 hover:text-violet-400 flex items-center gap-1.5 transition-colors"
+                          className="text-xs text-muted hover:text-violet-400 flex items-center gap-1.5 transition-colors"
                         >
                           <CheckCircle size={14} /> Click checkbox when solved
                         </button>
@@ -522,7 +522,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded hover:bg-violet-500 hover:text-black transition-all"
+                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded hover:bg-violet-500 hover:text-on-success transition-all"
                         >
                           <Play size={12} /> Solve on Algomaster
                         </a>
@@ -531,16 +531,16 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
                   ))}
                 </div>
               ) : concurrencyAllDone ? (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
                   <CheckCircle2 size={32} className="text-violet-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">All {concurrency.length} concurrency problems completed!</p>
-                  <p className="text-xs text-gray-400 mt-1">You've earned the right to say "it's not a race condition, it's a feature".</p>
+                  <p className="text-sm font-semibold text-ink">All {concurrency.length} concurrency problems completed!</p>
+                  <p className="text-xs text-muted mt-1">You've earned the right to say "it's not a race condition, it's a feature".</p>
                 </div>
               ) : (
-                <div className="bg-[#161616] p-6 rounded-lg border border-gray-800 text-center">
-                  <Coffee size={28} className="text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-white">Rest day for Concurrency</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                <div className="bg-field p-6 rounded-lg border border-line text-center">
+                  <Coffee size={28} className="text-faint mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-ink">Rest day for Concurrency</p>
+                  <p className="text-xs text-muted mt-1">
                     {concurrencyNextIdx !== null ? <>Next Concurrency day is <span className="text-violet-400">{formatIndex(concurrencyNextIdx)}</span>.</> : "Nothing else scheduled."}
                   </p>
                 </div>

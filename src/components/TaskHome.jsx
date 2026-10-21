@@ -34,7 +34,11 @@ const SMART_VIEWS = [
   { id: 'completed', name: 'Completed', icon: CheckCheck, color: '#4ade80' },
 ];
 const fieldClass =
-  'w-full rounded-xl border border-white/10 bg-[#161719] px-3.5 py-3 text-sm text-gray-100 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/15';
+  'w-full rounded-xl border border-line bg-field px-3.5 py-3 text-sm text-ink outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/15';
+
+function themedAccent(color) {
+  return `color-mix(in srgb, ${color}, var(--accent-mix) var(--accent-mix-strength))`;
+}
 
 function prettyDate(key, today) {
   if (!key) return '';
@@ -64,9 +68,9 @@ function Modal({ title, children, onClose }) {
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className="task-dialog m-auto w-[calc(100%-2rem)] max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl border border-white/10 bg-[#1c1d20] p-0 text-white shadow-2xl"
+      className="task-dialog m-auto w-[calc(100%-2rem)] max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl border border-line bg-elevated p-0 text-ink shadow-2xl"
     >
-      <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+      <div className="flex items-center justify-between border-b border-line px-6 py-5">
         <h2 id="task-dialog-title" className="text-lg font-semibold">
           {title}
         </h2>
@@ -74,7 +78,7 @@ function Modal({ title, children, onClose }) {
           type="button"
           onClick={onClose}
           aria-label="Close dialog"
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-white/5 hover:text-white"
+          className="rounded-lg p-1.5 text-muted hover:bg-hover hover:text-ink"
         >
           <X size={19} />
         </button>
@@ -121,7 +125,7 @@ function TaskForm({
         <div>
           <label
             htmlFor="task-title"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-muted"
           >
             Title
           </label>
@@ -139,9 +143,9 @@ function TaskForm({
         <div>
           <label
             htmlFor="task-notes"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-muted"
           >
-            Notes <span className="font-normal text-gray-600">· optional</span>
+            Notes <span className="font-normal text-faint">· optional</span>
           </label>
           <textarea
             id="task-notes"
@@ -157,7 +161,7 @@ function TaskForm({
           <div>
             <label
               htmlFor="task-list"
-              className="mb-2 block text-xs font-medium text-gray-400"
+              className="mb-2 block text-xs font-medium text-muted"
             >
               List
             </label>
@@ -177,10 +181,10 @@ function TaskForm({
           <div>
             <label
               htmlFor="task-date"
-              className="mb-2 block text-xs font-medium text-gray-400"
+              className="mb-2 block text-xs font-medium text-muted"
             >
               {draft.repeat === 'none' ? 'Due date' : 'Starts on'}{' '}
-              <span className="font-normal text-gray-600">
+              <span className="font-normal text-faint">
                 {draft.repeat === 'none' ? '· optional' : ''}
               </span>
             </label>
@@ -189,14 +193,14 @@ function TaskForm({
               type="date"
               value={draft.dueDate}
               onChange={(event) => field('dueDate', event.target.value)}
-              className={`${fieldClass} [color-scheme:dark]`}
+              className={`${fieldClass} `}
             />
           </div>
         </div>
         <div>
           <label
             htmlFor="task-repeat"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-muted"
           >
             Repeat
           </label>
@@ -222,7 +226,7 @@ function TaskForm({
             ))}
           </select>
           {draft.repeat !== 'none' && (
-            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+            <p className="mt-2 text-xs leading-relaxed text-muted">
               Complete each occurrence to move to the next{' '}
               {draft.repeat === 'weekdays'
                 ? 'weekday'
@@ -233,7 +237,7 @@ function TaskForm({
             </p>
           )}
         </div>
-        <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-300">
+        <label className="flex cursor-pointer items-center gap-3 text-sm text-secondary">
           <input
             type="checkbox"
             checked={draft.flagged}
@@ -242,7 +246,7 @@ function TaskForm({
           />
           <Flag size={15} className="text-orange-400" /> Flag as important
         </label>
-        <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-5">
+        <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
           {task ? (
             <button
               type="button"
@@ -258,7 +262,7 @@ function TaskForm({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5"
+              className="rounded-lg px-4 py-2.5 text-sm text-muted hover:bg-hover"
             >
               Cancel
             </button>
@@ -296,7 +300,7 @@ function ListForm({ list, lists, onSave, onClose }) {
         <div>
           <label
             htmlFor="list-name"
-            className="mb-2 block text-xs font-medium text-gray-400"
+            className="mb-2 block text-xs font-medium text-muted"
           >
             List name
           </label>
@@ -317,9 +321,7 @@ function ListForm({ list, lists, onSave, onClose }) {
           )}
         </div>
         <fieldset>
-          <legend className="mb-3 text-xs font-medium text-gray-400">
-            Color
-          </legend>
+          <legend className="mb-3 text-xs font-medium text-muted">Color</legend>
           <div className="flex gap-3">
             {LIST_COLORS.map((value, index) => (
               <button
@@ -331,25 +333,25 @@ function ListForm({ list, lists, onSave, onClose }) {
                 aria-pressed={color === value}
                 onClick={() => setColor(value)}
                 style={{ backgroundColor: value }}
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-black ${color === value ? 'ring-2 ring-white ring-offset-4 ring-offset-[#1c1d20]' : ''}`}
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-black ${color === value ? 'ring-2 ring-ink ring-offset-4 ring-offset-[var(--modal)]' : ''}`}
               >
                 {color === value && <Check size={17} />}
               </button>
             ))}
           </div>
         </fieldset>
-        <div className="flex justify-end gap-2 border-t border-white/10 pt-5">
+        <div className="flex justify-end gap-2 border-t border-line pt-5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5"
+            className="rounded-lg px-4 py-2.5 text-sm text-muted hover:bg-hover"
           >
             Cancel
           </button>
           <button
             disabled={!name.trim() || duplicate}
             type="submit"
-            className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold hover:bg-blue-400 disabled:opacity-40"
+            className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold hover:bg-blue-400 disabled:opacity-40 text-white"
           >
             {list ? 'Save list' : 'Create list'}
           </button>
@@ -552,7 +554,7 @@ export default function TaskHome({ onOpenHomework }) {
     return (
       <li
         key={row.key}
-        className="group flex items-start gap-3.5 border-b border-white/[0.055] px-1 py-4 last:border-0 sm:gap-4"
+        className="group flex items-start gap-3.5 border-b border-line px-1 py-4 last:border-0 sm:gap-4"
       >
         {!isDeleted && (
           <input
@@ -560,7 +562,7 @@ export default function TaskHome({ onOpenHomework }) {
             checked={isCompleted}
             onChange={() => toggle(row)}
             aria-label={`${isCompleted ? 'Reopen' : 'Complete'} ${row.task.title}${isCompleted && row.task.repeat !== 'none' ? ` on ${row.date}` : ''}`}
-            className="task-check mt-1 h-[21px] w-[21px] shrink-0 cursor-pointer appearance-none rounded-full border border-gray-600 transition hover:border-blue-400 checked:border-blue-400 checked:bg-blue-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+            className="task-check mt-1 h-[21px] w-[21px] shrink-0 cursor-pointer appearance-none rounded-full border border-line transition hover:border-blue-400 checked:border-blue-400 checked:bg-blue-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
           />
         )}
         <div className="min-w-0 flex-1">
@@ -568,16 +570,16 @@ export default function TaskHome({ onOpenHomework }) {
             onClick={() => setTaskEditor({ task: row.task })}
             disabled={isDeleted}
             aria-label={`Edit ${row.task.title}`}
-            className={`block max-w-full break-words text-left text-[15px] font-medium leading-6 ${isCompleted ? 'text-gray-500 line-through' : 'text-gray-200 hover:text-white'}`}
+            className={`block max-w-full break-words text-left text-[15px] font-medium leading-6 ${isCompleted ? 'text-muted line-through' : 'text-ink hover:text-ink'}`}
           >
             {row.task.title}
           </button>
           {row.task.notes && (
-            <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-gray-500">
+            <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-muted">
               {row.task.notes}
             </p>
           )}
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
             {!selectedList && (
               <span className="flex items-center gap-1.5">
                 <span
@@ -626,7 +628,7 @@ export default function TaskHome({ onOpenHomework }) {
                 ),
               }))
             }
-            className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-orange-400' : 'text-gray-600 hover:text-orange-400 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
+            className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-orange-400' : 'text-faint hover:text-orange-400 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
           >
             <Flag size={16} fill={row.task.flagged ? 'currentColor' : 'none'} />
           </button>
@@ -639,17 +641,17 @@ export default function TaskHome({ onOpenHomework }) {
     <div className="mx-auto max-w-[1600px] px-4 py-7 sm:px-6 sm:py-9 lg:px-10 lg:py-11">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="mb-2 text-xs font-medium tracking-wide text-gray-500">
+          <p className="mb-2 text-xs font-medium tracking-wide text-muted">
             {new Intl.DateTimeFormat('en', {
               weekday: 'long',
               month: 'long',
               day: 'numeric',
             }).format(new Date(`${today}T12:00:00`))}
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             Home
           </h1>
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-muted">
             A little structure. A clearer day.
           </p>
         </div>
@@ -671,7 +673,7 @@ export default function TaskHome({ onOpenHomework }) {
       <div className="grid grid-cols-1 gap-7 lg:min-h-[calc(100dvh-275px)] lg:grid-cols-[216px_minmax(0,1fr)] lg:gap-9">
         <aside
           aria-label="Task lists"
-          className="min-w-0 border-b border-white/[0.06] pb-5 lg:border-r lg:border-b-0 lg:pr-7 lg:pb-0"
+          className="min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-7 lg:pb-0"
         >
           <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
             {SMART_VIEWS.map((item) => {
@@ -685,15 +687,15 @@ export default function TaskHome({ onOpenHomework }) {
                   }}
                   aria-pressed={view === item.id}
                   aria-label={`${item.name} tasks`}
-                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-white/[0.055] text-gray-100' : 'text-gray-500 hover:bg-white/[0.025] hover:text-gray-300'}`}
+                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-secondary'}`}
                 >
                   <Icon
                     size={17}
-                    style={{ color: item.color }}
+                    style={{ color: themedAccent(item.color) }}
                     className="shrink-0"
                   />
                   <span>{item.name}</span>
-                  <span className="ml-auto pl-2 text-xs tabular-nums text-gray-500">
+                  <span className="ml-auto pl-2 text-xs tabular-nums text-muted">
                     {counts[item.id]}
                   </span>
                 </button>
@@ -701,13 +703,13 @@ export default function TaskHome({ onOpenHomework }) {
             })}
           </div>
           <div className="mt-4 flex items-center justify-between px-2 lg:mt-7">
-            <h2 className="text-[10px] font-semibold uppercase tracking-[0.13em] text-gray-500">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.13em] text-muted">
               My lists
             </h2>
             <button
               onClick={() => setListEditor({ list: null })}
               aria-label="Create a new list"
-              className="rounded-md p-1 text-gray-500 hover:bg-white/5 hover:text-gray-200"
+              className="rounded-md p-1 text-muted hover:bg-hover hover:text-ink"
             >
               <Plus size={15} />
             </button>
@@ -722,31 +724,31 @@ export default function TaskHome({ onOpenHomework }) {
                   setView(`list:${list.id}`);
                   setQuery('');
                 }}
-                className={`flex w-auto shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:w-full lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-white/[0.07] text-white' : 'text-gray-400 hover:bg-white/[0.035] hover:text-gray-200'}`}
+                className={`flex w-auto shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:w-full lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-ink'}`}
               >
                 <span
                   className="flex h-6 w-6 shrink-0 items-center justify-center"
                   style={{
-                    color: list.color,
+                    color: themedAccent(list.color),
                   }}
                 >
                   <ListTodo size={16} />
                 </span>
                 <span className="truncate">{list.name}</span>
-                <span className="ml-auto text-xs tabular-nums text-gray-500">
+                <span className="ml-auto text-xs tabular-nums text-muted">
                   {active.filter((row) => row.task.listId === list.id).length}
                 </span>
               </button>
             ))}
           </div>
-          <div className="mt-3 flex gap-1 border-t border-white/[0.06] pt-2 lg:mt-5 lg:block lg:space-y-1 lg:pt-4">
+          <div className="mt-3 flex gap-1 border-t border-line pt-2 lg:mt-5 lg:block lg:space-y-1 lg:pt-4">
             <button
               onClick={() => {
                 setView('flagged');
                 setQuery('');
               }}
               aria-pressed={view === 'flagged'}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'flagged' ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-200'}`}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'flagged' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
             >
               <Flag size={15} className="text-orange-400" />
               Flagged
@@ -760,7 +762,7 @@ export default function TaskHome({ onOpenHomework }) {
                 setQuery('');
               }}
               aria-pressed={view === 'deleted'}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'deleted' ? 'bg-white/[0.07] text-white' : 'text-gray-500 hover:text-gray-200'}`}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'deleted' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
             >
               <Trash2 size={15} />
               Recently deleted
@@ -777,22 +779,22 @@ export default function TaskHome({ onOpenHomework }) {
           </button>
         </aside>
         <section aria-label={title} className="flex min-w-0 flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/[0.065] pb-5">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
             <div className="flex items-center gap-3">
               <h2
                 className="text-2xl font-bold tracking-tight sm:text-3xl"
-                style={{ color: accent }}
+                style={{ color: themedAccent(accent) }}
               >
                 {title}
               </h2>
-              <span className="rounded-lg bg-white/5 px-2.5 py-1 text-xs tabular-nums text-gray-500">
+              <span className="rounded-lg bg-hover px-2.5 py-1 text-xs tabular-nums text-muted">
                 {rows.length}
               </span>
               {selectedList && (
                 <button
                   onClick={() => setListEditor({ list: selectedList })}
                   aria-label={`Edit ${selectedList.name} list`}
-                  className="rounded-lg p-1.5 text-gray-500 hover:text-gray-200"
+                  className="rounded-lg p-1.5 text-muted hover:text-ink"
                 >
                   <Pencil size={14} />
                 </button>
@@ -801,7 +803,7 @@ export default function TaskHome({ onOpenHomework }) {
             <div className="relative w-full sm:w-48">
               <Search
                 size={14}
-                className="pointer-events-none absolute top-3 left-3 text-gray-600"
+                className="pointer-events-none absolute top-3 left-3 text-faint"
               />
               <input
                 aria-label="Search tasks"
@@ -809,7 +811,7 @@ export default function TaskHome({ onOpenHomework }) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search this view"
-                className="w-full rounded-lg border border-white/[0.07] bg-white/[0.025] py-2.5 pr-3 pl-9 text-xs text-gray-200 outline-none placeholder:text-gray-600 focus:border-blue-400/60"
+                className="w-full rounded-lg border border-line bg-hover py-2.5 pr-3 pl-9 text-xs text-ink outline-none placeholder:text-faint focus:border-blue-400/60"
               />
             </div>
           </div>
@@ -819,7 +821,7 @@ export default function TaskHome({ onOpenHomework }) {
                 <div key={group}>
                   {group !== 'tasks' && (
                     <h3
-                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-red-400' : 'text-gray-400'}`}
+                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-red-400' : 'text-muted'}`}
                     >
                       {group === 'overdue'
                         ? 'Overdue'
@@ -839,7 +841,7 @@ export default function TaskHome({ onOpenHomework }) {
               <div className="mb-6 flex h-20 w-20 items-center justify-center text-blue-400/70">
                 <CircleCheck size={35} strokeWidth={1.25} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-200">
+              <h3 className="text-lg font-semibold text-ink">
                 {query
                   ? 'No matching tasks'
                   : view === 'today'
@@ -850,7 +852,7 @@ export default function TaskHome({ onOpenHomework }) {
                         ? 'Nothing in Recently deleted'
                         : 'A little room for what’s next'}
               </h3>
-              <p className="mt-2 max-w-xs text-sm leading-6 text-gray-500">
+              <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
                 {query
                   ? 'Try another title, note, or list name.'
                   : view === 'today'
@@ -882,11 +884,11 @@ export default function TaskHome({ onOpenHomework }) {
             </button>
           )}
           {!['completed', 'deleted'].includes(view) && doneRows.length > 0 && (
-            <div className="mt-7 border-t border-white/[0.065] pt-4">
+            <div className="mt-7 border-t border-line pt-4">
               <button
                 onClick={() => setShowCompleted(!showCompleted)}
                 aria-expanded={showCompleted}
-                className="flex items-center gap-2 text-xs text-gray-500 hover:text-gray-300"
+                className="flex items-center gap-2 text-xs text-muted hover:text-secondary"
               >
                 <ChevronDown
                   size={14}
@@ -901,14 +903,14 @@ export default function TaskHome({ onOpenHomework }) {
               )}
             </div>
           )}
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5 text-[11px] text-gray-600">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-[11px] text-faint">
             <span className="mt-5 flex items-center gap-1.5">
               <span className="h-1 w-1 rounded-full bg-green-500/70" />
               Saved in this browser
             </span>
             <button
               onClick={onOpenHomework}
-              className="mt-5 flex items-center gap-1.5 text-gray-500 hover:text-gray-200"
+              className="mt-5 flex items-center gap-1.5 text-muted hover:text-ink"
             >
               Your study plan is in Homework
               <ArrowRight size={12} />
@@ -939,7 +941,7 @@ export default function TaskHome({ onOpenHomework }) {
       {notice && (
         <div
           role="status"
-          className="fixed right-5 bottom-5 left-5 z-40 mx-auto flex w-fit max-w-[calc(100%-2.5rem)] items-center gap-5 rounded-xl border border-white/10 bg-[#25272b] px-4 py-3 text-xs text-gray-200 shadow-2xl"
+          className="fixed right-5 bottom-5 left-5 z-40 mx-auto flex w-fit max-w-[calc(100%-2.5rem)] items-center gap-5 rounded-xl border border-line bg-elevated px-4 py-3 text-xs text-ink shadow-2xl"
         >
           <span>{notice.message}</span>
           {notice.undo && (
@@ -956,7 +958,7 @@ export default function TaskHome({ onOpenHomework }) {
           <button
             onClick={() => setNotice(null)}
             aria-label="Dismiss notification"
-            className="text-gray-500"
+            className="text-muted"
           >
             <X size={14} />
           </button>
