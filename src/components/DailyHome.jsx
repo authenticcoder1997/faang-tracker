@@ -104,7 +104,7 @@ export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, 
             <Calendar size={16} />
             <span>Viewing: Day {selectedDayIndex + 1} of {totalDays}</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Home</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Homework</h1>
           <p className="text-gray-400 text-sm">One track a day — DSA, LLD, HLD, or Concurrency on rotation, with extra reps on weekends.</p>
         </div>
 
