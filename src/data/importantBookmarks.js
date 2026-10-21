@@ -1,7 +1,7 @@
-// Starting websites supplied for My Space. Changes are saved per browser.
+// Current Important folder supplied from Chrome. Changes are saved per browser.
 export const importantBookmarks = [
   {
-    title: 'ByteCodeBrew',
+    title: 'ByteCodeBrew — Interview preparation, in depth',
     url: 'https://bytecodebrew.com/',
     preview: '/link-previews/01-bytecodebrew.jpg',
   },
@@ -19,7 +19,6 @@ export const importantBookmarks = [
     title: 'Shreyansh Jain LLD',
     url: 'https://www.udemy.com/course/draft/5740968/learn/lecture/41700678#overview',
     preview: '/link-previews/04-udemy-lld.jpg',
-    previewNote: 'Sign-in preview',
   },
   {
     title: 'GKCS System Design',
@@ -33,37 +32,42 @@ export const importantBookmarks = [
     preview: '/link-previews/06-dp.jpg',
   },
   {
-    title: 'Graph For Beginners',
+    title:
+      'Graph For Beginners [Problems | Pattern | Sample Solutions] - LeetCode Discuss',
     url: 'https://leetcode.com/tag/graph/discuss/655708/Graph-For-Beginners-Problems-or-Pattern-or-Sample-Solutions',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/07-graph.jpg',
   },
   {
-    title: 'Greedy for Beginners',
+    title:
+      'Greedy for Beginners [Problems | Sample solutions] - LeetCode Discuss',
     url: 'https://leetcode.com/tag/greedy/discuss/669996/Greedy-for-Beginners-Problems-or-Sample-solutions',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/08-greedy.jpg',
   },
   {
-    title: 'Binary Search for Beginners',
+    title:
+      'Binary Search for Beginners [Problems | Patterns | Sample solutions] - LeetCode Discuss',
     url: 'https://leetcode.com/tag/binary-search/discuss/691825/Binary-Search-for-Beginners-Problems-or-Patterns-or-Sample-solutions',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/09-binary-search.jpg',
   },
   {
-    title: 'Microsoft & Amazon interview experience',
+    title:
+      '[NDA] | Microsoft | Amazon | Senior Software Engineer (Embedded Software) | India | Offers - LeetCode Discuss',
     url: 'https://leetcode.com/discuss/interview-experience/974067/nda-microsoft-amazon-senior-software-engineer-embedded-software-india-offers',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/10-interview-experience.jpg',
   },
   {
-    title: 'Important and Useful links from LeetCode',
+    title:
+      'Important and Useful links from all over the LeetCode - LeetCode Discuss',
     url: 'https://leetcode.com/discuss/general-discussion/665604/Important-and-Useful-links-from-all-over-the-Leetcode',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/11-leetcode-links.jpg',
   },
   {
-    title: 'Amazon SDE2 [50 posts in 1] DSA + LP + LLD/HLD',
+    title: 'Amazon SDE2 [50 posts in 1] DSA+LP+LLD/HLD - Discuss - LeetCode',
     url: 'https://leetcode.com/discuss/post/6075975/amazon-sde2-50-posts-in-1-dsalplldhld-by-mzmg/',
     folderPath: ['leetcode lists'],
     preview: '/link-previews/12-amazon-preparation.jpg',
@@ -79,66 +83,33 @@ export const importantBookmarks = [
     preview: '/link-previews/14-tuf.jpg',
   },
   {
-    title: 'Microsoft Careers',
+    title: 'Home | Microsoft Careers',
     url: 'https://careers.microsoft.com/v2/global/en/home.html',
     folderPath: ['Jobs Sites'],
     preview: '/link-previews/15-microsoft-jobs.jpg',
   },
   {
-    title: 'Google Careers',
+    title: 'Search for your career at Google.',
     url: 'https://www.google.com/about/careers/applications/',
     folderPath: ['Jobs Sites'],
     preview: '/link-previews/16-google-jobs.jpg',
   },
   {
-    title: 'Amazon Careers',
+    title: 'Amazon Careers: Impact the Future, Today',
     url: 'https://www.amazon.jobs/en/',
     folderPath: ['Jobs Sites'],
     preview: '/link-previews/17-amazon-jobs.jpg',
   },
   {
-    title: 'LinkedIn Jobs',
+    title: 'LinkedIn: Jobs | LinkedIn',
     url: 'https://www.linkedin.com/company/linkedin/jobs/',
     folderPath: ['Jobs Sites'],
     preview: '/link-previews/18-linkedin-jobs.jpg',
   },
   {
-    title: 'Atlassian Jobs',
+    title: 'Atlassian Jobs: View Listings for Open Positions | Atlassian',
     url: 'https://www.atlassian.com/company/careers/all-jobs?team=Engineering&location=India&search=',
     folderPath: ['Jobs Sites'],
     preview: '/link-previews/19-atlassian-jobs.jpg',
-  },
-  {
-    title: 'HLD Advanced',
-    url: 'https://www.udemy.com/course/system_design/learn/lecture/41794304?start=0#overview',
-    folderPath: ['LCO'],
-    preview: '/link-previews/04-udemy-lld.jpg',
-    previewNote: 'Sign-in preview',
-  },
-  {
-    title: 'LLD Advanced',
-    url: 'https://www.udemy.com/course/lld-from-basics-to-advanced/learn/lecture/41667944?start=0#overview',
-    folderPath: ['LCO'],
-    preview: '/link-previews/04-udemy-lld.jpg',
-    previewNote: 'Sign-in preview',
-  },
-  {
-    title: 'Spring boot | Udemy',
-    url: 'https://www.udemy.com/course/spring_boot/learn/lecture/43256562?start=0#overview',
-    folderPath: ['LCO'],
-    preview: '/link-previews/04-udemy-lld.jpg',
-    previewNote: 'Sign-in preview',
-  },
-  {
-    title: 'Java Advanced',
-    url: 'https://www.udemy.com/course/java_basics_to_advanced/learn/lecture/41998320?start=0#overview',
-    folderPath: ['LCO'],
-    preview: '/link-previews/04-udemy-lld.jpg',
-    previewNote: 'Sign-in preview',
-  },
-  {
-    title: 'LCO new page',
-    url: 'https://learn.ineuron.ai/one-neuron/lco-bundle/6555d0294562927d1030dfce',
-    folderPath: ['LCO'],
   },
 ];

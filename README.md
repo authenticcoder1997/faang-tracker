@@ -4,7 +4,7 @@ A personal workspace for everyday tasks, study plans, and notes.
 
 - **Home:** tasks grouped into lists, with voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
-- **Important links:** 24 supplied bookmarks, organized into their original folders with website screenshot cards, search, and bookmark import.
+- **Important links:** 19 supplied bookmarks, organized into their original folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.
 - **Notes:** an open notebook editor with automatic browser saving and optional cloud sync.
 - **Appearance:** consistent Light, Dark, and Liquid Glass themes throughout every page and dialog.
@@ -36,4 +36,4 @@ Tasks and lists remain in browser storage under `faang-tracker-tasks-v1`. Study 
 
 Browser-local data belongs to the browser and site address where it was created. Local development and the published website have separate saved data. When cloud access is unavailable, the interface reports local saving.
 
-Important links start with the supplied Important collection, including `leetcode lists`, `Jobs Sites`, and `LCO`. Additions and imports save under `my-space-important-bookmarks-v1` in this browser. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved website screenshots; sign-in pages and public course overviews are labeled where applicable. New imported websites use a domain fallback when no saved screenshot exists.
+Important links start with the supplied Important collection, including `leetcode lists` and `Jobs Sites`. Additions and imports save under `my-space-important-bookmarks-v1` in this browser. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved screenshots captured in Chrome, including the signed-in course page. New imported websites use a domain fallback when no saved screenshot exists.
