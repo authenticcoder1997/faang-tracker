@@ -11,11 +11,13 @@ import {
   ListTodo,
   PanelsTopLeft,
   MoreHorizontal,
+  Bookmark,
 } from 'lucide-react';
 import { useCloudStorage } from './hooks/useCloudStorage';
 import { useCloudNotes } from './hooks/useCloudNotes';
 import DailyHome from './components/DailyHome';
 import TaskHome from './components/TaskHome';
+import ImportantLinks from './components/ImportantLinks';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { useTheme } from './hooks/useTheme';
 import DsaTracker from './components/DsaTracker';
@@ -84,6 +86,7 @@ function App() {
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: ListTodo },
     { id: 'homework', label: 'Homework', icon: LayoutDashboard },
+    { id: 'important', label: 'Important links', icon: Bookmark },
     { id: 'dsa', label: 'DSA', icon: BookOpen },
     { id: 'lld', label: 'LLD', icon: Layers },
     { id: 'hld', label: 'HLD', icon: Monitor },
@@ -169,7 +172,10 @@ function App() {
             onOpenHomework={() => setActiveTab('homework')}
           />
         </div>
-        {isLoading && activeTab !== 'dashboard' ? (
+        <div className={activeTab === 'important' ? 'block' : 'hidden'}>
+          <ImportantLinks isActive={activeTab === 'important'} />
+        </div>
+        {isLoading && !['dashboard', 'important'].includes(activeTab) ? (
           <div
             className="flex min-h-[60vh] items-center justify-center"
             role="status"
