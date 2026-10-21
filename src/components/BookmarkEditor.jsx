@@ -263,7 +263,7 @@ export default function BookmarkEditor({
           </p>
         )}
         <p className="text-[11px] leading-5 text-faint">
-          Saved in this browser. Your browser’s bookmarks stay unchanged.
+          Websites sync through Firebase across your devices. Your browser’s bookmarks stay unchanged.
         </p>
         <div className="flex justify-end gap-2 border-t border-line pt-4">
           <button type="button" onClick={onClose} className="button-secondary">

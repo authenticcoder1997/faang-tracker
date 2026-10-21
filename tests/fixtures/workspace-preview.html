@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>My Space design preview</title></head>
+  <body><div style="padding:8px 14px;text-align:center;font:12px/1.5 system-ui;background:#e8edf6;color:#334155;border-bottom:1px solid #cbd5e1">Design preview · Sample data · Changes are temporary</div><div id="root"></div><script type="module">
+    import React from 'react';
+    import {createRoot} from 'react-dom/client';
+    import App from '/src/App.jsx';
+    import '/src/index.css';
+    import {WorkspaceContext} from '/src/hooks/workspaceContext.js';
+    import {createWorkspace} from '/src/lib/workspace.js';
+    import {applyTheme, DEFAULT_THEME} from '/src/lib/theme.js';
+    applyTheme(DEFAULT_THEME);
+    // An in-memory fixture for browser layout checks. No Firebase connection or persisted data.
+    function Preview() {
+      const [data, setData] = React.useState(createWorkspace);
+      const state = React.useRef(data);
+      const updateData = React.useCallback((change) => { const next = change(state.current); state.current = next; setData(next); return true; }, []);
+      return React.createElement(WorkspaceContext.Provider, {value:{data,updateData,user:{email:'Design preview'},ready:true,saving:false,error:'',retry(){},signOut(){},importNotice:''}}, React.createElement(App));
+    }
+    createRoot(document.getElementById('root')).render(React.createElement(Preview));
+  </script></body>
+</html>

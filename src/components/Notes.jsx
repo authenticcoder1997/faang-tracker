@@ -9,6 +9,7 @@ import {
   Mic,
 } from 'lucide-react';
 import { EmptyState, PageHeader } from './ui/Workspace';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 export default function Notes({
   notes,
@@ -16,9 +17,24 @@ export default function Notes({
   syncError = null,
   storageError = null,
 }) {
+  const { saving, error: workspaceError } = useWorkspace();
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [draftDirty, setDraftDirty] = useState(false);
+  const draftRevision = useRef(0);
+  const activeNote = notes.find((note) => note.id === activeNoteId);
+  const titleValue = draftDirty ? editTitle : activeNote?.title || '';
+  const contentValue = draftDirty ? editContent : activeNote?.content || '';
+  const currentDraft = useRef(null);
+
+  useEffect(() => {
+    currentDraft.current = {
+      id: activeNoteId,
+      title: titleValue,
+      content: contentValue,
+    };
+  }, [activeNoteId, titleValue, contentValue]);
 
   // AI State
   const [aiInput, setAiInput] = useState('');
@@ -30,50 +46,80 @@ export default function Notes({
 
   const mergeDraft = useCallback(
     (current) =>
-      current.map((note) =>
-        note.id === activeNoteId &&
-        (note.title !== editTitle || note.content !== editContent)
-          ? {
-              ...note,
-              title: editTitle,
-              content: editContent,
-              updatedAt: new Date().toISOString(),
-            }
-          : note,
-      ),
-    [activeNoteId, editTitle, editContent],
+      !draftDirty
+        ? current
+        : current.map((note) =>
+            note.id === activeNoteId &&
+            (note.title !== titleValue || note.content !== contentValue)
+              ? {
+                  ...note,
+                  title: titleValue,
+                  content: contentValue,
+                  updatedAt: new Date().toISOString(),
+                }
+              : note,
+          ),
+    [activeNoteId, titleValue, contentValue, draftDirty],
   );
 
   // Debounced auto-save
   useEffect(() => {
-    if (!activeNoteId) return;
+    if (!activeNoteId || !draftDirty) return;
     const timer = setTimeout(() => {
       const activeNote = notes.find((n) => n.id === activeNoteId);
       if (
         activeNote &&
-        (activeNote.title !== editTitle || activeNote.content !== editContent)
+        (activeNote.title !== titleValue || activeNote.content !== contentValue)
       ) {
-        setNotes(mergeDraft);
+        const revision = draftRevision.current;
+        Promise.resolve(setNotes(mergeDraft)).then((accepted) => {
+          if (accepted && revision === draftRevision.current)
+            setDraftDirty(false);
+        });
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [editTitle, editContent, activeNoteId, notes, setNotes, mergeDraft]);
+  }, [
+    titleValue,
+    contentValue,
+    activeNoteId,
+    draftDirty,
+    notes,
+    setNotes,
+    mergeDraft,
+  ]);
 
-  // A refresh should keep the last typed words even before the debounce fires.
+  // Flush the draft promptly when leaving the page; Firebase remains authoritative.
   useEffect(() => {
-    const flushDraft = () => {
+    const flushDraft = (event) => {
       const activeNote = notes.find((note) => note.id === activeNoteId);
       if (
-        !activeNote ||
-        (activeNote.title === editTitle && activeNote.content === editContent)
+        !draftDirty ||
+        (activeNote?.title === titleValue && activeNote?.content === contentValue)
       )
         return;
       setNotes(mergeDraft);
+      if (event.type === 'beforeunload') {
+        event.preventDefault();
+        event.returnValue = '';
+      }
     };
+    window.addEventListener('beforeunload', flushDraft);
     window.addEventListener('pagehide', flushDraft);
-    return () => window.removeEventListener('pagehide', flushDraft);
-  }, [activeNoteId, editTitle, editContent, notes, setNotes, mergeDraft]);
+    return () => {
+      window.removeEventListener('beforeunload', flushDraft);
+      window.removeEventListener('pagehide', flushDraft);
+    };
+  }, [
+    activeNoteId,
+    titleValue,
+    contentValue,
+    draftDirty,
+    notes,
+    setNotes,
+    mergeDraft,
+  ]);
 
   // Clean up speech recognition on unmount
   useEffect(() => {
@@ -92,6 +138,8 @@ export default function Notes({
       updatedAt: new Date().toISOString(),
     };
     setNotes((current) => [newNote, ...mergeDraft(current)]);
+    draftRevision.current += 1;
+    setDraftDirty(false);
     setActiveNoteId(newNote.id);
     setEditTitle(newNote.title);
     setEditContent(newNote.content);
@@ -100,7 +148,11 @@ export default function Notes({
   const deleteNote = (id) => {
     if (window.confirm('Delete this note?')) {
       setNotes((current) => mergeDraft(current).filter((n) => n.id !== id));
-      if (activeNoteId === id) setActiveNoteId(null);
+      if (activeNoteId === id) {
+        draftRevision.current += 1;
+        setDraftDirty(false);
+        setActiveNoteId(null);
+      }
     }
   };
 
@@ -108,11 +160,14 @@ export default function Notes({
     if (note.id === activeNoteId) return;
     const activeNote = notes.find((current) => current.id === activeNoteId);
     if (
+      draftDirty &&
       activeNote &&
-      (activeNote.title !== editTitle || activeNote.content !== editContent)
+      (activeNote.title !== titleValue || activeNote.content !== contentValue)
     ) {
       setNotes(mergeDraft);
     }
+    draftRevision.current += 1;
+    setDraftDirty(false);
     setActiveNoteId(note.id);
     setEditTitle(note.title);
     setEditContent(note.content);
@@ -219,12 +274,16 @@ export default function Notes({
       if (data.candidates && data.candidates[0].content.parts[0].text) {
         const generatedText = data.candidates[0].content.parts[0].text.trim();
 
-        setEditContent((prev) => {
-          const newContent = prev.trim()
-            ? `${prev}\n\n${generatedText}`
-            : generatedText;
-          return newContent;
-        });
+        const draft = currentDraft.current;
+        if (draft?.id !== activeNoteId) return;
+        draftRevision.current += 1;
+        setEditTitle(draft.title);
+        setEditContent(
+          draft.content.trim()
+            ? `${draft.content}\n\n${generatedText}`
+            : generatedText,
+        );
+        setDraftDirty(true);
 
         setTimeout(() => {
           if (textareaRef.current) {
@@ -243,20 +302,17 @@ export default function Notes({
     }
   };
 
-  const activeNote = notes.find((note) => note.id === activeNoteId);
   const hasUnsavedDraft =
-    activeNote &&
-    (activeNote.title !== editTitle || activeNote.content !== editContent);
+    draftDirty &&
+    (!activeNote || activeNote.title !== titleValue || activeNote.content !== contentValue);
   const saveStatus =
-    storageError && syncError
-      ? 'Saving unavailable · keep this page open'
-      : hasUnsavedDraft
+    workspaceError || syncError || storageError
+      ? 'Unable to save to Firebase · keep this page open'
+      : draftDirty && !activeNote
+        ? 'This note was deleted on another device. Copy your draft before closing.'
+      : hasUnsavedDraft || saving
         ? 'Saving…'
-        : storageError
-          ? 'Browser backup unavailable'
-          : syncError
-            ? 'Saved in this browser'
-            : 'Saved automatically';
+        : 'Saved to Firebase';
 
   return (
     <section className="page-frame">
@@ -336,8 +392,16 @@ export default function Notes({
                 <p className="eyebrow mb-3">Personal note</p>
                 <input
                   aria-label="Note title"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
+                  value={titleValue}
+                  onChange={(e) => {
+                    draftRevision.current += 1;
+                    setEditTitle(e.target.value);
+                    setEditContent(contentValue);
+                    setDraftDirty(
+                      e.target.value !== activeNote?.title ||
+                        contentValue !== activeNote?.content,
+                    );
+                  }}
                   className="w-full min-w-0 bg-transparent text-2xl font-semibold tracking-tight text-ink outline-none sm:text-3xl"
                   placeholder="Untitled note"
                 />
@@ -346,8 +410,16 @@ export default function Notes({
               <textarea
                 ref={textareaRef}
                 aria-label="Note content"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
+                value={contentValue}
+                onChange={(e) => {
+                  draftRevision.current += 1;
+                  setEditTitle(titleValue);
+                  setEditContent(e.target.value);
+                  setDraftDirty(
+                    titleValue !== activeNote?.title ||
+                      e.target.value !== activeNote?.content,
+                  );
+                }}
                 className="custom-scrollbar min-h-64 flex-1 resize-none bg-transparent py-6 text-[15px] leading-7 text-secondary outline-none"
                 placeholder="Start with whatever is on your mind…"
               />
@@ -365,11 +437,9 @@ export default function Notes({
                   <span
                     role="status"
                     className={
-                      storageError && syncError
+                      workspaceError || syncError || storageError
                         ? 'text-danger'
-                        : storageError
-                          ? 'text-warning'
-                          : ''
+                        : ''
                     }
                   >
                     {saveStatus}

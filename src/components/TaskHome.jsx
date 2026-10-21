@@ -557,7 +557,7 @@ function DeleteListDialog({
 }
 
 export default function TaskHome({ onOpenHomework, isActive = true }) {
-  const { data, updateData, error } = useTasks();
+  const { data, updateData, error, saving } = useTasks();
   const [view, setView] = useState('today');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
@@ -1164,8 +1164,8 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           )}
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-[11px] text-faint">
             <span className="mt-5 flex items-center gap-1.5">
-              <span className="h-1 w-1 rounded-full bg-success/70" />
-              Saved in this browser
+              <span className={`h-1 w-1 rounded-full ${error ? 'bg-warning' : saving ? 'bg-accent' : 'bg-success/70'}`} />
+              {error ? 'Unable to save to Firebase' : saving ? 'Saving to Firebase…' : 'Saved to Firebase'}
             </span>
             <button
               onClick={onOpenHomework}

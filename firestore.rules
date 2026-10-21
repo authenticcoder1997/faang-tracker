@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // One public shared workspace, explicitly selected by the owner.
+    match /workspaces/main {
+      allow get: if true;
+      allow create, update: if request.resource.data.schemaVersion == 1
+        && request.resource.data.tasks is map
+        && request.resource.data.tasks.lists is list
+        && request.resource.data.tasks.tasks is list
+        && request.resource.data.bookmarks is list
+        && request.resource.data.notes is list
+        && request.resource.data.appearance is map
+        && request.resource.data.progress is map;
+    }
+    // Read the original tracker once during migration. No legacy writes.
+    match /{legacyCollection}/my-personal-tracker {
+      allow get: if legacyCollection in [
+        'dsa_progress', 'lld_progress', 'hld_progress',
+        'concurrency_progress', 'user_notes'
+      ];
+    }
+  }
+}

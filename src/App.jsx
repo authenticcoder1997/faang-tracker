@@ -12,6 +12,9 @@ import {
   PanelsTopLeft,
   MoreHorizontal,
   Bookmark,
+  Cloud,
+  CloudOff,
+  LoaderCircle,
 } from 'lucide-react';
 import { useCloudStorage } from './hooks/useCloudStorage';
 import { useCloudNotes } from './hooks/useCloudNotes';
@@ -29,10 +32,18 @@ import { dsaTopics } from './data/dsaTopics';
 import { lldTopics } from './data/lldTopics';
 import { hldTopics } from './data/hldTopics';
 import { concurrencyTopics } from './data/concurrencyTopics';
+import { useWorkspace } from './hooks/useWorkspace';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { theme, setTheme, storageError } = useTheme();
+  const {
+    saving,
+    error: workspaceError,
+    retry,
+    importNotice,
+    importPending,
+  } = useWorkspace();
 
   const docId = 'my-personal-tracker';
 
@@ -79,7 +90,6 @@ function App() {
         setHld(hldTopics),
         setConcurrency(concurrencyTopics),
       ]);
-      window.location.reload();
     }
   };
 
@@ -120,8 +130,37 @@ function App() {
               <ThemeSwitcher
                 theme={theme}
                 onChange={setTheme}
-                storageError={storageError}
+                syncError={
+                  workspaceError ||
+                  (storageError ? 'Appearance could not be saved.' : '')
+                }
               />
+              <span
+                role="status"
+                className="header-utility"
+                title={
+                  workspaceError
+                    ? 'Changes need attention'
+                    : saving
+                      ? 'Saving to Firebase'
+                      : 'Synced with Firebase'
+                }
+              >
+                {workspaceError ? (
+                  <CloudOff size={17} className="text-danger" />
+                ) : saving ? (
+                  <LoaderCircle size={17} className="animate-spin text-muted" />
+                ) : (
+                  <Cloud size={17} className="text-accent" />
+                )}
+                <span className="sr-only">
+                  {workspaceError
+                    ? 'Unable to sync'
+                    : saving
+                      ? 'Saving to Firebase'
+                      : 'Synced with Firebase'}
+                </span>
+              </span>
               <details className="workspace-menu">
                 <summary
                   aria-label="Workspace options"
@@ -132,6 +171,9 @@ function App() {
                 </summary>
                 <div className="panel workspace-menu-content">
                   <p className="eyebrow px-3 pt-2 mb-2">Workspace</p>
+                  <p className="break-all px-3 pb-2 text-xs text-muted">
+                    Shared workspace · Firebase
+                  </p>
                   <a
                     href="https://github.com/authenticcoder1997/faang-tracker"
                     target="_blank"
@@ -166,6 +208,27 @@ function App() {
 
       {/* Main Content */}
       <main id="workspace" className="min-w-0">
+        {workspaceError && (
+          <div
+            role="alert"
+            className="mx-3 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-danger/25 bg-danger/5 p-4 text-sm text-danger sm:mx-6"
+          >
+            <p>{workspaceError}</p>
+            <button type="button" className="button-secondary" onClick={retry}>
+              Retry saving
+            </button>
+          </div>
+        )}
+        {importNotice && (
+          <div role="status" className="flex flex-wrap items-center gap-3 px-3 pt-4 text-xs text-muted sm:px-6">
+            <p>{importNotice}</p>
+            {importPending && (
+              <button type="button" className="button-secondary" onClick={retry}>
+                Retry connection
+              </button>
+            )}
+          </div>
+        )}
         <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
           <TaskHome
             isActive={activeTab === 'dashboard'}

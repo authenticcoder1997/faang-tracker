@@ -1,63 +1,50 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyTheme, readTheme, THEME_STORAGE_KEY } from './theme.js';
+import {
+  applyTheme,
+  DEFAULT_THEME,
+  isValidTheme,
+  normalizeTheme,
+  THEME_MODES,
+  THEME_PALETTES,
+} from './theme.js';
 
-const browser = (saved, dark = false) => ({
-  localStorage: {
-    getItem(key) {
-      assert.equal(key, THEME_STORAGE_KEY);
-      return saved;
-    },
-  },
-  matchMedia(query) {
-    assert.equal(query, '(prefers-color-scheme: dark)');
-    return { matches: dark };
-  },
+test('legacy appearance preferences migrate to the shared glass material', () => {
+  assert.deepEqual(normalizeTheme('light'), { mode: 'light', palette: 'neutral' });
+  assert.deepEqual(normalizeTheme('dark'), { mode: 'dark', palette: 'neutral' });
+  assert.deepEqual(normalizeTheme('glass'), { mode: 'light', palette: 'neutral' });
 });
 
-test('all valid saved themes take precedence over the system appearance', () => {
-  for (const theme of ['light', 'dark', 'glass']) {
-    assert.deepEqual(readTheme(browser(theme, theme === 'light')), {
-      theme,
-      storageError: false,
-    });
+test('invalid cloud preferences fall back per field without losing valid choices', () => {
+  for (const invalid of [undefined, null, 1, [], 'invalid', '__proto__']) {
+    assert.deepEqual(normalizeTheme(invalid), DEFAULT_THEME);
+    assert.equal(isValidTheme(invalid), false);
   }
-});
-
-test('missing and invalid saved preferences follow the system appearance', () => {
-  for (const saved of [null, '', 'sepia', '"dark"', '__proto__']) {
-    assert.equal(readTheme(browser(saved, true)).theme, 'dark');
-    assert.equal(readTheme(browser(saved, false)).theme, 'light');
-  }
-});
-
-test('blocked storage retains system preference and reports the saving limitation', () => {
-  const blocked = browser(null, false);
-  Object.defineProperty(blocked, 'localStorage', {
-    get() {
-      throw new Error('Storage disabled');
-    },
+  assert.deepEqual(normalizeTheme({ mode: 'dark', palette: 'unknown' }), {
+    mode: 'dark',
+    palette: 'neutral',
   });
-  assert.deepEqual(readTheme(blocked), { theme: 'light', storageError: true });
+  assert.deepEqual(normalizeTheme({ mode: 'invalid', palette: 'rose' }), {
+    mode: 'light',
+    palette: 'rose',
+  });
 });
 
-test('unavailable system appearance and non-browser contexts use dark', () => {
-  assert.deepEqual(readTheme(null), { theme: 'dark', storageError: false });
-  assert.deepEqual(readTheme({}), { theme: 'dark', storageError: false });
-  assert.equal(
-    readTheme({
-      matchMedia() {
-        throw new Error('Unavailable');
-      },
-    }).theme,
-    'dark',
-  );
+test('light and dark are independent of every glass palette', () => {
+  for (const mode of THEME_MODES) {
+    for (const palette of THEME_PALETTES) {
+      const input = { mode, palette };
+      assert.equal(isValidTheme(input), true);
+      assert.deepEqual(normalizeTheme(input), input);
+      assert.notEqual(normalizeTheme(input), input);
+    }
+  }
 });
 
-test('applying a theme updates native controls and clears stale dark classes', () => {
+test('applying preferences updates all appearance attributes and native controls', () => {
   const classes = new Set(['dark', 'other-class']);
   const root = {
-    dataset: {},
+    dataset: { theme: 'glass' },
     style: {},
     classList: {
       toggle(name, enabled) {
@@ -67,14 +54,22 @@ test('applying a theme updates native controls and clears stale dark classes', (
     },
   };
 
-  for (const theme of ['glass', 'dark', 'light']) {
-    assert.equal(applyTheme(theme, root), theme);
-    assert.equal(root.dataset.theme, theme);
-    assert.equal(classes.has('dark'), theme === 'dark');
-    assert.equal(root.style.colorScheme, theme === 'dark' ? 'dark' : 'light');
-    assert.equal(classes.has('other-class'), true);
+  for (const mode of THEME_MODES) {
+    for (const palette of THEME_PALETTES) {
+      assert.deepEqual(applyTheme({ mode, palette }, root), { mode, palette });
+      assert.equal(root.dataset.theme, mode);
+      assert.equal(root.dataset.palette, palette);
+      assert.equal(root.dataset.material, 'glass');
+      assert.equal(classes.has('dark'), mode === 'dark');
+      assert.equal(root.style.colorScheme, mode);
+      assert.equal(classes.has('other-class'), true);
+    }
   }
-  assert.equal(applyTheme('invalid', root), 'dark');
-  assert.equal(root.dataset.theme, 'dark');
-  assert.equal(applyTheme('glass', null), 'glass');
+  assert.deepEqual(applyTheme('invalid', root), DEFAULT_THEME);
+  assert.equal(root.dataset.theme, 'light');
+  assert.equal(classes.has('dark'), false);
+  assert.deepEqual(applyTheme({ mode: 'dark', palette: 'ocean' }, null), {
+    mode: 'dark',
+    palette: 'ocean',
+  });
 });

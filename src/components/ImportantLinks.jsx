@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   ArrowUpRight,
   Download,
@@ -11,12 +11,10 @@ import {
 import BookmarkEditor from './BookmarkEditor';
 import { EmptyState, PageHeader } from './ui/Workspace';
 import { importantBookmarks } from '../data/importantBookmarks';
+import { useWorkspace } from '../hooks/useWorkspace';
 import {
-  BOOKMARKS_STORAGE_KEY,
   buildBookmarkTree,
   normalizeBookmarks,
-  readBookmarks,
-  saveBookmarks,
 } from '../lib/bookmarks';
 
 const previews = new Map(
@@ -31,18 +29,6 @@ const previewNotes = new Map(
     bookmark.previewNote,
   ]),
 );
-
-function browserStorage() {
-  try {
-    return window.localStorage;
-  } catch {
-    return null;
-  }
-}
-
-function readImportantLinks() {
-  return readBookmarks(browserStorage(), importantBookmarks);
-}
 
 function pathStartsWith(path, prefix) {
   return prefix.every((segment, index) => path[index] === segment);
@@ -120,9 +106,10 @@ function WebsiteCard({ bookmark }) {
 }
 
 export default function ImportantLinks({ isActive = true }) {
-  const [initial] = useState(readImportantLinks);
-  const [bookmarks, setBookmarks] = useState(initial.bookmarks);
-  const [error, setError] = useState(initial.error);
+  const { data, updateData, saving, error: syncError } = useWorkspace();
+  const bookmarks = data.bookmarks;
+  const [operationError, setOperationError] = useState(null);
+  const error = syncError || operationError;
   const [editor, setEditor] = useState(null);
   const [selectedFolder, setSelectedFolder] = useState('all');
   const [search, setSearch] = useState('');
@@ -164,57 +151,42 @@ export default function ImportantLinks({ isActive = true }) {
     0,
   );
 
-  useEffect(() => {
-    function receive(event) {
-      if (event.key !== BOOKMARKS_STORAGE_KEY && event.key !== null) return;
-      const next = readImportantLinks();
-      setBookmarks(next.bookmarks);
-      setError(next.error);
-      setUndo(null);
-      setNotice('');
-    }
-    window.addEventListener('storage', receive);
-    return () => window.removeEventListener('storage', receive);
-  }, []);
-
   function update(change) {
-    const current = readImportantLinks();
-    if (current.error) {
-      setError(current.error);
-      return current.error;
+    let previous;
+    let next;
+    const accepted = updateData((current) => {
+      previous = current.bookmarks;
+      next = normalizeBookmarks(change(current.bookmarks));
+      return { ...current, bookmarks: next };
+    });
+    if (!accepted) {
+      const message = syncError || 'Your websites could not be updated. Please try again.';
+      setOperationError(message);
+      return message;
     }
-    const next = normalizeBookmarks(change(current.bookmarks));
-    const saved = saveBookmarks(browserStorage(), next);
-    if (saved.error) {
-      setError(saved.error);
-      return saved.error;
-    }
-    setBookmarks(next);
-    setError(null);
-    setUndo({ before: current.bookmarks, after: next });
+    setOperationError(null);
+    setUndo({ before: previous, after: next });
     setEditor(null);
     setNotice(
-      `${next.length} ${next.length === 1 ? 'website' : 'websites'} saved`,
+      `${next.length} ${next.length === 1 ? 'website' : 'websites'} in your collection`,
     );
     return null;
   }
 
   function restorePrevious() {
-    const current = readImportantLinks();
-    if (current.error) return setError(current.error);
-    if (JSON.stringify(current.bookmarks) !== JSON.stringify(undo.after)) {
-      setBookmarks(current.bookmarks);
-      setUndo(null);
-      return setNotice(
-        'Websites changed in another tab. Your newer changes were kept.',
-      );
-    }
-    const result = saveBookmarks(browserStorage(), undo.before);
-    if (result.error) return setError(result.error);
-    setBookmarks(undo.before);
-    setError(null);
+    if (!undo) return;
+    let changedElsewhere = false;
+    const accepted = updateData((current) => {
+      if (JSON.stringify(current.bookmarks) !== JSON.stringify(undo.after)) {
+        changedElsewhere = true;
+        return current;
+      }
+      return { ...current, bookmarks: undo.before };
+    });
+    if (!accepted) return setOperationError(syncError || 'Your websites could not be restored. Please try again.');
+    setOperationError(null);
     setUndo(null);
-    setNotice('Previous websites restored');
+    setNotice(changedElsewhere ? 'Websites changed on another device. Your newer changes were kept.' : 'Previous websites restored');
   }
 
   return (
@@ -399,7 +371,7 @@ export default function ImportantLinks({ isActive = true }) {
           {bookmarks.length} websites · {folderPaths.length}{' '}
           {folderPaths.length === 1 ? 'folder' : 'folders'}
         </p>
-        <p>Changes are saved in this browser.</p>
+        <p role="status">{error ? 'Unable to save to Firebase' : saving ? 'Saving to Firebase…' : 'Saved to Firebase'}</p>
       </footer>
 
       {editor && isActive && (

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import NoteModal from './NoteModal';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 function Difficulty({ value }) {
   const tone =
@@ -67,6 +68,7 @@ export default function StudyTracker({
   accessFilter = false,
   savingLocally = false,
 }) {
+  const { saving, error } = useWorkspace();
   const [query, setQuery] = useState('');
   const [difficulty, setDifficulty] = useState('All');
   const [context, setContext] = useState('All');
@@ -158,7 +160,7 @@ export default function StudyTracker({
   };
   const toggleItem = (itemId) =>
     setItems(
-      items.map((item) =>
+      (current) => current.map((item) =>
         item.id === itemId ? { ...item, completed: !item.completed } : item,
       ),
     );
@@ -332,11 +334,9 @@ export default function StudyTracker({
         <div className="progress-fill" style={{ width: `${percent}%` }} />
       </div>
 
-      {savingLocally && (
-        <p className="mb-5 text-xs text-muted" role="status">
-          Your progress is saved on this device. Cloud sync is unavailable.
-        </p>
-      )}
+      <p className={`mb-5 text-xs ${error || savingLocally ? 'text-warning' : 'text-muted'}`} role="status">
+        {error || savingLocally ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
+      </p>
 
       <div className="mb-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -526,7 +526,7 @@ export default function StudyTracker({
         onSave={(note) => {
           if (activeNote && activeNote.note !== note)
             setItems(
-              items.map((item) =>
+              (current) => current.map((item) =>
                 item.id === activeNote.id ? { ...item, note } : item,
               ),
             );

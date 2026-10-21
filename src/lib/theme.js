@@ -1,48 +1,50 @@
-export const THEME_STORAGE_KEY = 'my-space-theme';
-export const THEMES = ['light', 'dark', 'glass'];
+export const THEME_MODES = Object.freeze(['light', 'dark']);
+export const THEME_PALETTES = Object.freeze([
+  'neutral',
+  'ocean',
+  'violet',
+  'rose',
+  'amber',
+]);
+export const DEFAULT_THEME = Object.freeze({ mode: 'light', palette: 'neutral' });
 
-export function isValidTheme(theme) {
-  return THEMES.includes(theme);
+/** Keep old preferences useful while giving every appearance the glass material. */
+export function normalizeTheme(value) {
+  if (typeof value === 'string') {
+    return {
+      ...DEFAULT_THEME,
+      mode: value === 'dark' ? 'dark' : 'light',
+    };
+  }
+
+  return {
+    mode: THEME_MODES.includes(value?.mode) ? value.mode : DEFAULT_THEME.mode,
+    palette: THEME_PALETTES.includes(value?.palette)
+      ? value.palette
+      : DEFAULT_THEME.palette,
+  };
 }
 
-/** Read browser preferences without making storage access a requirement. */
-export function readTheme(
-  browser = typeof window === 'undefined' ? null : window,
-) {
-  let storageError = false;
-
-  try {
-    const saved = browser?.localStorage?.getItem(THEME_STORAGE_KEY);
-    if (isValidTheme(saved)) return { theme: saved, storageError };
-  } catch {
-    storageError = true;
-  }
-
-  try {
-    if (typeof browser?.matchMedia === 'function') {
-      return {
-        theme: browser.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light',
-        storageError,
-      };
-    }
-  } catch {
-    // An unavailable media query leaves a usable, deterministic default.
-  }
-
-  return { theme: 'dark', storageError };
+export function isValidTheme(value) {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    THEME_MODES.includes(value.mode) &&
+    THEME_PALETTES.includes(value.palette)
+  );
 }
 
 export function applyTheme(
-  theme,
+  value,
   root = typeof document === 'undefined' ? null : document.documentElement,
 ) {
-  const nextTheme = isValidTheme(theme) ? theme : 'dark';
+  const theme = normalizeTheme(value);
   if (root) {
-    root.dataset.theme = nextTheme;
-    root.classList.toggle('dark', nextTheme === 'dark');
-    root.style.colorScheme = nextTheme === 'dark' ? 'dark' : 'light';
+    root.dataset.theme = theme.mode;
+    root.dataset.palette = theme.palette;
+    root.dataset.material = 'glass';
+    root.classList.toggle('dark', theme.mode === 'dark');
+    root.style.colorScheme = theme.mode;
   }
-  return nextTheme;
+  return theme;
 }

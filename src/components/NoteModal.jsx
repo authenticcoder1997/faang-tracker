@@ -18,13 +18,18 @@ export default function NoteModal({
   const descriptionId = useId();
   const textareaRef = useRef(null);
   const recognitionRef = useRef(null);
+  const initialNoteRef = useRef(initialNote);
+
+  useEffect(() => {
+    initialNoteRef.current = initialNote;
+  }, [initialNote]);
 
   useEffect(() => {
     if (isOpen) {
-      setLocalNote(initialNote || '');
+      setLocalNote(initialNoteRef.current || '');
       setAiInput('');
     }
-  }, [isOpen, initialNote]);
+  }, [isOpen]);
 
   useEffect(() => {
     return () => {
@@ -206,7 +211,7 @@ export default function NoteModal({
               <Sparkles size={13} className="text-accent" aria-hidden="true" />
               Shape a rough thought
             </span>
-            <span>Saved when you close</span>
+            <span>Save to Firebase when you close</span>
           </div>
           <form
             onSubmit={handleAiSubmit}
