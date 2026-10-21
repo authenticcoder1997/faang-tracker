@@ -1,170 +1,19 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, CircleMinus, CirclePlus, Trophy, RotateCcw, PauseCircle, Sparkles, FileText, CheckCircle2, Circle } from 'lucide-react';
-import NoteModal from './NoteModal';
+import StudyTracker from './StudyTracker';
 import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 
 export default function DsaTracker({ items, setItems, savingLocally = false }) {
-  const [collapsedSections, setCollapsedSections] = useState({});
-  const [activeNoteItem, setActiveNoteItem] = useState(null);
-
-  const toggleItem = (id) => {
-    setItems(items.map(item =>
-      item.id === id ? { ...item, completed: !item.completed } : item
-    ));
-  };
-
-  const totalCompleted = items.filter(i => i.completed).length;
-  const overallPct = items.length > 0 ? Math.round((totalCompleted / items.length) * 100) : 0;
-
-  const completedDays = DSA_SECTIONS_LIST.filter(secObj => {
-    const sItems = items.filter(i => i.section === secObj.name);
-    return sItems.length > 0 && sItems.every(i => i.completed);
-  }).length;
-
   return (
-    <div className="bg-canvas min-h-screen text-secondary p-4 sm:p-6 md:p-10 font-sans">
-      <div className="max-w-4xl mx-auto">
-
-        {/* Top Progress Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-y-3 mb-8 border-b border-line pb-4">
-          <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0 flex-wrap">
-            <span className="hidden sm:inline text-sm font-medium text-muted">Progress</span>
-            <div className="relative w-24 sm:w-48 h-1.5 bg-selected rounded-full flex items-center shrink-0">
-              <div className="absolute h-1.5 bg-gradient-to-r from-green-600 to-green-400 rounded-full transition-all duration-300" style={{ width: `${overallPct}%` }}></div>
-              <div className="absolute w-3 h-3 bg-green-500 rounded-full shadow transition-all duration-300" style={{ left: `calc(${overallPct}% - 6px)` }}></div>
-            </div>
-            <div className="flex items-center gap-2 text-green-500 text-sm font-bold sm:ml-4">
-              <Trophy size={16} /> Day {completedDays}/{DSA_SECTIONS_LIST.length}
-              <span className="text-muted font-normal text-xs ml-1">({totalCompleted}/{items.length} problems)</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4 text-muted text-sm shrink-0">
-            <a href="https://takeuforward.org/plus" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-500 hover:text-green-400 font-medium">View on TakeUForward ↓</a>
-            <button className="flex items-center gap-1 hover:text-secondary"><RotateCcw size={14}/> Reset</button>
-            <button className="flex items-center gap-1 hover:text-secondary"><PauseCircle size={14}/> Pause</button>
-          </div>
-        </div>
-
-        {savingLocally && (
-          <p role="status" className="text-xs text-muted mb-4">
-            Progress saved on this device. Cloud sync is unavailable.
-          </p>
-        )}
-
-        {/* Accordion Sections */}
-        <div className="space-y-2 sm:space-y-4">
-          {DSA_SECTIONS_LIST.map((secObj, idx) => {
-            const section = secObj.name;
-            const sectionItems = items.filter(i => i.section === section);
-            const sectionCompleted = sectionItems.filter(i => i.completed).length;
-            const isFullyCompleted = sectionCompleted === sectionItems.length && sectionItems.length > 0;
-            const isCollapsed = collapsedSections[section] !== undefined ? collapsedSections[section] : true; // Default collapsed
-            const sectionPct = sectionItems.length > 0 ? Math.round((sectionCompleted / sectionItems.length) * 100) : 0;
-            const dateStr = secObj.date;
-
-            return (
-              <div key={section} className="w-full flex bg-surface flex-col rounded-xl border border-line transition-all shadow-lg shadow-black/10">
-                {/* Header */}
-                <div className="rounded-xl border border-transparent">
-                  <button
-                    className={`flex p-3 sm:p-[12px] px-3 sm:px-4 items-center justify-between w-full group text-ink rounded-t-xl hover:bg-selected ${!isCollapsed ? 'bg-selected' : ''}`}
-                    aria-expanded={!isCollapsed}
-                    onClick={() => setCollapsedSections(prev => ({...prev, [section]: !isCollapsed}))}
-                  >
-                    <div className="flex items-center justify-center gap-2 sm:gap-3 min-w-0">
-                      <div className="shrink-0 flex items-center justify-center">
-                        {isFullyCompleted ? (
-                          <CheckCircle2 size={18} className="text-green-500" />
-                        ) : (
-                          <Circle size={18} className="text-muted" />
-                        )}
-                      </div>
-                      <div className="flex text-left gap-1.5 text-sm sm:text-base font-bold min-w-0">
-                        <div className="font-medium truncate">{section}</div>
-                        <p className="font-medium whitespace-nowrap text-muted">({sectionCompleted}/{sectionItems.length})</p>
-                      </div>
-
-                      {!isCollapsed && sectionPct >= 0 && (
-                        <div className="relative hidden md:flex items-center gap-2 min-w-48 px-2 ml-4">
-                          <div className="relative flex-1 h-1.5 bg-selected rounded-full overflow-hidden">
-                            <div className="absolute left-0 top-0 h-full rounded-full transition-all duration-300 ease-out bg-green-500" style={{ width: `${sectionPct}%` }}></div>
-                          </div>
-                          <div className="text-xs text-muted whitespace-nowrap">{sectionPct}%</div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 sm:gap-2 ml-2 shrink-0 text-muted">
-                      <div className="p-1 hover:text-secondary transition-colors"><CircleMinus size={18} strokeWidth={1.5} /></div>
-                      <div className="hidden sm:flex items-center"><p className="text-xs sm:text-sm">{dateStr}</p></div>
-                      <div className="p-1 hover:text-secondary transition-colors"><CirclePlus size={18} strokeWidth={1.5} /></div>
-                      <div className={`ml-1 sm:ml-4 transition-transform duration-200 ${!isCollapsed ? 'rotate-180' : ''}`}>
-                        <ChevronDown size={20} strokeWidth={2} />
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Body */}
-                {!isCollapsed && (
-                  <div className="text-sm text-ink overflow-hidden border-t border-line">
-                    <div className="flex flex-col py-2 bg-surface rounded-b-xl">
-                      {sectionItems.map((item, iIdx) => (
-                        <div
-                          key={item.id}
-                          className={`flex justify-between items-center w-full gap-x-3 px-3 sm:px-4 py-2 hover:bg-selected transition-colors group cursor-pointer ${iIdx % 2 === 1 ? 'bg-hover' : ''}`}
-                          onClick={() => toggleItem(item.id)}
-                        >
-                          <div className="flex items-center gap-x-3 flex-1 min-w-0">
-                            <div className="shrink-0 flex items-center justify-center">
-                              {item.completed ? (
-                                <CheckCircle2 size={18} className="text-green-500" />
-                              ) : (
-                                <Circle size={18} className="text-faint group-hover:text-green-500/70 transition-colors" />
-                              )}
-                            </div>
-                            <a
-                              href={item.url || '#'}
-                              target={item.url ? "_blank" : "_self"}
-                              rel="noopener noreferrer"
-                              className={`text-[15px] sm:text-[17px] font-medium truncate transition-colors ${item.completed ? 'text-muted line-through' : 'text-muted group-hover:text-ink'}`}
-                              onClick={(e) => { e.stopPropagation(); }}
-                            >
-                              {item.title}
-                            </a>
-                          </div>
-                          <div className="shrink-0 flex items-center justify-center mr-1 sm:mr-2">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setActiveNoteItem(item); }}
-                              className={`p-1.5 rounded transition-colors ${item.note ? 'text-green-500 hover:bg-[#22c55e]/10' : 'text-muted hover:text-secondary hover:bg-selected'}`}
-                              title={item.note ? "Edit Notes" : "Add Notes"}
-                            >
-                              <FileText size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-      </div>
-
-      <NoteModal
-        isOpen={!!activeNoteItem}
-        onClose={() => setActiveNoteItem(null)}
-        initialNote={activeNoteItem?.note}
-        problemTitle={activeNoteItem?.title}
-        onSave={(newNote) => {
-          if (activeNoteItem && activeNoteItem.note !== newNote) {
-            setItems(items.map(i => i.id === activeNoteItem.id ? { ...i, note: newNote } : i));
-          }
-        }}
-      />
-    </div>
+    <StudyTracker
+      id="dsa"
+      title="Data structures & algorithms"
+      description="Build the foundations, one thoughtful solution at a time."
+      sourceLabel="TakeUForward"
+      sourceUrl="https://takeuforward.org/plus"
+      items={items}
+      setItems={setItems}
+      sectionDefinitions={DSA_SECTIONS_LIST}
+      initiallyCollapsed
+      savingLocally={savingLocally}
+    />
   );
 }

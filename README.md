@@ -1,16 +1,34 @@
-# React + Vite
+# My Space
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A personal workspace for everyday tasks, study plans, and notes.
 
-Currently, two official plugins are available:
+- **Home:** tasks grouped into lists, with daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
+- **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
+- **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.
+- **Notes:** an open notebook editor with automatic browser saving and optional cloud sync.
+- **Appearance:** consistent Light, Dark, and Liquid Glass themes throughout every page and dialog.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run locally
 
-## React Compiler
+```sh
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```sh
+npm run build
+npm run lint
+node --test src/lib/*.test.js src/hooks/*.test.js
+```
 
-## Expanding the Oxlint configuration
+## Design system
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+`src/index.css` defines the shared theme tokens, page frame, typography, surfaces, and controls. `src/components/ui/Workspace.jsx` contains reusable page headers, statistics, and empty states. All four study libraries use `StudyTracker.jsx`.
+
+Theme selection follows the system appearance until a preference is saved. It persists under `my-space-theme` and applies before the first render.
+
+## Saved data
+
+Tasks and lists remain in browser storage under `faang-tracker-tasks-v1`. Study progress keeps its existing per-track storage keys and Firebase integration. Notes use the existing `faang-tracker-notes` key, including migration of older note arrays; edits save locally before cloud requests. Cloud sync waits for a confirmed server read and merges pending local notes first.
+
+Browser-local data belongs to the browser and site address where it was created. Local development and the published website have separate saved data. When cloud access is unavailable, the interface reports local saving.

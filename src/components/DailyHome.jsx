@@ -1,555 +1,442 @@
-import React, { useState } from "react";
-import { Target, CheckCircle2, ArrowRight, Play, BookOpen, Layers, Monitor, Lock, Calendar, Check, ExternalLink, Sparkles, CheckCircle, ChevronLeft, ChevronRight, Coffee } from "lucide-react";
-import { DSA_SECTIONS_LIST } from "../data/dsaTopics";
+import React, { useState } from 'react';
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Circle,
+  Coffee,
+  ExternalLink,
+  Layers,
+  Lock,
+  Monitor,
+} from 'lucide-react';
+import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
+import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-// Day 0 of the schedule. All dayIndex values on DSA sections / LLD / HLD items are days offset from this date.
-const EPOCH = new Date(2026, 6, 31); // 31 Jul 2026
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+// All scheduled dayIndex values are offsets from 31 July 2026.
+const EPOCH = new Date(2026, 6, 31);
 
-function dateFromIndex(idx) {
-  const d = new Date(EPOCH);
-  d.setDate(d.getDate() + idx);
-  return d;
+function dateFromIndex(index) {
+  const date = new Date(EPOCH);
+  date.setDate(date.getDate() + index);
+  return date;
 }
 
-function formatIndex(idx) {
-  const d = dateFromIndex(idx);
-  return `${String(d.getDate()).padStart(2, "0")} ${MONTHS[d.getMonth()]}`;
+function formatIndex(index) {
+  const date = dateFromIndex(index);
+  return `${String(date.getDate()).padStart(2, '0')} ${MONTHS[date.getMonth()]}`;
 }
 
 function todayIndex() {
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
   return Math.round((startOfToday - EPOCH) / 86400000);
 }
 
-// Finds the closest upcoming scheduled date (by dayIndex) after `fromIndex`, for showing "next up on X" messaging.
 function nextScheduledIndex(items, fromIndex) {
   let best = null;
   for (const item of items) {
-    if (typeof item.dayIndex === "number" && item.dayIndex > fromIndex) {
+    if (typeof item.dayIndex === 'number' && item.dayIndex > fromIndex) {
       if (best === null || item.dayIndex < best) best = item.dayIndex;
     }
   }
   return best;
 }
 
-export default function DailyHome({ dsa, lld, hld, concurrency, setDsa, setLld, setHld, setConcurrency, setActiveTab }) {
-  const todayIdx = todayIndex();
-
-  const totalDays = Math.max(
-    todayIdx + 1,
-    ...DSA_SECTIONS_LIST.map(s => (typeof s.dayIndex === "number" ? s.dayIndex : -1)),
-    ...lld.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1)),
-    ...hld.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1)),
-    ...concurrency.map(i => (typeof i.dayIndex === "number" ? i.dayIndex : -1))
-  ) + 1;
-
-  const [selectedDayIndex, setSelectedDayIndex] = useState(Math.min(Math.max(todayIdx, 0), totalDays - 1));
-
-  const formattedSelectedDate = formatIndex(selectedDayIndex);
-
-  const dsaSectionsToday = DSA_SECTIONS_LIST.filter(s => s.dayIndex === selectedDayIndex);
-  const selectedSectionNames = dsaSectionsToday.map(s => s.name);
-  const todayDsaQuestions = selectedSectionNames.length
-    ? dsa.filter(i => selectedSectionNames.includes(i.section))
-    : [];
-  const todayDsaCompleted = todayDsaQuestions.filter(i => i.completed).length;
-
-  const nextLld = lld.filter(i => i.dayIndex === selectedDayIndex);
-  const nextHld = hld.filter(i => i.dayIndex === selectedDayIndex);
-  const nextConcurrency = concurrency.filter(i => i.dayIndex === selectedDayIndex);
-
-  const toggleDsa = (id) => {
-    if (!setDsa) return;
-    setDsa(dsa.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
-  };
-
-  const toggleLld = (id) => {
-    if (!setLld) return;
-    setLld(lld.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
-  };
-
-  const toggleHld = (id) => {
-    if (!setHld) return;
-    setHld(hld.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
-  };
-
-  const toggleConcurrency = (id) => {
-    if (!setConcurrency) return;
-    setConcurrency(concurrency.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
-  };
-
-  const totalDsa = dsa.filter(i => i.completed).length;
-  const totalLld = lld.filter(i => i.completed).length;
-  const totalHld = hld.filter(i => i.completed).length;
-  const totalConcurrency = concurrency.filter(i => i.completed).length;
-
-  const dsaAllDone = totalDsa === dsa.length;
-  const lldAllDone = totalLld === lld.length;
-  const hldAllDone = totalHld === hld.length;
-  const concurrencyAllDone = totalConcurrency === concurrency.length;
-
-  const dsaNextIdx = nextScheduledIndex(DSA_SECTIONS_LIST, selectedDayIndex);
-  const lldNextIdx = nextScheduledIndex(lld, selectedDayIndex);
-  const hldNextIdx = nextScheduledIndex(hld, selectedDayIndex);
-  const concurrencyNextIdx = nextScheduledIndex(concurrency, selectedDayIndex);
+function AgendaSection({ track, onOpen }) {
+  const Icon = track.icon;
+  const completed = track.items.filter((item) => item.completed).length;
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 max-w-5xl mx-auto font-sans">
-      {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-green-500 font-semibold text-sm mb-2">
-            <Calendar size={16} />
-            <span>Viewing: Day {selectedDayIndex + 1} of {totalDays}</span>
+    <section
+      className="panel min-w-0 overflow-hidden"
+      aria-labelledby={`agenda-${track.id}`}
+    >
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-5 sm:px-6">
+        <div className="min-w-0">
+          <div className="mb-1.5 flex items-center gap-2.5">
+            <Icon size={17} className="shrink-0 text-accent" />
+            <h3 id={`agenda-${track.id}`} className="section-heading">
+              {track.title}
+            </h3>
+            {track.items.length > 0 && (
+              <span className="status-pill tabular-nums">
+                {completed}/{track.items.length}
+              </span>
+            )}
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-ink mb-2">Homework</h1>
-          <p className="text-muted text-sm">One track a day — DSA, LLD, HLD, or Concurrency on rotation, with extra reps on weekends.</p>
+          <p className="max-w-lg text-xs leading-5 text-muted">
+            {track.subtitle}
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => onOpen(track.id)}
+          className="inline-flex shrink-0 items-center gap-1.5 py-0.5 text-xs font-medium text-accent hover:opacity-75"
+          aria-label={`View all ${track.label}`}
+        >
+          View track <ArrowRight size={13} />
+        </button>
+      </header>
 
-
-        {/* Date Selector */}
-        <div className="bg-surface border border-line rounded-lg p-2 flex items-center gap-2 w-full sm:w-auto">
-          <button
-            onClick={() => setSelectedDayIndex(todayIdx)}
-            className="px-3 py-1.5 bg-field border border-line text-secondary hover:text-ink text-xs font-semibold rounded hover:bg-selected transition-colors hidden sm:block"
-          >
-            Today
-          </button>
-
-          <button
-            onClick={() => setSelectedDayIndex(prev => Math.max(0, prev - 1))}
-            disabled={selectedDayIndex <= 0}
-            className="p-1.5 text-muted hover:text-ink hover:bg-selected rounded disabled:opacity-30 transition-colors"
-          >
-            <ChevronLeft size={18} />
-          </button>
-
-          <select
-            id="date-selector"
-            value={selectedDayIndex}
-            onChange={(e) => setSelectedDayIndex(Number(e.target.value))}
-            className="bg-transparent text-ink text-sm focus:ring-0 focus:border-0 block w-full outline-none cursor-pointer text-center appearance-none"
-            style={{ textAlignLast: 'center' }}
-          >
-            {Array.from({ length: totalDays }).map((_, idx) => (
-              <option key={idx} value={idx} className="bg-field">
-                {formatIndex(idx)}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={() => setSelectedDayIndex(prev => Math.min(totalDays - 1, prev + 1))}
-            disabled={selectedDayIndex >= totalDays - 1}
-            className="p-1.5 text-muted hover:text-ink hover:bg-selected rounded disabled:opacity-30 transition-colors"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-
-      </div>
-
-      {/* Progress Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("dsa")}>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-green-500 font-semibold flex items-center gap-2"><BookOpen size={18}/> DSA</h3>
-            <span className="text-xs text-muted font-mono">{totalDsa}/{dsa.length}</span>
-          </div>
-          <div className="w-full bg-surface rounded-full h-2 mb-2">
-            <div className="bg-gradient-to-r from-green-600 to-green-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalDsa/dsa.length)*100}%` }}></div>
-          </div>
-          <p className="text-xs text-muted">TakeUForward Concept Revision →</p>
-        </div>
-
-        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("lld")}>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-emerald-400 font-semibold flex items-center gap-2"><Layers size={18}/> LLD</h3>
-            <span className="text-xs text-muted font-mono">{totalLld}/{lld.length}</span>
-          </div>
-          <div className="w-full bg-surface rounded-full h-2 mb-2">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalLld/lld.length)*100}%` }}></div>
-          </div>
-          <p className="text-xs text-muted">Algomaster 1 Daily Practice →</p>
-        </div>
-
-        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("hld")}>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-teal-400 font-semibold flex items-center gap-2"><Monitor size={18}/> HLD</h3>
-            <span className="text-xs text-muted font-mono">{totalHld}/{hld.length}</span>
-          </div>
-          <div className="w-full bg-surface rounded-full h-2 mb-2">
-            <div className="bg-gradient-to-r from-teal-600 to-teal-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalHld/hld.length)*100}%` }}></div>
-          </div>
-          <p className="text-xs text-muted">HelloInterview Breakdown →</p>
-        </div>
-
-        <div className="bg-surface border border-line rounded-xl p-5 hover:border-line hover:-translate-y-0.5 shadow-lg shadow-black/20 transition-all cursor-pointer" onClick={() => setActiveTab("concurrency")}>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-violet-400 font-semibold flex items-center gap-2"><Lock size={18}/> Concurrency</h3>
-            <span className="text-xs text-muted font-mono">{totalConcurrency}/{concurrency.length}</span>
-          </div>
-          <div className="w-full bg-surface rounded-full h-2 mb-2">
-            <div className="bg-gradient-to-r from-violet-600 to-violet-400 h-2 rounded-full transition-all duration-300" style={{ width: `${(totalConcurrency/concurrency.length)*100}%` }}></div>
-          </div>
-          <p className="text-xs text-muted">Algomaster Concurrency Practice →</p>
-        </div>
-      </div>
-
-      {/* Main Focus Container */}
-      <div className="space-y-6">
-
-        {/* DSA Today Scheduled Questions */}
-        <div className="bg-surface border border-line rounded-xl overflow-hidden shadow-lg shadow-black/20">
-          <div className="p-5 border-b border-line flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-field">
-            <div className="flex items-center gap-2">
-              <Target size={20} className="text-green-500" />
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-ink flex items-center gap-2">
-                  DSA Questions {selectedSectionNames.length > 0 && <><span className="text-muted font-normal ml-1">for</span> <span className="text-green-400">{selectedSectionNames.join(" & ")}</span></>}
-                </h2>
-                <p className="text-xs text-muted">Scheduled for {formattedSelectedDate} {selectedSectionNames.length > 0 && `• ${todayDsaCompleted}/${todayDsaQuestions.length} completed`}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setActiveTab("dsa")}
-              className="text-xs text-green-400 hover:text-green-300 font-medium flex items-center gap-1 self-start sm:self-auto"
+      {track.items.length > 0 ? (
+        <ul className="divide-y divide-line">
+          {track.items.map((item, index) => (
+            <li
+              key={item.id}
+              className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
             >
-              View All DSA <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {todayDsaQuestions.length > 0 ? (
-            <div className="divide-y divide-line">
-              {todayDsaQuestions.map((q, idx) => (
-                <div
-                  key={q.id}
-                  className={`p-4 flex items-center justify-between hover:bg-selected transition-colors ${q.completed ? "bg-green-950/10" : ""}`}
+              <button
+                type="button"
+                onClick={() => track.toggle(item.id)}
+                aria-pressed={!!item.completed}
+                aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
+                title={item.completed ? 'Mark incomplete' : 'Mark complete'}
+                className="completion-button mt-0.5 shrink-0"
+              >
+                {item.completed ? (
+                  <CheckCircle2 size={21} />
+                ) : (
+                  <Circle size={21} />
+                )}
+              </button>
+              <div className="min-w-0 flex-1">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`break-words text-sm font-semibold leading-6 transition-colors hover:text-accent ${item.completed ? 'text-muted line-through' : 'text-ink'}`}
                 >
-                  <div className="flex items-center gap-3 min-w-0 pr-4">
-                    <button
-                      onClick={() => toggleDsa(q.id)}
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                        q.completed ? "bg-green-500 border-green-500 text-on-success" : "border-line hover:border-green-400"
-                      }`}
-                      title={q.completed ? "Mark as Incomplete" : "Mark as Done"}
-                    >
-                      {q.completed && <Check size={12} strokeWidth={3} />}
-                    </button>
-                    <div className="min-w-0">
-                      <span className="text-xs text-muted font-mono mr-2">#{idx + 1}</span>
-                      <a
-                        href={q.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`text-sm font-medium hover:text-green-400 transition-colors ${
-                          q.completed ? "line-through text-muted" : "text-ink"
-                        }`}
-                      >
-                        {q.title}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <a
-                      href={q.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-selected hover:bg-green-500 hover:text-on-success text-secondary rounded transition-all"
-                    >
-                      Solve <ExternalLink size={12} />
-                    </a>
-                  </div>
+                  {item.title}
+                </a>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
+                  {track.id === 'dsa' ? (
+                    <span className="tabular-nums">Question {index + 1}</span>
+                  ) : (
+                    <span>{item.topic || item.section || 'Breakdown'}</span>
+                  )}
+                  {item.difficulty && (
+                    <span className="status-pill">{item.difficulty}</span>
+                  )}
+                  {item.premium && (
+                    <span className="status-pill text-warning">Premium</span>
+                  )}
                 </div>
-              ))}
-            </div>
-          ) : dsaAllDone ? (
-            <div className="p-8 text-center bg-surface">
-              <CheckCircle2 size={40} className="text-green-500 mx-auto mb-3" />
-              <p className="text-base font-semibold text-ink">DSA Roadmap Complete!</p>
-              <p className="text-sm text-muted mt-2">All {dsa.length} problems solved. Legendary.</p>
-            </div>
-          ) : (
-            <div className="p-8 text-center bg-surface">
-              <Coffee size={32} className="text-faint mx-auto mb-3" />
-              <p className="text-base font-semibold text-ink">Rest day for DSA</p>
-              <p className="text-sm text-muted mt-2">
-                {dsaNextIdx !== null ? <>Next DSA day is <span className="text-green-400">{formatIndex(dsaNextIdx)}</span>.</> : "Nothing else scheduled."}
-              </p>
-            </div>
-          )}
+                {item.description && (
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                    {item.description}
+                  </p>
+                )}
+              </div>
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${item.title} on ${track.source}`}
+                title={`Open on ${track.source}`}
+                className="icon-button -mr-1 shrink-0"
+              >
+                <ExternalLink size={15} />
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="agenda-empty">
+          <EmptyState
+            icon={track.allDone ? CheckCircle2 : Coffee}
+            title={track.allDone ? `${track.label} complete` : 'A lighter day'}
+            description={
+              track.allDone
+                ? `All ${track.total} ${track.completionLabel} completed.`
+                : track.nextIndex !== null
+                  ? `Your next ${track.label} session is on ${formatIndex(track.nextIndex)}.`
+                  : `No more ${track.label} sessions are scheduled.`
+            }
+          />
         </div>
+      )}
+    </section>
+  );
+}
 
-        {/* Daily LLD, HLD & Concurrency Targets */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+export default function DailyHome({
+  dsa,
+  lld,
+  hld,
+  concurrency,
+  setDsa,
+  setLld,
+  setHld,
+  setConcurrency,
+  setActiveTab,
+}) {
+  const todayIdx = todayIndex();
+  const totalDays =
+    Math.max(
+      todayIdx + 1,
+      ...DSA_SECTIONS_LIST.map((section) =>
+        typeof section.dayIndex === 'number' ? section.dayIndex : -1,
+      ),
+      ...lld.map((item) =>
+        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
+      ),
+      ...hld.map((item) =>
+        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
+      ),
+      ...concurrency.map((item) =>
+        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
+      ),
+    ) + 1;
+  const [selectedDayIndex, setSelectedDayIndex] = useState(
+    Math.min(Math.max(todayIdx, 0), totalDays - 1),
+  );
 
-          {/* LLD */}
-          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Layers size={18} className="text-emerald-400" />
-                  <h3 className="text-sm font-bold text-ink">LLD Practice{nextLld.length > 1 ? ` (${nextLld.length} today)` : ""}</h3>
-                </div>
-                <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">Algomaster</span>
-              </div>
+  const selectedSectionNames = DSA_SECTIONS_LIST.filter(
+    (section) => section.dayIndex === selectedDayIndex,
+  ).map((section) => section.name);
+  const todayDsaQuestions = selectedSectionNames.length
+    ? dsa.filter((item) => selectedSectionNames.includes(item.section))
+    : [];
+  const nextLld = lld.filter((item) => item.dayIndex === selectedDayIndex);
+  const nextHld = hld.filter((item) => item.dayIndex === selectedDayIndex);
+  const nextConcurrency = concurrency.filter(
+    (item) => item.dayIndex === selectedDayIndex,
+  );
 
-              {nextLld.length > 0 ? (
-                <div className="space-y-3">
-                  {nextLld.map(item => (
-                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="flex items-start gap-3">
-                          <button
-                            onClick={() => toggleLld(item.id)}
-                            className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-emerald-500 border-emerald-500 text-on-success" : "border-line hover:border-emerald-400"
-                            }`}
-                            title="Mark as Done"
-                          >
-                            {item.completed && <Check size={12} strokeWidth={3} />}
-                          </button>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-muted">{item.section}</span>
-                              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                {item.difficulty}
-                              </span>
-                            </div>
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-base font-semibold text-ink hover:text-emerald-400 transition-colors"
-                            >
-                              {item.title}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
+  function toggle(items, setItems, id) {
+    if (!setItems) return;
+    setItems(
+      items.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item,
+      ),
+    );
+  }
 
-                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
-                        {item.description}
-                      </p>
+  const totalDsa = dsa.filter((item) => item.completed).length;
+  const totalLld = lld.filter((item) => item.completed).length;
+  const totalHld = hld.filter((item) => item.completed).length;
+  const totalConcurrency = concurrency.filter((item) => item.completed).length;
+  const selectedItems = [
+    ...todayDsaQuestions,
+    ...nextLld,
+    ...nextHld,
+    ...nextConcurrency,
+  ];
+  const selectedCompleted = selectedItems.filter(
+    (item) => item.completed,
+  ).length;
+  const selectedProgress = selectedItems.length
+    ? Math.round((selectedCompleted / selectedItems.length) * 100)
+    : 0;
+  const selectedWeekday = new Intl.DateTimeFormat('en', {
+    weekday: 'long',
+  }).format(dateFromIndex(selectedDayIndex));
 
-                      <div className="flex items-center justify-between pt-1">
-                        <button
-                          onClick={() => toggleLld(item.id)}
-                          className="text-xs text-muted hover:text-emerald-400 flex items-center gap-1.5 transition-colors"
-                        >
-                          <CheckCircle size={14} /> Click checkbox when solved
-                        </button>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded hover:bg-emerald-500 hover:text-on-success transition-all"
-                        >
-                          <Play size={12} /> Solve on Algomaster
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : lldAllDone ? (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <CheckCircle2 size={32} className="text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">All {lld.length} LLD problems completed!</p>
-                  <p className="text-xs text-muted mt-1">Awesome job mastering Low-Level Design.</p>
-                </div>
-              ) : (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <Coffee size={28} className="text-faint mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">Rest day for LLD</p>
-                  <p className="text-xs text-muted mt-1">
-                    {lldNextIdx !== null ? <>Next LLD day is <span className="text-emerald-400">{formatIndex(lldNextIdx)}</span>.</> : "Nothing else scheduled."}
-                  </p>
-                </div>
-              )}
+  const tracks = [
+    {
+      id: 'dsa',
+      label: 'DSA',
+      title: 'DSA practice',
+      icon: BookOpen,
+      subtitle: selectedSectionNames.length
+        ? selectedSectionNames.join(' & ')
+        : 'Concept revision · TakeUForward',
+      items: todayDsaQuestions,
+      total: dsa.length,
+      allDone: totalDsa === dsa.length,
+      nextIndex: nextScheduledIndex(DSA_SECTIONS_LIST, selectedDayIndex),
+      toggle: (id) => toggle(dsa, setDsa, id),
+      source: 'TakeUForward',
+      completionLabel: 'DSA problems',
+    },
+    {
+      id: 'lld',
+      label: 'LLD',
+      title: 'Low-level design',
+      icon: Layers,
+      subtitle: 'Design patterns & practice · Algomaster',
+      items: nextLld,
+      total: lld.length,
+      allDone: totalLld === lld.length,
+      nextIndex: nextScheduledIndex(lld, selectedDayIndex),
+      toggle: (id) => toggle(lld, setLld, id),
+      source: 'Algomaster',
+      completionLabel: 'LLD problems',
+    },
+    {
+      id: 'hld',
+      label: 'HLD',
+      title: 'System design',
+      icon: Monitor,
+      subtitle: 'System breakdowns · HelloInterview',
+      items: nextHld,
+      total: hld.length,
+      allDone: totalHld === hld.length,
+      nextIndex: nextScheduledIndex(hld, selectedDayIndex),
+      toggle: (id) => toggle(hld, setHld, id),
+      source: 'HelloInterview',
+      completionLabel: 'HLD breakdowns',
+    },
+    {
+      id: 'concurrency',
+      label: 'Concurrency',
+      title: 'Concurrency',
+      icon: Lock,
+      subtitle: 'Threading & coordination · Algomaster',
+      items: nextConcurrency,
+      total: concurrency.length,
+      allDone: totalConcurrency === concurrency.length,
+      nextIndex: nextScheduledIndex(concurrency, selectedDayIndex),
+      toggle: (id) => toggle(concurrency, setConcurrency, id),
+      source: 'Algomaster',
+      completionLabel: 'concurrency problems',
+    },
+  ];
+
+  return (
+    <div className="page-frame">
+      <PageHeader
+        eyebrow={`Study plan · Day ${selectedDayIndex + 1} of ${totalDays}`}
+        title="Homework"
+        description="A focused daily agenda for algorithms, design, and concurrency."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedDayIndex(todayIdx)}
+              className="button-secondary"
+            >
+              Today
+            </button>
+            <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedDayIndex((previous) => Math.max(0, previous - 1))
+                }
+                disabled={selectedDayIndex <= 0}
+                aria-label="Previous study day"
+                className="icon-button disabled:cursor-default disabled:opacity-30"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <label htmlFor="date-selector" className="sr-only">
+                Study date
+              </label>
+              <select
+                id="date-selector"
+                value={selectedDayIndex}
+                onChange={(event) =>
+                  setSelectedDayIndex(Number(event.target.value))
+                }
+                className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
+                style={{ textAlignLast: 'center' }}
+              >
+                {Array.from({ length: totalDays }, (_, index) => (
+                  <option key={index} value={index}>
+                    {formatIndex(index)}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedDayIndex((previous) =>
+                    Math.min(totalDays - 1, previous + 1),
+                  )
+                }
+                disabled={selectedDayIndex >= totalDays - 1}
+                aria-label="Next study day"
+                className="icon-button disabled:cursor-default disabled:opacity-30"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
           </div>
+        }
+      />
 
-          {/* HLD */}
-          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Monitor size={18} className="text-teal-400" />
-                  <h3 className="text-sm font-bold text-ink">HLD Breakdown{nextHld.length > 1 ? ` (${nextHld.length} today)` : ""}</h3>
-                </div>
-                <span className="text-xs bg-teal-500/10 text-teal-400 border border-teal-500/20 px-2 py-0.5 rounded">HelloInterview</span>
-              </div>
+      <StatsStrip
+        items={[
+          {
+            label: 'DSA',
+            value: `${totalDsa}/${dsa.length}`,
+            detail: 'problems completed',
+          },
+          {
+            label: 'LLD',
+            value: `${totalLld}/${lld.length}`,
+            detail: 'problems completed',
+          },
+          {
+            label: 'HLD',
+            value: `${totalHld}/${hld.length}`,
+            detail: 'breakdowns completed',
+          },
+          {
+            label: 'Concurrency',
+            value: `${totalConcurrency}/${concurrency.length}`,
+            detail: 'problems completed',
+          },
+        ]}
+      />
 
-              {nextHld.length > 0 ? (
-                <div className="space-y-3">
-                  {nextHld.map(item => (
-                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="flex items-start gap-3">
-                          <button
-                            onClick={() => toggleHld(item.id)}
-                            className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-teal-500 border-teal-500 text-on-success" : "border-line hover:border-teal-400"
-                            }`}
-                            title="Mark as Done"
-                          >
-                            {item.completed && <Check size={12} strokeWidth={3} />}
-                          </button>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-muted">{item.section || "Breakdown"}</span>
-                              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                                {item.difficulty}
-                              </span>
-                            </div>
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-base font-semibold text-ink hover:text-teal-400 transition-colors"
-                            >
-                              {item.title}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
-                        {item.description}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <button
-                          onClick={() => toggleHld(item.id)}
-                          className="text-xs text-muted hover:text-teal-400 flex items-center gap-1.5 transition-colors"
-                        >
-                          <CheckCircle size={14} /> Click checkbox when read
-                        </button>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-teal-500/20 text-teal-400 border border-teal-500/30 rounded hover:bg-teal-500 hover:text-on-success transition-all"
-                        >
-                          <Play size={12} /> Read on HelloInterview
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : hldAllDone ? (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <CheckCircle2 size={32} className="text-teal-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">All {hld.length} HLD breakdowns completed!</p>
-                  <p className="text-xs text-muted mt-1">Awesome job mastering System Design.</p>
-                </div>
-              ) : (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <Coffee size={28} className="text-faint mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">Rest day for HLD</p>
-                  <p className="text-xs text-muted mt-1">
-                    {hldNextIdx !== null ? <>Next HLD day is <span className="text-teal-400">{formatIndex(hldNextIdx)}</span>.</> : "Nothing else scheduled."}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Concurrency */}
-          <div className="bg-surface border border-line rounded-xl p-5 flex flex-col justify-between shadow-lg shadow-black/20">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Lock size={18} className="text-violet-400" />
-                  <h3 className="text-sm font-bold text-ink">Concurrency{nextConcurrency.length > 1 ? ` (${nextConcurrency.length} today)` : ""}</h3>
-                </div>
-                <span className="text-xs bg-violet-500/10 text-violet-400 border border-violet-500/20 px-2 py-0.5 rounded">Algomaster</span>
-              </div>
-
-              {nextConcurrency.length > 0 ? (
-                <div className="space-y-3">
-                  {nextConcurrency.map(item => (
-                    <div key={item.id} className="bg-field p-4 rounded-lg border border-line">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <div className="flex items-start gap-3">
-                          <button
-                            onClick={() => toggleConcurrency(item.id)}
-                            className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-                              item.completed ? "bg-violet-500 border-violet-500 text-on-success" : "border-line hover:border-violet-400"
-                            }`}
-                            title="Mark as Done"
-                          >
-                            {item.completed && <Check size={12} strokeWidth={3} />}
-                          </button>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="text-xs text-muted">{item.topic}</span>
-                              <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                                {item.difficulty}
-                              </span>
-                              {item.premium && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider text-amber-400 border-amber-400/30 bg-amber-400/10">
-                                  Premium
-                                </span>
-                              )}
-                            </div>
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-base font-semibold text-ink hover:text-violet-400 transition-colors"
-                            >
-                              {item.title}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-muted mt-2 mb-4 leading-relaxed bg-surface p-2.5 rounded border border-line">
-                        {item.description}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <button
-                          onClick={() => toggleConcurrency(item.id)}
-                          className="text-xs text-muted hover:text-violet-400 flex items-center gap-1.5 transition-colors"
-                        >
-                          <CheckCircle size={14} /> Click checkbox when solved
-                        </button>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-violet-500/20 text-violet-400 border border-violet-500/30 rounded hover:bg-violet-500 hover:text-on-success transition-all"
-                        >
-                          <Play size={12} /> Solve on Algomaster
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : concurrencyAllDone ? (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <CheckCircle2 size={32} className="text-violet-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">All {concurrency.length} concurrency problems completed!</p>
-                  <p className="text-xs text-muted mt-1">You've earned the right to say "it's not a race condition, it's a feature".</p>
-                </div>
-              ) : (
-                <div className="bg-field p-6 rounded-lg border border-line text-center">
-                  <Coffee size={28} className="text-faint mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-ink">Rest day for Concurrency</p>
-                  <p className="text-xs text-muted mt-1">
-                    {concurrencyNextIdx !== null ? <>Next Concurrency day is <span className="text-violet-400">{formatIndex(concurrencyNextIdx)}</span>.</> : "Nothing else scheduled."}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
+      <div className="mb-5 mt-9 flex flex-wrap items-center justify-between gap-5">
+        <div>
+          <p className="eyebrow mb-2">Daily agenda</p>
+          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+            <CalendarDays size={17} className="text-accent" />
+            {selectedWeekday}, {formatIndex(selectedDayIndex)}
+          </h2>
         </div>
+        <div className="w-full sm:w-52" aria-label="Selected day progress">
+          <div className="mb-2 flex items-center justify-between gap-4 text-xs">
+            <span className="text-muted">
+              {selectedItems.length
+                ? `${selectedCompleted} of ${selectedItems.length} complete`
+                : 'No study scheduled'}
+            </span>
+            {selectedItems.length > 0 && (
+              <span className="font-medium tabular-nums text-accent">
+                {selectedProgress}%
+              </span>
+            )}
+          </div>
+          <div className="progress-track">
+            <div
+              className="progress-fill"
+              style={{ width: `${selectedProgress}%` }}
+            />
+          </div>
+        </div>
+      </div>
 
+      <div className="grid items-start gap-5 xl:grid-cols-2">
+        {tracks.map((track) => (
+          <AgendaSection key={track.id} track={track} onOpen={setActiveTab} />
+        ))}
       </div>
     </div>
   );

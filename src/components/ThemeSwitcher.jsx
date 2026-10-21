@@ -17,7 +17,7 @@ export default function ThemeSwitcher({
       <select
         aria-label="Theme"
         aria-describedby={storageError ? messageId : undefined}
-        className="theme-control min-w-0 cursor-pointer rounded-md text-xs font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500"
+        className="theme-control min-w-0 cursor-pointer rounded-md text-xs font-medium focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         value={theme}
         onChange={(event) => onChange(event.target.value)}
       >

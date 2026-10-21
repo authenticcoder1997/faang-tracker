@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
+import { PageHeader } from './ui/Workspace';
 import {
   completeTask,
   dateKey,
@@ -28,13 +29,12 @@ import {
 } from '../lib/tasks';
 
 const SMART_VIEWS = [
-  { id: 'today', name: 'Today', icon: CalendarDays, color: '#60a5fa' },
-  { id: 'scheduled', name: 'Scheduled', icon: CalendarClock, color: '#fb923c' },
-  { id: 'all', name: 'All', icon: ClipboardList, color: '#a1a1aa' },
-  { id: 'completed', name: 'Completed', icon: CheckCheck, color: '#4ade80' },
+  { id: 'today', name: 'Today', icon: CalendarDays },
+  { id: 'scheduled', name: 'Scheduled', icon: CalendarClock },
+  { id: 'all', name: 'All', icon: ClipboardList },
+  { id: 'completed', name: 'Completed', icon: CheckCheck },
 ];
-const fieldClass =
-  'w-full rounded-xl border border-line bg-field px-3.5 py-3 text-sm text-ink outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/15';
+const fieldClass = 'input-control';
 
 function themedAccent(color) {
   return `color-mix(in srgb, ${color}, var(--accent-mix) var(--accent-mix-strength))`;
@@ -242,16 +242,16 @@ function TaskForm({
             type="checkbox"
             checked={draft.flagged}
             onChange={(event) => field('flagged', event.target.checked)}
-            className="h-4 w-4 accent-blue-400"
+            className="h-4 w-4 accent-accent"
           />
-          <Flag size={15} className="text-orange-400" /> Flag as important
+          <Flag size={15} className="text-warning" /> Flag as important
         </label>
         <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
           {task ? (
             <button
               type="button"
               onClick={onDelete}
-              className="flex items-center gap-2 rounded-lg py-2 text-sm text-red-400 hover:text-red-300"
+              className="flex items-center gap-2 rounded-lg py-2 text-sm text-danger hover:text-danger"
             >
               <Trash2 size={15} /> Delete task
             </button>
@@ -269,7 +269,7 @@ function TaskForm({
             <button
               type="submit"
               disabled={!draft.title.trim()}
-              className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-400 disabled:opacity-40"
+              className="button-primary"
             >
               {task ? 'Save changes' : 'Add task'}
             </button>
@@ -315,7 +315,7 @@ function ListForm({ list, lists, onSave, onClose }) {
             className={fieldClass}
           />
           {duplicate && (
-            <p role="alert" className="mt-2 text-xs text-orange-300">
+            <p role="alert" className="mt-2 text-xs text-warning">
               A list with that name already exists.
             </p>
           )}
@@ -351,7 +351,7 @@ function ListForm({ list, lists, onSave, onClose }) {
           <button
             disabled={!name.trim() || duplicate}
             type="submit"
-            className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold hover:bg-blue-400 disabled:opacity-40 text-white"
+            className="button-primary"
           >
             {list ? 'Save list' : 'Create list'}
           </button>
@@ -394,10 +394,6 @@ export default function TaskHome({ onOpenHomework }) {
     selectedList?.name ||
     selectedSmart?.name ||
     (view === 'flagged' ? 'Flagged' : 'Recently deleted');
-  const accent =
-    selectedList?.color ||
-    selectedSmart?.color ||
-    (view === 'flagged' ? '#fb923c' : '#a1a1aa');
   const counts = {
     today: active.filter((row) => row.date && row.date <= today).length,
     scheduled: active.filter((row) => row.date).length,
@@ -562,7 +558,7 @@ export default function TaskHome({ onOpenHomework }) {
             checked={isCompleted}
             onChange={() => toggle(row)}
             aria-label={`${isCompleted ? 'Reopen' : 'Complete'} ${row.task.title}${isCompleted && row.task.repeat !== 'none' ? ` on ${row.date}` : ''}`}
-            className="task-check mt-1 h-[21px] w-[21px] shrink-0 cursor-pointer appearance-none rounded-full border border-line transition hover:border-blue-400 checked:border-blue-400 checked:bg-blue-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+            className="task-check mt-1 h-[20px] w-[20px] shrink-0 cursor-pointer appearance-none rounded-full border transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           />
         )}
         <div className="min-w-0 flex-1">
@@ -591,7 +587,7 @@ export default function TaskHome({ onOpenHomework }) {
             )}
             {row.date && (
               <span
-                className={`flex items-center gap-1 ${!isCompleted && row.date < today ? 'text-red-400' : !isCompleted && row.date === today ? 'text-blue-400' : ''}`}
+                className={`flex items-center gap-1 ${!isCompleted && row.date < today ? 'text-danger' : !isCompleted && row.date === today ? 'text-accent' : ''}`}
               >
                 <CalendarDays size={11} />
                 {prettyDate(row.date, today)}
@@ -609,7 +605,7 @@ export default function TaskHome({ onOpenHomework }) {
           <button
             onClick={() => restoreTask(row.task.id)}
             aria-label={`Restore ${row.task.title}`}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-blue-400 hover:bg-blue-400/10"
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs text-accent hover:bg-accent/10"
           >
             <Undo2 size={14} />
             Restore
@@ -628,7 +624,7 @@ export default function TaskHome({ onOpenHomework }) {
                 ),
               }))
             }
-            className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-orange-400' : 'text-faint hover:text-orange-400 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
+            className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-warning' : 'text-faint hover:text-warning sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
           >
             <Flag size={16} fill={row.task.flagged ? 'currentColor' : 'none'} />
           </button>
@@ -638,39 +634,30 @@ export default function TaskHome({ onOpenHomework }) {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] px-4 py-7 sm:px-6 sm:py-9 lg:px-10 lg:py-11">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
-        <div>
-          <p className="mb-2 text-xs font-medium tracking-wide text-muted">
-            {new Intl.DateTimeFormat('en', {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric',
-            }).format(new Date(`${today}T12:00:00`))}
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Home
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            A little structure. A clearer day.
-          </p>
-        </div>
-        <button
-          onClick={openNewTask}
-          className="flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/10 transition hover:bg-blue-400"
-        >
-          <Plus size={17} /> New task
-        </button>
-      </header>
+    <div className="page-frame task-home">
+      <PageHeader
+        eyebrow={new Intl.DateTimeFormat('en', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+        }).format(new Date(`${today}T12:00:00`))}
+        title="Make room for your day."
+        description="Your tasks, small wins, and everyday routines — all in one place."
+        actions={
+          <button onClick={openNewTask} className="button-primary">
+            <Plus size={16} /> New task
+          </button>
+        }
+      />
       {error && (
         <p
           role="alert"
-          className="mb-5 rounded-xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-300"
+          className="mb-5 rounded-xl border border-danger/20 bg-danger/5 p-4 text-sm text-danger"
         >
           {error}
         </p>
       )}
-      <div className="grid grid-cols-1 gap-7 lg:min-h-[calc(100dvh-275px)] lg:grid-cols-[216px_minmax(0,1fr)] lg:gap-9">
+      <div className="grid grid-cols-1 gap-7 lg:min-h-[calc(100dvh-330px)] lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
         <aside
           aria-label="Task lists"
           className="min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-7 lg:pb-0"
@@ -687,13 +674,9 @@ export default function TaskHome({ onOpenHomework }) {
                   }}
                   aria-pressed={view === item.id}
                   aria-label={`${item.name} tasks`}
-                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-secondary'}`}
+                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-hover hover:text-secondary'}`}
                 >
-                  <Icon
-                    size={17}
-                    style={{ color: themedAccent(item.color) }}
-                    className="shrink-0"
-                  />
+                  <Icon size={17} className="shrink-0 text-accent" />
                   <span>{item.name}</span>
                   <span className="ml-auto pl-2 text-xs tabular-nums text-muted">
                     {counts[item.id]}
@@ -748,9 +731,9 @@ export default function TaskHome({ onOpenHomework }) {
                 setQuery('');
               }}
               aria-pressed={view === 'flagged'}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'flagged' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
+              className={`flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs ${view === 'flagged' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
             >
-              <Flag size={15} className="text-orange-400" />
+              <Flag size={15} className="text-warning" />
               Flagged
               <span className="ml-auto">
                 {active.filter((row) => row.task.flagged).length}
@@ -762,7 +745,7 @@ export default function TaskHome({ onOpenHomework }) {
                 setQuery('');
               }}
               aria-pressed={view === 'deleted'}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-xs ${view === 'deleted' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
+              className={`flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs ${view === 'deleted' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
             >
               <Trash2 size={15} />
               Recently deleted
@@ -773,7 +756,7 @@ export default function TaskHome({ onOpenHomework }) {
           </div>
           <button
             onClick={() => setListEditor({ list: null })}
-            className="mt-6 hidden items-center gap-2 px-2 py-2 text-xs font-medium text-blue-400 lg:flex hover:text-blue-300"
+            className="mt-6 hidden items-center gap-2 px-2 py-2 text-xs font-medium text-accent lg:flex hover:text-accent"
           >
             <Plus size={15} /> Add list
           </button>
@@ -781,13 +764,10 @@ export default function TaskHome({ onOpenHomework }) {
         <section aria-label={title} className="flex min-w-0 flex-col">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
             <div className="flex items-center gap-3">
-              <h2
-                className="text-2xl font-bold tracking-tight sm:text-3xl"
-                style={{ color: themedAccent(accent) }}
-              >
+              <h2 className="text-xl font-semibold tracking-tight text-ink">
                 {title}
               </h2>
-              <span className="rounded-lg bg-hover px-2.5 py-1 text-xs tabular-nums text-muted">
+              <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] tabular-nums text-accent">
                 {rows.length}
               </span>
               {selectedList && (
@@ -811,7 +791,7 @@ export default function TaskHome({ onOpenHomework }) {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search this view"
-                className="w-full rounded-lg border border-line bg-hover py-2.5 pr-3 pl-9 text-xs text-ink outline-none placeholder:text-faint focus:border-blue-400/60"
+                className="input-control task-search pl-9"
               />
             </div>
           </div>
@@ -821,7 +801,7 @@ export default function TaskHome({ onOpenHomework }) {
                 <div key={group}>
                   {group !== 'tasks' && (
                     <h3
-                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-red-400' : 'text-muted'}`}
+                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-danger' : 'text-muted'}`}
                     >
                       {group === 'overdue'
                         ? 'Overdue'
@@ -837,11 +817,11 @@ export default function TaskHome({ onOpenHomework }) {
               ))}
             </div>
           ) : (
-            <div className="flex min-h-80 flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center text-blue-400/70">
-                <CircleCheck size={35} strokeWidth={1.25} />
+            <div className="flex min-h-80 flex-1 flex-col items-center justify-center px-4 py-12 text-center">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-accent-soft text-accent">
+                <CircleCheck size={25} strokeWidth={1.25} />
               </div>
-              <h3 className="text-lg font-semibold text-ink">
+              <h3 className="text-base font-semibold text-ink">
                 {query
                   ? 'No matching tasks'
                   : view === 'today'
@@ -864,10 +844,7 @@ export default function TaskHome({ onOpenHomework }) {
                         : 'Add your first task and take it one step at a time.'}
               </p>
               {canAdd && !query && (
-                <button
-                  onClick={openNewTask}
-                  className="mt-6 flex items-center gap-2 rounded-lg bg-blue-400/10 px-4 py-2.5 text-xs font-semibold text-blue-400 hover:bg-blue-400/15"
-                >
+                <button onClick={openNewTask} className="button-secondary mt-5">
                   <Plus size={15} />
                   Add a task
                 </button>
@@ -877,7 +854,7 @@ export default function TaskHome({ onOpenHomework }) {
           {canAdd && rows.length > 0 && (
             <button
               onClick={openNewTask}
-              className="mt-4 flex items-center gap-3 self-start rounded-lg px-1 py-2 text-sm text-blue-400 hover:text-blue-300"
+              className="mt-4 flex items-center gap-3 self-start rounded-lg px-1 py-2 text-sm text-accent hover:text-accent"
             >
               <Plus size={20} />
               Add a task
@@ -905,7 +882,7 @@ export default function TaskHome({ onOpenHomework }) {
           )}
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-[11px] text-faint">
             <span className="mt-5 flex items-center gap-1.5">
-              <span className="h-1 w-1 rounded-full bg-green-500/70" />
+              <span className="h-1 w-1 rounded-full bg-success/70" />
               Saved in this browser
             </span>
             <button
@@ -950,7 +927,7 @@ export default function TaskHome({ onOpenHomework }) {
                 notice.undo();
                 setNotice(null);
               }}
-              className="font-semibold text-blue-400"
+              className="font-semibold text-accent"
             >
               Undo
             </button>

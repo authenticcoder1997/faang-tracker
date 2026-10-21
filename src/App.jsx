@@ -9,6 +9,8 @@ import {
   FileText,
   Lock,
   ListTodo,
+  PanelsTopLeft,
+  MoreHorizontal,
 } from 'lucide-react';
 import { useCloudStorage } from './hooks/useCloudStorage';
 import { useCloudNotes } from './hooks/useCloudNotes';
@@ -57,7 +59,8 @@ function App() {
     concurrencyTopics,
     'faang-tracker-concurrency-v1',
   );
-  const [notes, setNotes, notesLoading] = useCloudNotes(docId);
+  const [notes, setNotes, notesLoading, notesSyncError, notesStorageError] =
+    useCloudNotes(docId);
 
   const isLoading =
     dsaLoading ||
@@ -79,130 +82,87 @@ function App() {
   };
 
   const tabs = [
-    {
-      id: 'dashboard',
-      label: 'Home',
-      icon: <ListTodo size={18} />,
-      accent: 'text-blue-400',
-      bar: 'bg-blue-400',
-    },
-    {
-      id: 'homework',
-      label: 'Homework',
-      icon: <LayoutDashboard size={18} />,
-      accent: 'text-green-400',
-      bar: 'bg-green-400',
-    },
-    {
-      id: 'dsa',
-      label: 'DSA',
-      icon: <BookOpen size={18} />,
-      accent: 'text-green-400',
-      bar: 'bg-green-500',
-    },
-    {
-      id: 'lld',
-      label: 'LLD',
-      icon: <Layers size={18} />,
-      accent: 'text-emerald-400',
-      bar: 'bg-emerald-500',
-    },
-    {
-      id: 'hld',
-      label: 'HLD',
-      icon: <Monitor size={18} />,
-      accent: 'text-teal-400',
-      bar: 'bg-teal-500',
-    },
-    {
-      id: 'concurrency',
-      label: 'Concurrency',
-      icon: <Lock size={18} />,
-      accent: 'text-violet-400',
-      bar: 'bg-violet-500',
-    },
-    {
-      id: 'notes',
-      label: 'Notes',
-      icon: <FileText size={18} />,
-      accent: 'text-amber-400',
-      bar: 'bg-amber-500',
-    },
+    { id: 'dashboard', label: 'Home', icon: ListTodo },
+    { id: 'homework', label: 'Homework', icon: LayoutDashboard },
+    { id: 'dsa', label: 'DSA', icon: BookOpen },
+    { id: 'lld', label: 'LLD', icon: Layers },
+    { id: 'hld', label: 'HLD', icon: Monitor },
+    { id: 'concurrency', label: 'Concurrency', icon: Lock },
+    { id: 'notes', label: 'Notes', icon: FileText },
   ];
 
   return (
     <div className="app-shell min-h-screen bg-canvas font-sans text-ink">
-      <header className="app-header sticky top-0 z-20 border-b border-line bg-header backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 px-4 sm:gap-x-6 lg:gap-x-8 sm:px-6 lg:px-10">
-          <div className="py-4 lg:py-5">
-            <p className="text-base font-bold tracking-tight text-ink">
-              My Space
-            </p>
-            <p className="mt-0.5 hidden text-[11px] text-muted sm:block">
-              Your everyday workspace
-            </p>
-          </div>
-          <nav
-            aria-label="Main navigation"
-            className="order-3 flex w-full min-w-0 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden 2xl:order-2 2xl:w-auto 2xl:flex-1"
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                aria-current={activeTab === tab.id ? 'page' : undefined}
-                className={`relative flex shrink-0 items-center gap-2 px-3 py-4 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-blue-400 2xl:py-7 ${
-                  activeTab === tab.id
-                    ? 'text-ink'
-                    : 'text-muted hover:text-ink'
-                }`}
-              >
-                <span
-                  className={activeTab === tab.id ? tab.accent : 'text-faint'}
+      <a
+        href="#workspace"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 button-primary"
+      >
+        Skip to content
+      </a>
+      <header className="app-header sticky top-0 z-20 border-b border-line bg-header">
+        <div className="header-inner">
+          <div className="brand-row">
+            <div className="brand-lockup">
+              <span className="brand-mark">
+                <PanelsTopLeft size={19} strokeWidth={1.6} />
+              </span>
+              <div>
+                <p className="brand-name">
+                  My Space<span className="text-accent">.</span>
+                </p>
+                <p className="brand-caption">A place for your everyday.</p>
+              </div>
+            </div>
+            <div className="header-tools">
+              <ThemeSwitcher
+                theme={theme}
+                onChange={setTheme}
+                storageError={storageError}
+              />
+              <details className="workspace-menu">
+                <summary
+                  aria-label="Workspace options"
+                  title="Workspace options"
+                  className="header-utility"
                 >
-                  {tab.icon}
-                </span>
-                {tab.label}
-                {activeTab === tab.id && (
-                  <span
-                    className={`absolute inset-x-3 bottom-0 h-0.5 rounded-full ${tab.bar}`}
-                  />
-                )}
+                  <MoreHorizontal size={19} />
+                </summary>
+                <div className="panel workspace-menu-content">
+                  <p className="eyebrow px-3 pt-2 mb-2">Workspace</p>
+                  <a
+                    href="https://github.com/authenticcoder1997/faang-tracker"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <GitBranch size={15} />
+                    View source
+                  </a>
+                  <button onClick={resetProgress}>
+                    <RefreshCw size={15} />
+                    Reset study progress
+                  </button>
+                </div>
+              </details>
+            </div>
+          </div>
+          <nav aria-label="Main navigation" className="navigation-strip">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                aria-current={activeTab === id ? 'page' : undefined}
+                className="navigation-tab"
+              >
+                <Icon size={16} strokeWidth={1.7} />
+                {label}
               </button>
             ))}
           </nav>
-          <div className="order-2 ml-auto flex items-center gap-1 2xl:order-3">
-            <ThemeSwitcher
-              theme={theme}
-              onChange={setTheme}
-              storageError={storageError}
-            />
-            <a
-              href="https://github.com/authenticcoder1997/faang-tracker"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View Source"
-              title="View source"
-              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted hover:bg-hover hover:text-ink"
-            >
-              <GitBranch size={15} />
-              <span className="hidden sm:inline">Source</span>
-            </a>
-            <button
-              onClick={resetProgress}
-              aria-label="Reset Progress"
-              title="Reset study progress"
-              className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted hover:bg-hover hover:text-red-400"
-            >
-              <RefreshCw size={15} />
-              <span className="hidden sm:inline">Reset progress</span>
-            </button>
-          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="min-w-0">
+      <main id="workspace" className="min-w-0">
         <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
           <TaskHome onOpenHomework={() => setActiveTab('homework')} />
         </div>
@@ -212,7 +172,7 @@ function App() {
             role="status"
             aria-label="Loading study progress"
           >
-            <RefreshCw className="animate-spin text-green-400" size={28} />
+            <RefreshCw className="animate-spin text-accent" size={28} />
           </div>
         ) : (
           <>
@@ -249,7 +209,12 @@ function App() {
               />
             </div>
             <div className={activeTab === 'notes' ? 'block h-full' : 'hidden'}>
-              <Notes notes={notes} setNotes={setNotes} />
+              <Notes
+                notes={notes}
+                setNotes={setNotes}
+                syncError={notesSyncError}
+                storageError={notesStorageError}
+              />
             </div>
           </>
         )}
