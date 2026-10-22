@@ -4,7 +4,7 @@ A personal workspace for everyday tasks, study plans, notes, and links, backed b
 
 - **Home:** tasks grouped into lists, with voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
-- **Important links:** 20 supplied bookmarks, organized into their original folders with website screenshot cards, search, and bookmark import.
+- **Important links:** 21 supplied bookmarks, organized into folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.
 - **Notes:** an open notebook editor with automatic Firebase saving.
 - **Appearance:** Light and Dark Liquid Glass, with Silver, Ocean, Iris, Rose, and Amber palettes throughout every page and dialog.
@@ -38,7 +38,7 @@ Use the trash button beside a list to delete it. Tasks move to a list you choose
 
 The first connection imports existing browser data and the original Firebase collections where access is permitted. Old browser keys are removed only after a confirmed server save, and only if their contents have not changed during import. Unreadable data is retained and reported. Each edit is applied as a field-level patch in a Firestore transaction, preserving unrelated changes from another device. Server revisions prevent older responses from replacing a newer snapshot.
 
-Important links start with the supplied Important collection, including `leetcode lists` and `Jobs Sites`. Additions and imports save in Firebase. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved screenshots captured in Chrome, including the signed-in course page. New imported websites use a domain fallback when no saved screenshot exists.
+Important links start with the supplied Important collection, including `leetcode lists`, `Jobs Sites`, and `Online Games` for NFS and Cricket 07. Additions and imports save in Firebase. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved screenshots captured in Chrome, including the signed-in course page. New imported websites use a domain fallback when no saved screenshot exists.
 
 Pending edits stay in memory until Firebase confirms them. The interface reports saving failures and protects reloads while edits are pending; reconnect or use Retry saving. There is no authentication or persistent browser cache.
 

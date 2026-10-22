@@ -135,6 +135,13 @@ export const importantBookmarks = [
   {
     "title": "Cricket 07",
     "url": "https://cricket07.dhaiwat.com/",
+    "folderPath": ["Online Games"],
     "preview": "/link-previews/20-cricket07.jpg"
+  },
+  {
+    "title": "NFSMW Online",
+    "url": "https://nfsmwonline.com/",
+    "folderPath": ["Online Games"],
+    "preview": "/link-previews/21-nfsmw.jpg"
   }
 ];
