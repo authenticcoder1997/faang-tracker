@@ -616,7 +616,7 @@ function DeleteListDialog({
 
 export default function TaskHome({ onOpenHomework, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
-  const [view, setView] = useState('all');
+  const [view, setView] = useState('today');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [listEditor, setListEditor] = useState(null);
