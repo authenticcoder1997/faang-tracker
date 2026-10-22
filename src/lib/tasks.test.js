@@ -9,7 +9,10 @@ import {
   INITIAL_TASK_DATA,
   isValidDate,
   mergeTaskEdits,
+  MAX_TASK_LINKS,
+  MAX_TASK_LINK_LENGTH,
   nextOccurrence,
+  normalizeTaskLinks,
   restoreTaskList,
   validateTaskData,
 } from './tasks.js';
@@ -25,6 +28,54 @@ const task = (overrides = {}) => ({
   flagged: false,
   createdAt: '2026-10-21T04:00:00Z',
   ...overrides,
+});
+
+test('task website links normalize text and arrays, add HTTPS, and deduplicate safely', () => {
+  assert.deepEqual(normalizeTaskLinks(undefined), []);
+  assert.deepEqual(normalizeTaskLinks(' \n\t '), []);
+  assert.deepEqual(
+    normalizeTaskLinks('example.com\nhttps://EXAMPLE.com/  http://example.org/path?x=1#section'),
+    ['https://example.com/', 'http://example.org/path?x=1#section'],
+  );
+  assert.deepEqual(
+    normalizeTaskLinks(['leetcode.com/problems/two-sum/', '//example.com/course', 'localhost:5173/task']),
+    ['https://leetcode.com/problems/two-sum/', 'https://example.com/course', 'https://localhost:5173/task'],
+  );
+});
+
+test('unsafe schemes, embedded credentials and malformed task links are rejected without partial results', () => {
+  for (const input of [
+    'javascript:alert(1)',
+    'data:text/html,hello',
+    'file:///private/example',
+    'ftp://example.com/file',
+    'https://name:password@example.com/',
+    'https://name@example.com/',
+    'not a website',
+    '/relative/path',
+    'https://',
+    ['https://example.com/\u0000hidden'],
+    ['https://example.com/a b'],
+    ['https://example.com/', null],
+    ['https://example.com/', 'javascript:alert(1)'],
+  ]) assert.throws(() => normalizeTaskLinks(input));
+});
+
+test('task links have bounded count and URL length while duplicate links use one slot', () => {
+  const maximum = Array.from({ length: MAX_TASK_LINKS }, (_, index) => `https://example.com/${index}`);
+  assert.equal(normalizeTaskLinks(maximum).length, MAX_TASK_LINKS);
+  assert.equal(normalizeTaskLinks([...maximum, maximum[0]]).length, MAX_TASK_LINKS);
+  assert.throws(() => normalizeTaskLinks([...maximum, 'https://example.com/extra']), /up to/);
+  assert.throws(() => normalizeTaskLinks(`https://example.com/${'a'.repeat(MAX_TASK_LINK_LENGTH)}`), /characters/);
+});
+
+test('old tasks can omit links and stored task links must be safe arrays', () => {
+  const oldData = { ...INITIAL_TASK_DATA, tasks: [task()] };
+  assert.equal(validateTaskData(oldData), oldData);
+  assert.equal(Object.hasOwn(oldData.tasks[0], 'links'), false);
+  assert.equal(validateTaskData({ ...oldData, tasks: [task({ links: ['https://example.com/'] })] }).tasks[0].links.length, 1);
+  assert.throws(() => validateTaskData({ ...oldData, tasks: [task({ links: 'https://example.com/' })] }), /links/);
+  assert.throws(() => validateTaskData({ ...oldData, tasks: [task({ links: ['data:text/html,bad'] })] }));
 });
 
 test('dates follow the local calendar across month and year boundaries', () => {
@@ -181,6 +232,27 @@ test('an untouched task form leaves the latest task unchanged and cannot submit 
   const latest = completeTask(opened, null, '2026-10-21T05:00:00Z');
   const saved = mergeTaskEdits(latest, opened, { ...editorDraft(opened), completed: false, completedDates: [], createdAt: 'changed', id: 'changed' }, '2026-10-21T06:00:00Z', '2026-10-21');
   assert.equal(saved, latest);
+});
+
+test('task title edits preserve remote links when the original task had no links', () => {
+  const opened = task();
+  const latest = { ...opened, links: ['https://phone.example/'] };
+  const saved = mergeTaskEdits(latest, opened, { ...editorDraft(opened), title: 'New title', links: [] }, '2026-10-21T06:00:00Z', '2026-10-21');
+  assert.equal(saved.title, 'New title');
+  assert.deepEqual(saved.links, ['https://phone.example/']);
+});
+
+test('unchanged normalized links keep remote edits, and intentional link edits retain other remote fields', () => {
+  const opened = task({ links: ['https://example.com/'] });
+  const latest = { ...opened, title: 'Phone title', links: ['https://phone.example/'], completed: true };
+  const unchanged = mergeTaskEdits(latest, opened, { ...editorDraft(opened), links: 'example.com' }, '2026-10-21T06:00:00Z', '2026-10-21');
+  assert.equal(unchanged, latest);
+  const changed = mergeTaskEdits(latest, opened, { ...editorDraft(opened), links: 'example.org/course\nhttps://example.net/' }, '2026-10-21T06:00:00Z', '2026-10-21');
+  assert.deepEqual(changed.links, ['https://example.org/course', 'https://example.net/']);
+  assert.equal(changed.title, 'Phone title');
+  assert.equal(changed.completed, true);
+  const cleared = mergeTaskEdits(latest, opened, { ...editorDraft(opened), links: [] }, '2026-10-21T06:00:00Z', '2026-10-21');
+  assert.deepEqual(cleared.links, []);
 });
 
 test('invalid cached data is rejected without accepting missing lists or unsupported repeats', () => {

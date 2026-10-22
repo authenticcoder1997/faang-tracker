@@ -8,6 +8,7 @@ import {
   ChevronDown,
   CircleCheck,
   ClipboardList,
+  ExternalLink,
   Flag,
   ListTodo,
   Mic,
@@ -30,6 +31,7 @@ import {
   getTaskRows,
   LIST_COLORS,
   mergeTaskEdits,
+  normalizeTaskLinks,
   REPEAT_OPTIONS,
   restoreTaskList,
 } from '../lib/tasks';
@@ -108,6 +110,7 @@ function TaskForm({
   const [draft, setDraft] = useState({
     title: task?.title || '',
     notes: task?.notes || '',
+    links: (task?.links || []).join('\n'),
     listId: task?.listId || defaultListId || lists[0]?.id || '',
     dueDate: task ? task.dueDate || '' : defaultDate || '',
     repeat: task?.repeat || 'none',
@@ -116,6 +119,7 @@ function TaskForm({
   const recognition = useRef(null);
   const [voice, setVoice] = useState({ status: 'idle', field: null });
   const [voiceError, setVoiceError] = useState('');
+  const [linkError, setLinkError] = useState('');
   const [voiceUsed, setVoiceUsed] = useState(voiceMode);
   const [supported] = useState(
     () => !!(window.SpeechRecognition || window.webkitSpeechRecognition),
@@ -184,14 +188,23 @@ function TaskForm({
   }
 
   function field(key, value) {
+    if (key === 'links') setLinkError('');
     setDraft((previous) => ({ ...previous, [key]: value }));
   }
   function submit(event) {
     event.preventDefault();
     if (voiceActive || !draft.title.trim()) return;
+    let links;
+    try {
+      links = normalizeTaskLinks(draft.links);
+    } catch (error) {
+      setLinkError(error.message);
+      return;
+    }
     recognition.current?.cancel();
     onSave({
       ...draft,
+      links,
       title: draft.title.trim(),
       notes: draft.notes.trim(),
       dueDate: draft.dueDate || (draft.repeat !== 'none' ? today : null),
@@ -277,6 +290,37 @@ function TaskForm({
             className={`${fieldClass} resize-y`}
           />
         </div>
+        <div>
+          <label
+            htmlFor="task-links"
+            className="mb-2 block text-xs font-medium text-muted"
+          >
+            Links <span className="font-normal text-faint">· optional</span>
+          </label>
+          <textarea
+            id="task-links"
+            value={draft.links}
+            onChange={(event) => field('links', event.target.value)}
+            placeholder="example.com · one link per line"
+            rows={2}
+            maxLength={20500}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-invalid={!!linkError}
+            aria-describedby={linkError ? 'task-links-error' : 'task-links-hint'}
+            className={`${fieldClass} resize-y`}
+          />
+          {linkError ? (
+            <p id="task-links-error" role="alert" className="mt-1.5 text-xs text-danger">
+              {linkError}
+            </p>
+          ) : (
+            <p id="task-links-hint" className="mt-1.5 text-[11px] text-faint">
+              Add up to 10 website links. They’ll open directly from your task.
+            </p>
+          )}
+        </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
@@ -299,15 +343,28 @@ function TaskForm({
             </select>
           </div>
           <div>
-            <label
-              htmlFor="task-date"
-              className="mb-2 block text-xs font-medium text-muted"
-            >
-              {draft.repeat === 'none' ? 'Due date' : 'Starts on'}{' '}
-              <span className="font-normal text-faint">
-                {draft.repeat === 'none' ? '· optional' : ''}
-              </span>
-            </label>
+            <div className="mb-2 flex h-4 items-center justify-between">
+              <label
+                htmlFor="task-date"
+                className="text-xs font-medium text-muted"
+              >
+                {draft.repeat === 'none' ? 'Due date' : 'Starts on'}{' '}
+                <span className="font-normal text-faint">
+                  {draft.repeat === 'none' ? '· optional' : ''}
+                </span>
+              </label>
+              {draft.dueDate && draft.repeat === 'none' && (
+                <button
+                  type="button"
+                  onClick={() => field('dueDate', '')}
+                  aria-label="Clear due date"
+                  title="Clear due date"
+                  className="rounded p-1 text-faint hover:bg-hover hover:text-ink"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
             <input
               id="task-date"
               type="date"
@@ -599,7 +656,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
     completed: completed.length,
   };
   const matches = (row) =>
-    `${row.task.title} ${row.task.notes || ''} ${data.lists.find((list) => list.id === row.task.listId)?.name || ''}`
+    `${row.task.title} ${row.task.notes || ''} ${(row.task.links || []).join(' ')} ${data.lists.find((list) => list.id === row.task.listId)?.name || ''}`
       .toLowerCase()
       .includes(query.toLowerCase());
   const inView = (row) =>
@@ -846,6 +903,26 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
             <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-muted">
               {row.task.notes}
             </p>
+          )}
+          {!!row.task.links?.length && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {row.task.links.map((link) => (
+                <a
+                  key={link}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open ${link}`}
+                  title={link}
+                  className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-accent-soft px-2 py-1 text-xs text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                >
+                  <ExternalLink size={12} className="shrink-0" />
+                  <span className="truncate">
+                    {link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                  </span>
+                </a>
+              ))}
+            </div>
           )}
           <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
             {!selectedList && (
@@ -1198,7 +1275,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           task={taskEditor.task}
           lists={data.lists}
           defaultListId={selectedList?.id}
-          defaultDate={['today', 'scheduled'].includes(view) ? today : ''}
+          defaultDate={today}
           today={today}
           onSave={saveTask}
           onDelete={() => deleteTask(taskEditor.task)}

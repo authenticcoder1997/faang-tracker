@@ -498,6 +498,39 @@ test('old Firebase conversion skips missing documents and reports malformed coll
   );
 });
 
+test('legacy task records can omit website links while present links are normalized for Firebase', () => {
+  const oldTaskData = base().tasks;
+  const legacy = createWorkspace({ 'faang-tracker-tasks-v1': JSON.stringify(oldTaskData) });
+  assert.equal(Object.hasOwn(legacy.tasks.tasks[0], 'links'), false);
+  const linked = base();
+  linked.tasks.tasks[0].links = ['example.com/course', 'https://example.com/course'];
+  assert.deepEqual(normalizeWorkspace(linked).tasks.tasks[0].links, ['https://example.com/course']);
+  assert.deepEqual(linked.tasks.tasks[0].links, ['example.com/course', 'https://example.com/course']);
+  linked.tasks.tasks[0].links = ['javascript:alert(1)'];
+  assert.throws(() => normalizeWorkspace(linked));
+});
+
+test('task links survive serialized Firebase patches without erasing unrelated phone changes', () => {
+  const before = base();
+  before.tasks.tasks[0].repeat = 'daily';
+  const after = copy(before);
+  after.tasks.tasks[0].links = ['leetcode.com/problems/two-sum/'];
+  const remote = copy(before);
+  remote.tasks.tasks[0].notes = 'Added from phone';
+  remote.tasks.tasks[0].completedDates = ['2026-10-21'];
+  const patch = JSON.parse(JSON.stringify(makeWorkspacePatch(before, after)));
+  const result = applyWorkspacePatch(remote, patch);
+  assert.deepEqual(result.tasks.tasks[0].links, ['https://leetcode.com/problems/two-sum/']);
+  assert.equal(result.tasks.tasks[0].notes, 'Added from phone');
+  assert.deepEqual(result.tasks.tasks[0].completedDates, ['2026-10-21']);
+  assert.deepEqual(normalizeWorkspace(JSON.parse(JSON.stringify(result))), result);
+  const titleOnly = copy(before);
+  titleOnly.tasks.tasks[0].title = 'Renamed on laptop';
+  const renamed = applyWorkspacePatch(result, makeWorkspacePatch(before, titleOnly));
+  assert.deepEqual(renamed.tasks.tasks[0].links, ['https://leetcode.com/problems/two-sum/']);
+  assert.equal(renamed.tasks.tasks[0].title, 'Renamed on laptop');
+});
+
 test('task edits and concurrent additions merge by ID and by changed field without mutating snapshots', () => {
   const before = base();
   const after = copy(before);

@@ -1,4 +1,55 @@
 export const TASK_STORAGE_KEY = 'faang-tracker-tasks-v1';
+export const MAX_TASK_LINKS = 10;
+export const MAX_TASK_LINK_LENGTH = 2048;
+
+/** Normalize optional task websites before storing or rendering clickable links. */
+export function normalizeTaskLinks(value) {
+  if (value === undefined || value === null) return [];
+  if (typeof value !== 'string' && !Array.isArray(value))
+    throw new Error('Enter website links as text or a list of URLs.');
+  const candidates = typeof value === 'string'
+    ? value.trim().split(/\s+/).filter(Boolean)
+    : value;
+  const links = new Set();
+  let totalLength = 0;
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string')
+      throw new Error('Each website link must be a URL.');
+    const input = candidate.trim();
+    if (!input) continue;
+    totalLength += input.length;
+    if (input.length > MAX_TASK_LINK_LENGTH)
+      throw new Error(`Keep each website link to ${MAX_TASK_LINK_LENGTH} characters or fewer.`);
+    if (totalLength > MAX_TASK_LINKS * (MAX_TASK_LINK_LENGTH + 1))
+      throw new Error(`Add up to ${MAX_TASK_LINKS} website links per task.`);
+    if (Array.from(input).some((character) => {
+      const code = character.charCodeAt(0);
+      return code <= 32 || code === 127;
+    }))
+      throw new Error('Website links cannot contain spaces or control characters.');
+    const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(input)
+      && !/^[a-z\d.-]+:\d+(?:[/?#]|$)/i.test(input);
+    if (input.startsWith('/') && !input.startsWith('//'))
+      throw new Error('Use a full website address, such as https://example.com.');
+    let url;
+    try {
+      url = new URL(hasScheme ? input : input.startsWith('//') ? `https:${input}` : `https://${input}`);
+    } catch {
+      throw new Error('Enter a valid website address, such as https://example.com.');
+    }
+    if (!['https:', 'http:'].includes(url.protocol) || !url.hostname || url.username || url.password)
+      throw new Error('Use http:// or https:// website links without usernames or passwords.');
+    if (!hasScheme && url.hostname !== 'localhost' && !url.hostname.startsWith('[') && !/^[a-z\d](?:[a-z\d-]*[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]*[a-z\d])?)+\.?$/i.test(url.hostname))
+      throw new Error('Enter a website domain, such as example.com.');
+    if (url.href.length > MAX_TASK_LINK_LENGTH)
+      throw new Error(`Keep each website link to ${MAX_TASK_LINK_LENGTH} characters or fewer.`);
+    links.add(url.href);
+    if (links.size > MAX_TASK_LINKS)
+      throw new Error(`Add up to ${MAX_TASK_LINKS} website links per task.`);
+  }
+  return [...links];
+}
+
 export const REPEAT_OPTIONS = [
   { value: 'none', label: 'No repeat' },
   { value: 'daily', label: 'Daily' },
@@ -92,11 +143,19 @@ export function mergeTaskEdits(current, opened, draft, now, today = dateKey()) {
     dueDate: opened.dueDate || (opened.repeat !== 'none' ? today : null),
     repeat: opened.repeat,
     flagged: !!opened.flagged,
+    links: normalizeTaskLinks(opened.links),
   };
+  const submitted = Object.hasOwn(draft, 'links')
+    ? { ...draft, links: normalizeTaskLinks(draft.links) }
+    : draft;
   const changed = Object.fromEntries(
     Object.keys(baseline)
-      .filter((key) => Object.hasOwn(draft, key) && draft[key] !== baseline[key])
-      .map((key) => [key, draft[key]]),
+      .filter((key) => Object.hasOwn(submitted, key) && (
+        key === 'links'
+          ? JSON.stringify(submitted.links) !== JSON.stringify(baseline.links)
+          : submitted[key] !== baseline[key]
+      ))
+      .map((key) => [key, submitted[key]]),
   );
   if (!Object.keys(changed).length) return current;
   const next = { ...current, ...changed, updatedAt: now };
@@ -225,5 +284,10 @@ export function validateTaskData(value) {
     )
   )
     throw new Error('Invalid tasks');
+  for (const task of value.tasks) {
+    if (task.links === undefined) continue;
+    if (!Array.isArray(task.links)) throw new Error('Invalid task website links');
+    normalizeTaskLinks(task.links);
+  }
   return value;
 }

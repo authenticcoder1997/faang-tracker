@@ -2,7 +2,7 @@
 
 A personal workspace for everyday tasks, study plans, notes, and links, backed by Firebase Firestore.
 
-- **Home:** tasks grouped into lists, with voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
+- **Home:** tasks grouped into lists, with clickable website links, voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks. Home opens on All; new tasks default to today's date, which can be changed or cleared.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
 - **Important links:** 21 supplied bookmarks, organized into folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.

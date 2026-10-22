@@ -4,7 +4,7 @@ import { hldTopics } from '../data/hldTopics.js';
 import { concurrencyTopics } from '../data/concurrencyTopics.js';
 import { importantBookmarks } from '../data/importantBookmarks.js';
 import { normalizeBookmark } from './bookmarks.js';
-import { INITIAL_TASK_DATA, LIST_COLORS, validateTaskData } from './tasks.js';
+import { INITIAL_TASK_DATA, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 
 const SOURCES = {
   dsa: dsaTopics,
@@ -93,6 +93,7 @@ function tasks(value) {
     return {
       ...task,
       completedDates: [...new Set(task.completedDates)].sort(),
+      ...(task.links !== undefined ? { links: normalizeTaskLinks(task.links) } : {}),
     };
   });
   return data;
