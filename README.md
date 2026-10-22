@@ -4,7 +4,7 @@ A personal workspace for everyday tasks, study plans, notes, and links, backed b
 
 - **Home:** tasks grouped into lists, with voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
-- **Important links:** 19 supplied bookmarks, organized into their original folders with website screenshot cards, search, and bookmark import.
+- **Important links:** 20 supplied bookmarks, organized into their original folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** searchable problems, shared filters, progress tracking, and problem notes.
 - **Notes:** an open notebook editor with automatic Firebase saving.
 - **Appearance:** Light and Dark Liquid Glass, with Silver, Ocean, Iris, Rose, and Amber palettes throughout every page and dialog.

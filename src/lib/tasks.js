@@ -81,6 +81,30 @@ export function completeTask(
   };
 }
 
+// An editor may remain open while another device changes the same task. Merge
+// only the form fields changed from its opening snapshot into the latest task.
+export function mergeTaskEdits(current, opened, draft, now, today = dateKey()) {
+  if (!current || current.id !== opened?.id || current.deletedAt) return null;
+  const baseline = {
+    title: opened.title.trim(),
+    notes: (opened.notes || '').trim(),
+    listId: opened.listId,
+    dueDate: opened.dueDate || (opened.repeat !== 'none' ? today : null),
+    repeat: opened.repeat,
+    flagged: !!opened.flagged,
+  };
+  const changed = Object.fromEntries(
+    Object.keys(baseline)
+      .filter((key) => Object.hasOwn(draft, key) && draft[key] !== baseline[key])
+      .map((key) => [key, draft[key]]),
+  );
+  if (!Object.keys(changed).length) return current;
+  const next = { ...current, ...changed, updatedAt: now };
+  return next.repeat === current.repeat
+    ? next
+    : { ...next, completed: false, completedAt: null, completedDates: [] };
+}
+
 export function getTaskRows(tasks, today = dateKey()) {
   const active = [];
   const completed = [];

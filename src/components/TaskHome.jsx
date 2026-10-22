@@ -29,6 +29,7 @@ import {
   deleteTaskList,
   getTaskRows,
   LIST_COLORS,
+  mergeTaskEdits,
   REPEAT_OPTIONS,
   restoreTaskList,
 } from '../lib/tasks';
@@ -558,7 +559,7 @@ function DeleteListDialog({
 
 export default function TaskHome({ onOpenHomework, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
-  const [view, setView] = useState('today');
+  const [view, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [listEditor, setListEditor] = useState(null);
@@ -643,19 +644,30 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
   function saveTask(draft) {
     const previous = taskEditor?.task;
     const now = new Date().toISOString();
-    const task = {
-      ...previous,
-      ...draft,
-      id: previous?.id || crypto.randomUUID(),
-      completed: previous?.repeat === draft.repeat ? previous.completed : false,
-      completedDates:
-        previous?.repeat === draft.repeat ? previous.completedDates : [],
-      createdAt: previous?.createdAt || now,
-      updatedAt: now,
-      deletedAt: null,
-    };
+    let unavailable = false;
     if (
       updateData((current) => {
+        const task = previous
+          ? mergeTaskEdits(
+              current.tasks.find((item) => item.id === previous.id),
+              previous,
+              draft,
+              now,
+              today,
+            )
+          : {
+              ...draft,
+              id: crypto.randomUUID(),
+              completed: false,
+              completedDates: [],
+              createdAt: now,
+              updatedAt: now,
+              deletedAt: null,
+            };
+        if (!task) {
+          unavailable = true;
+          return current;
+        }
         const list = current.lists.find((item) => item.id === task.listId) ||
           current.lists[0] || {
             id: crypto.randomUUID(),
@@ -675,7 +687,11 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
       })
     ) {
       setTaskEditor(null);
-      setNotice({ message: previous ? 'Task updated' : 'Task added' });
+      setNotice({
+        message: unavailable
+          ? 'This task was deleted elsewhere. Your changes were not saved.'
+          : previous ? 'Task updated' : 'Task added',
+      });
     }
   }
   function saveList(draft) {

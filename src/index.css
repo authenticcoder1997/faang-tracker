@@ -664,8 +664,8 @@ textarea::placeholder {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 8px;
-  padding: 5px 7px;
+  gap: 10px;
+  padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 13px;
   background: var(--surface);
@@ -710,7 +710,7 @@ textarea::placeholder {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
   overflow-x: auto;
   scrollbar-width: none;
   scroll-snap-type: x proximity;
@@ -878,7 +878,7 @@ textarea::placeholder {
     width: 28px;
   }
   .theme-switcher {
-    gap: 5px;
+    gap: 7px;
     padding: 4px;
     border-radius: 11px;
   }
@@ -889,7 +889,7 @@ textarea::placeholder {
   }
   .theme-palette-rail {
     max-width: 99px;
-    gap: 1px;
+    gap: 3px;
   }
   .theme-palette-button {
     width: 30px;

@@ -46,10 +46,10 @@ const base = () => ({
   tasks: { ...createWorkspace().tasks, tasks: [task()] },
 });
 
-test('new workspaces include source progress, all 19 Important links and independent default task lists', () => {
+test('new workspaces include source progress, all 20 Important links and independent default task lists', () => {
   const first = createWorkspace();
   const second = createWorkspace();
-  assert.equal(first.bookmarks.length, 19);
+  assert.equal(first.bookmarks.length, 20);
   assert.equal(first.tasks.lists.length, 3);
   assert.deepEqual(first.tasks.tasks, []);
   assert.deepEqual(first.appearance, { mode: 'light', palette: 'neutral' });

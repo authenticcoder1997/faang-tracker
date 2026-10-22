@@ -46,7 +46,7 @@ function collectSections(nodes, path = []) {
   ];
 }
 
-function WebsiteCard({ bookmark }) {
+function WebsiteCard({ bookmark, priority = false }) {
   const [failed, setFailed] = useState(false);
   const hostname = new URL(bookmark.url).hostname.replace(/^www\./, '');
   const preview = previews.get(bookmark.url);
@@ -59,12 +59,13 @@ function WebsiteCard({ bookmark }) {
       aria-label={`${bookmark.title} — opens in a new tab`}
       className="panel group block min-w-0 overflow-hidden transition-colors hover:border-accent/50"
     >
-      <div className="relative aspect-[16/10] overflow-hidden border-b border-line bg-well">
+      <div className="relative aspect-video overflow-hidden border-b border-line bg-well">
         {preview && !failed ? (
           <img
             src={preview}
             alt={`${bookmark.title} website preview`}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
             decoding="async"
             onError={() => setFailed(true)}
             className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
@@ -298,7 +299,7 @@ export default function ImportantLinks({ isActive = true }) {
       </p>
       {sections.length ? (
         <div className="space-y-10">
-          {sections.map((section) => (
+          {sections.map((section, sectionIndex) => (
             <section
               key={JSON.stringify(section.path)}
               aria-labelledby={`links-folder-${encodeURIComponent(JSON.stringify(section.path))}`}
@@ -321,8 +322,12 @@ export default function ImportantLinks({ isActive = true }) {
                 </span>
               </div>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {section.bookmarks.map((bookmark) => (
-                  <WebsiteCard key={bookmark.id} bookmark={bookmark} />
+                {section.bookmarks.map((bookmark, bookmarkIndex) => (
+                  <WebsiteCard
+                    key={bookmark.id}
+                    bookmark={bookmark}
+                    priority={isActive && sectionIndex === 0 && bookmarkIndex < 3}
+                  />
                 ))}
               </div>
             </section>
