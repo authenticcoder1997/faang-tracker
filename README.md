@@ -5,7 +5,7 @@ A personal workspace for everyday tasks, study plans, notes, and links, backed b
 - **Home:** tasks grouped into lists, with clickable website links, voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks. Home opens on Today; new tasks default to today's date, which can be changed or cleared.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
 - **Important links:** 21 supplied bookmarks, organized into folders with website screenshot cards, search, and bookmark import.
-- **Study libraries:** DSA opens on the 179 problems from the captured Planly sprints, with direct TakeUForward links, a solved count, and a shared All tracked view. Mark solves in My Space to sync them across devices. Other libraries keep their own filters, progress, and problem notes.
+- **Study libraries:** DSA opens on the 179 captured Planly problems grouped by topic, with direct TakeUForward links, a solved count, and a shared All tracked view. Mark solves in My Space to sync them across devices. Other libraries keep their own filters, progress, and problem notes.
 - **Notes:** an open notebook editor with automatic Firebase saving.
 - **Appearance:** Light and Dark Liquid Glass, with Silver, Ocean, Iris, Rose, and Amber palettes throughout every page and dialog.
 

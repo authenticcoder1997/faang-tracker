@@ -68,6 +68,7 @@ export default function StudyTracker({
   accessFilter = false,
   completedLabel = 'Completed',
   libraryLabel = 'Practice library',
+  topicFilter = false,
   toolbar,
 }) {
   const saving = useWorkspaceSaving(id);
@@ -78,6 +79,7 @@ export default function StudyTracker({
   const [priority, setPriority] = useState('All');
   const [access, setAccess] = useState('All');
   const [completion, setCompletion] = useState('All');
+  const [topic, setTopic] = useState('All');
   const [collapsed, setCollapsed] = useState({});
   const [noteId, setNoteId] = useState(null);
   const activeNote = items.find((item) => item.id === noteId);
@@ -123,7 +125,8 @@ export default function StudyTracker({
     context !== 'All' ||
     priority !== 'All' ||
     access !== 'All' ||
-    completion !== 'All';
+    completion !== 'All' ||
+    topic !== 'All';
   const matchingItems = items.filter((item) => {
     const matchesQuery =
       !query.trim() ||
@@ -148,7 +151,8 @@ export default function StudyTracker({
       matchesContext &&
       matchesPriority &&
       matchesAccess &&
-      matchesCompletion
+      matchesCompletion &&
+      (topic === 'All' || item.section === topic)
     );
   });
   const dated = items.some((item) => item.date);
@@ -160,6 +164,7 @@ export default function StudyTracker({
     setPriority('All');
     setAccess('All');
     setCompletion('All');
+    setTopic('All');
   };
   const toggleItem = (itemId) =>
     setItems(
@@ -316,7 +321,7 @@ export default function StudyTracker({
           },
           hasGroups
             ? {
-                label: 'Sections finished',
+                label: topicFilter ? 'Topics finished' : 'Sections finished',
                 value: `${completedSections}/${sections.length}`,
                 detail: 'Foundations to build on',
               }
@@ -393,6 +398,14 @@ export default function StudyTracker({
               </button>
             )}
           </div>
+          {topicFilter && hasGroups && (
+            <Filter
+              label="Topic"
+              value={topic}
+              options={sections.map((section) => section.name)}
+              onChange={updateFilter(setTopic)}
+            />
+          )}
           <Filter
             label="Difficulty"
             value={difficulty}

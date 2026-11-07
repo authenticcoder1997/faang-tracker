@@ -50,7 +50,7 @@ export default function DsaTracker() {
       key={scope}
       id="dsa"
       title="Data structures & algorithms"
-      description="Open a problem to practice, then mark it solved here. Your progress syncs across devices."
+      description="Practice by topic, then mark problems solved here. Your progress syncs across devices."
       sourceLabel="Planly DSA"
       sourceUrl={PLANLY_DSA_URL}
       items={items}
@@ -58,13 +58,14 @@ export default function DsaTracker() {
       sectionDefinitions={isPlanly ? planlyDsaSections : allDsaSections}
       initiallyCollapsed
       completedLabel="Solved"
-      libraryLabel={isPlanly ? 'Planly sprint problems' : 'All tracked problems'}
+      libraryLabel="Problems by topic"
+      topicFilter
       toolbar={(
         <div className="mb-5 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div role="group" aria-label="DSA problem list" className="inline-flex gap-1 rounded-xl border border-line bg-well p-1">
               {[
-                ['planly', 'Planly sprints'],
+                ['planly', 'Planly problems'],
                 ['all', 'All tracked'],
               ].map(([id, label]) => (
                 <button key={id} type="button" aria-pressed={scope === id} onClick={() => setScope(id)}

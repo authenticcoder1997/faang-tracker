@@ -1,5 +1,6 @@
-import { dsaTopics, DSA_SECTIONS_LIST } from '../data/dsaTopics.js';
+import { dsaTopics } from '../data/dsaTopics.js';
 import { PLANLY_ROWS } from '../data/dsaPlanly.js';
+import { dsaCategory, dsaCategorySections } from '../data/dsaCategories.js';
 
 export const PLANLY_DSA_URL = 'https://takeuforward.org/planly/dsa';
 const PRACTICE_BASE = 'https://takeuforward.org/practice/dsa/';
@@ -9,29 +10,26 @@ const difficulties = { Basic: 'Easy', Core: 'Medium', Pro: 'Hard' };
 const planById = new Map(PLANLY_ROWS.map((row) => [row[0], row]));
 const oldById = new Map(dsaTopics.map((item) => [item.id, item]));
 
-export const planlyDsaTopics = PLANLY_ROWS.map(([id, title, slug, level, sprint, day]) => ({
+export const planlyDsaTopics = PLANLY_ROWS.map(([id, title, slug, level]) => ({
   id, title, url: PRACTICE_BASE + slug,
   difficulty: difficulties[level],
-  section: `Sprint ${sprint} · Day ${day}`,
+  section: dsaCategory(id, oldById.get(id)?.section),
   completed: !!oldById.get(id)?.completed,
 }));
 
-export const planlyDsaSections = [...new Set(planlyDsaTopics.map((item) => item.section))]
-  .map((name) => ({ name }));
+export const planlyDsaSections = dsaCategorySections(planlyDsaTopics);
 
 const planlyOnly = planlyDsaTopics.filter((item) => !oldById.has(item.id));
 export const allDsaTopics = [
   ...dsaTopics.filter((item) => item.id !== OLD_EDIT_DISTANCE).map((item) => ({
     ...item,
+    section: dsaCategory(item.id, item.section),
     url: planById.has(item.id) ? PRACTICE_BASE + planById.get(item.id)[2]
       : item.url,
   })),
-  ...planlyOnly.map((item) => ({ ...item, section: 'Additional Planly problems' })),
+  ...planlyOnly,
 ];
-export const allDsaSections = [
-  ...DSA_SECTIONS_LIST,
-  ...(planlyOnly.length ? [{ name: 'Additional Planly problems' }] : []),
-];
+export const allDsaSections = dsaCategorySections(allDsaTopics);
 
 function problemSlug(address) {
   try {
