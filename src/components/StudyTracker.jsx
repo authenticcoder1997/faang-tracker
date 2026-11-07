@@ -66,10 +66,6 @@ export default function StudyTracker({
   renderContext,
   priorityFilter = false,
   accessFilter = false,
-  completedLabel = 'Completed',
-  libraryLabel = 'Practice library',
-  topicFilter = false,
-  toolbar,
 }) {
   const saving = useWorkspaceSaving(id);
   const error = useWorkspaceValue((state) => state.error);
@@ -79,7 +75,6 @@ export default function StudyTracker({
   const [priority, setPriority] = useState('All');
   const [access, setAccess] = useState('All');
   const [completion, setCompletion] = useState('All');
-  const [topic, setTopic] = useState('All');
   const [collapsed, setCollapsed] = useState({});
   const [noteId, setNoteId] = useState(null);
   const activeNote = items.find((item) => item.id === noteId);
@@ -125,8 +120,7 @@ export default function StudyTracker({
     context !== 'All' ||
     priority !== 'All' ||
     access !== 'All' ||
-    completion !== 'All' ||
-    topic !== 'All';
+    completion !== 'All';
   const matchingItems = items.filter((item) => {
     const matchesQuery =
       !query.trim() ||
@@ -144,15 +138,14 @@ export default function StudyTracker({
       (access === 'Premium' ? !!item.premium : !item.premium);
     const matchesCompletion =
       completion === 'All' ||
-      (completion === completedLabel ? item.completed : !item.completed);
+      (completion === 'Completed' ? item.completed : !item.completed);
     return (
       matchesQuery &&
       matchesDifficulty &&
       matchesContext &&
       matchesPriority &&
       matchesAccess &&
-      matchesCompletion &&
-      (topic === 'All' || item.section === topic)
+      matchesCompletion
     );
   });
   const dated = items.some((item) => item.date);
@@ -164,7 +157,6 @@ export default function StudyTracker({
     setPriority('All');
     setAccess('All');
     setCompletion('All');
-    setTopic('All');
   };
   const toggleItem = (itemId) =>
     setItems(
@@ -198,8 +190,7 @@ export default function StudyTracker({
       <button
         type="button"
         onClick={() => toggleItem(item.id)}
-        aria-label={`${item.completed ? 'Mark incomplete' : completedLabel === 'Solved' ? 'Mark solved' : 'Mark complete'}: ${item.title}`}
-        title={item.completed ? 'Mark incomplete' : completedLabel === 'Solved' ? 'Mark solved' : 'Mark complete'}
+        aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
         aria-pressed={!!item.completed}
         className="completion-button mt-0.5 shrink-0"
       >
@@ -306,11 +297,10 @@ export default function StudyTracker({
         }
       />
 
-      {toolbar}
       <StatsStrip
         items={[
           {
-            label: completedLabel,
+            label: 'Completed',
             value: totalCompleted,
             detail: `of ${items.length} problems`,
           },
@@ -321,7 +311,7 @@ export default function StudyTracker({
           },
           hasGroups
             ? {
-                label: topicFilter ? 'Topics finished' : 'Sections finished',
+                label: 'Sections finished',
                 value: `${completedSections}/${sections.length}`,
                 detail: 'Foundations to build on',
               }
@@ -352,7 +342,7 @@ export default function StudyTracker({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="section-heading flex items-center gap-2">
             <BookOpen size={16} className="text-accent" />
-            {libraryLabel}{' '}
+            Practice library{' '}
             <span className="ml-1 text-xs font-normal text-muted">
               {matchingItems.length}{' '}
               {matchingItems.length === 1 ? 'problem' : 'problems'}
@@ -398,14 +388,6 @@ export default function StudyTracker({
               </button>
             )}
           </div>
-          {topicFilter && hasGroups && (
-            <Filter
-              label="Topic"
-              value={topic}
-              options={sections.map((section) => section.name)}
-              onChange={updateFilter(setTopic)}
-            />
-          )}
           <Filter
             label="Difficulty"
             value={difficulty}
@@ -415,7 +397,7 @@ export default function StudyTracker({
           <Filter
             label="Status"
             value={completion}
-            options={['To do', completedLabel]}
+            options={['To do', 'Completed']}
             onChange={updateFilter(setCompletion)}
           />
           {contextField && (
