@@ -66,6 +66,9 @@ export default function StudyTracker({
   renderContext,
   priorityFilter = false,
   accessFilter = false,
+  completedLabel = 'Completed',
+  libraryLabel = 'Practice library',
+  toolbar,
 }) {
   const saving = useWorkspaceSaving(id);
   const error = useWorkspaceValue((state) => state.error);
@@ -138,7 +141,7 @@ export default function StudyTracker({
       (access === 'Premium' ? !!item.premium : !item.premium);
     const matchesCompletion =
       completion === 'All' ||
-      (completion === 'Completed' ? item.completed : !item.completed);
+      (completion === completedLabel ? item.completed : !item.completed);
     return (
       matchesQuery &&
       matchesDifficulty &&
@@ -190,7 +193,8 @@ export default function StudyTracker({
       <button
         type="button"
         onClick={() => toggleItem(item.id)}
-        aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
+        aria-label={`${item.completed ? 'Mark incomplete' : completedLabel === 'Solved' ? 'Mark solved' : 'Mark complete'}: ${item.title}`}
+        title={item.completed ? 'Mark incomplete' : completedLabel === 'Solved' ? 'Mark solved' : 'Mark complete'}
         aria-pressed={!!item.completed}
         className="completion-button mt-0.5 shrink-0"
       >
@@ -297,10 +301,11 @@ export default function StudyTracker({
         }
       />
 
+      {toolbar}
       <StatsStrip
         items={[
           {
-            label: 'Completed',
+            label: completedLabel,
             value: totalCompleted,
             detail: `of ${items.length} problems`,
           },
@@ -342,7 +347,7 @@ export default function StudyTracker({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="section-heading flex items-center gap-2">
             <BookOpen size={16} className="text-accent" />
-            Practice library{' '}
+            {libraryLabel}{' '}
             <span className="ml-1 text-xs font-normal text-muted">
               {matchingItems.length}{' '}
               {matchingItems.length === 1 ? 'problem' : 'problems'}
@@ -397,7 +402,7 @@ export default function StudyTracker({
           <Filter
             label="Status"
             value={completion}
-            options={['To do', 'Completed']}
+            options={['To do', completedLabel]}
             onChange={updateFilter(setCompletion)}
           />
           {contextField && (
