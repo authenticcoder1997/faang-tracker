@@ -4,7 +4,7 @@ const topics = [
   ['Arrays & Hashing', /^(Sorting & Arrays|Arrays?\b)/, [], [
     "sort-an-array-of-0's-1's-and-2's", 'next-permutation',
   ]],
-  ['Binary Search', /^Binary Search /, [], [
+  ['Binary Search', /^Binary Search [IVX]+$/, [], [
     'single-element-in-sorted-array', 'find-peak-element-ii',
     'find-nth-root-of-a-number', 'kth-element-of-2-sorted-arrays',
   ]],

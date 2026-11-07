@@ -25,6 +25,8 @@ test('topic views cover the whole catalog and keep the same problem IDs and link
   assert.equal(planlyById.get('dsa-178'), 'Dynamic Programming');
   assert.equal(planlyById.get('planly-power-set-bit-manipulation'), 'Bit Manipulation');
   assert.equal(planlyById.get('dsa-64'), 'Stacks & Queues');
+  assert.equal(planlyById.get('dsa-117'), 'Binary Search Trees');
+  assert.equal(all.get('dsa-114').section, 'Binary Search Trees');
 });
 
 test('import recognizes official problem links, deduplicates aliases, and flags unrelated links', () => {
