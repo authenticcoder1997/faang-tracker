@@ -1,7 +1,9 @@
+import { useCloudStorage } from '../hooks/useCloudStorage';
 import StudyTracker from './StudyTracker';
-import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
+import { DSA_SECTIONS_LIST, dsaTopics } from '../data/dsaTopics';
 
-export default function DsaTracker({ items, setItems, savingLocally = false }) {
+export default function DsaTracker() {
+  const [items, setItems] = useCloudStorage('dsa', dsaTopics);
   return (
     <StudyTracker
       id="dsa"
@@ -13,7 +15,6 @@ export default function DsaTracker({ items, setItems, savingLocally = false }) {
       setItems={setItems}
       sectionDefinitions={DSA_SECTIONS_LIST}
       initiallyCollapsed
-      savingLocally={savingLocally}
     />
   );
 }

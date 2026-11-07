@@ -1,3 +1,8 @@
+import { useCloudStorage } from '../hooks/useCloudStorage';
+import { DSA_SECTIONS_LIST, dsaTopics } from '../data/dsaTopics';
+import { lldTopics } from '../data/lldTopics';
+import { hldTopics } from '../data/hldTopics';
+import { concurrencyTopics } from '../data/concurrencyTopics';
 import React, { useState } from 'react';
 import {
   ArrowRight,
@@ -13,7 +18,6 @@ import {
   Lock,
   Monitor,
 } from 'lucide-react';
-import { DSA_SECTIONS_LIST } from '../data/dsaTopics';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
 
 const MONTHS = [
@@ -181,17 +185,11 @@ function AgendaSection({ track, onOpen }) {
   );
 }
 
-export default function DailyHome({
-  dsa,
-  lld,
-  hld,
-  concurrency,
-  setDsa,
-  setLld,
-  setHld,
-  setConcurrency,
-  setActiveTab,
-}) {
+export default function DailyHome({ setActiveTab }) {
+  const [dsa, setDsa] = useCloudStorage('dsa', dsaTopics);
+  const [lld, setLld] = useCloudStorage('lld', lldTopics);
+  const [hld, setHld] = useCloudStorage('hld', hldTopics);
+  const [concurrency, setConcurrency] = useCloudStorage('concurrency', concurrencyTopics);
   const todayIdx = todayIndex();
   const totalDays =
     Math.max(

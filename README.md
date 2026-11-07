@@ -26,7 +26,7 @@ node --test src/lib/*.test.js src/hooks/*.test.js
 
 `src/index.css` defines the shared theme tokens, page frame, typography, surfaces, and controls. `src/components/ui/Workspace.jsx` contains reusable page headers, statistics, and empty states. All four study libraries use `StudyTracker.jsx`.
 
-Appearance is saved with the Firebase workspace and is shared across devices. The header separates the light/dark toggle from the horizontally scrollable palette rail. Header and page frames use the available width, with 24px desktop and 14px phone gutters.
+Appearance is saved with the Firebase workspace and is shared across devices. The header separates the light/dark toggle from the palette rail. Header and page frames use the available width, with 24px desktop and 14px phone gutters. Wide desktop windows fit the navigation and theme controls in one row, and the Home task sidebar stays visible while scrolling.
 
 Voice task entry uses the browser’s speech recognition. Click a microphone to start, stop to review the text, then save the task. Microphone access is requested only after starting dictation; browsers without speech support keep the typed form available.
 
@@ -36,11 +36,13 @@ Tasks, lists, notes, bookmarks, study progress, and appearance are stored in one
 
 Use the trash button beside a list to delete it. Tasks move to a list you choose, preserving schedules and completion history; deleting the last populated list creates an Inbox for its tasks. Empty lists can all be removed, and adding a task then creates an Inbox. The deletion notification offers Undo.
 
-The first connection imports existing browser data and the original Firebase collections where access is permitted. Old browser keys are removed only after a confirmed server save, and only if their contents have not changed during import. Unreadable data is retained and reported. Each edit is applied as a field-level patch in a Firestore transaction, preserving unrelated changes from another device. Server revisions prevent older responses from replacing a newer snapshot.
+My Space shows its layout while connecting, fills Home from the first confirmed Firebase snapshot, and loads other tabs when opened. Tabs keep their drafts and filters while you switch between them.
+
+The first connection imports existing browser data and the original Firebase collections where access is permitted. Old browser keys are removed only after a confirmed server save, and only if their contents have not changed during import. Unreadable data is retained and reported. Edits appear immediately and pending edits can share a Firestore transaction that writes only the changed sections. Field-level patches preserve unrelated changes from another device, and server revisions prevent older responses from replacing a newer snapshot.
 
 Important links start with the supplied Important collection, including `leetcode lists`, `Jobs Sites`, and `Online Games` for NFS and Cricket 07. Additions and imports save in Firebase. Importing an exported browser bookmarks HTML file retains nested folders under Important; it does not change or continuously sync browser bookmarks. Preview images in `public/link-previews` are saved screenshots captured in Chrome, including the signed-in course page. New imported websites use a domain fallback when no saved screenshot exists.
 
-Pending edits stay in memory until Firebase confirms them. The interface reports saving failures and protects reloads while edits are pending; reconnect or use Retry saving. There is no authentication or persistent browser cache.
+Pending edits stay in memory until Firebase confirms them. The interface reports saving failures and protects reloads while edits are pending; reconnect or use Retry sync. There is no authentication or persistent browser cache.
 
 ## Firebase setup
 

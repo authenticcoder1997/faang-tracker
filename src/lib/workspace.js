@@ -1,43 +1,20 @@
-import { dsaTopics } from '../data/dsaTopics.js';
-import { lldTopics } from '../data/lldTopics.js';
-import { hldTopics } from '../data/hldTopics.js';
-import { concurrencyTopics } from '../data/concurrencyTopics.js';
-import { importantBookmarks } from '../data/importantBookmarks.js';
 import { normalizeBookmark } from './bookmarks.js';
-import { INITIAL_TASK_DATA, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
+import { LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 
-const SOURCES = {
-  dsa: dsaTopics,
-  lld: lldTopics,
-  hld: hldTopics,
-  concurrency: concurrencyTopics,
-};
-const PROGRESS_KEYS = {
-  dsa: ['faang-tracker-dsa-v10', 'faang-tracker-dsa-v9'],
-  lld: ['faang-tracker-lld-v8'],
-  hld: ['faang-tracker-hld-v8'],
-  concurrency: ['faang-tracker-concurrency-v1'],
-};
-export const LEGACY_STORAGE_KEYS = Object.freeze([
-  'faang-tracker-tasks-v1',
-  'my-space-important-bookmarks-v1',
-  'faang-tracker-notes',
-  'my-space-theme',
-  ...Object.values(PROGRESS_KEYS).flat(),
-]);
+export const PROGRESS_TRACKS = Object.freeze(['dsa', 'lld', 'hld', 'concurrency']);
 const PALETTES = ['neutral', 'ocean', 'violet', 'rose', 'amber'];
 
-function object(value) {
+export function object(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function assert(condition, message) {
+export function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
 // A workspace is JSON data. Reject unsupported values instead of silently
 // removing them before an authoritative cloud write.
-function clone(value) {
+export function clone(value) {
   if (value === null || typeof value === 'string' || typeof value === 'boolean')
     return value;
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -52,7 +29,7 @@ function clone(value) {
   throw new Error('Unsupported workspace value');
 }
 
-function entityKey(id) {
+export function entityKey(id) {
   return `${typeof id}:${id}`;
 }
 
@@ -68,7 +45,7 @@ function uniqueEntities(value, label, normalize) {
   });
 }
 
-function tasks(value) {
+export function tasks(value) {
   assert(object(value), 'Invalid tasks');
   const data = clone(value);
   validateTaskData(data);
@@ -99,7 +76,7 @@ function tasks(value) {
   return data;
 }
 
-function bookmarks(value) {
+export function bookmarks(value) {
   return uniqueEntities(value, 'bookmark', (bookmark) => {
     const next = normalizeBookmark(bookmark);
     assert(next, 'Invalid bookmark');
@@ -107,7 +84,7 @@ function bookmarks(value) {
   });
 }
 
-function notes(value) {
+export function notes(value) {
   return uniqueEntities(value, 'note', (note) => {
     assert(object(note), 'Invalid note');
     assert(
@@ -137,7 +114,7 @@ function notes(value) {
   });
 }
 
-function appearance(value) {
+export function appearance(value) {
   assert(
     object(value) &&
       ['light', 'dark'].includes(value.mode) &&
@@ -164,7 +141,7 @@ function progressState(value) {
 }
 
 /** Validate a complete cloud document without replacing unreadable data. */
-export function normalizeWorkspace(value) {
+export function normalizeWorkspace(value, previous) {
   assert(
     object(value) && value.schemaVersion === 1,
     'Unrecognized workspace version',
@@ -172,319 +149,19 @@ export function normalizeWorkspace(value) {
   assert(object(value.progress), 'Invalid study progress');
   return {
     schemaVersion: 1,
-    tasks: tasks(value.tasks),
-    bookmarks: bookmarks(value.bookmarks),
-    notes: notes(value.notes),
-    appearance: appearance(value.appearance),
+    tasks: previous && value.tasks === previous.tasks ? previous.tasks : tasks(value.tasks),
+    bookmarks: previous && value.bookmarks === previous.bookmarks ? previous.bookmarks : bookmarks(value.bookmarks),
+    notes: previous && value.notes === previous.notes ? previous.notes : notes(value.notes),
+    appearance: previous && value.appearance === previous.appearance ? previous.appearance : appearance(value.appearance),
     progress: Object.fromEntries(
-      Object.keys(SOURCES).map((name) => [
+      PROGRESS_TRACKS.map((name) => [
         name,
-        progressState(value.progress[name]),
+        previous && value.progress[name] === previous.progress[name]
+          ? previous.progress[name]
+          : progressState(value.progress[name]),
       ]),
     ),
   };
-}
-
-function initialProgress() {
-  return Object.fromEntries(
-    Object.entries(SOURCES).map(([name, topics]) => [
-      name,
-      Object.fromEntries(
-        topics.map((topic) => [
-          topic.id,
-          { completed: !!topic.completed, note: topic.note || '' },
-        ]),
-      ),
-    ]),
-  );
-}
-
-function legacyProgress(value, source, restoreSourceCompletions) {
-  assert(Array.isArray(value), 'Invalid progress cache');
-  const result = clone(source);
-  const seen = new Set();
-  for (const item of value) {
-    assert(
-      object(item) &&
-        typeof item.id === 'string' &&
-        item.id &&
-        !seen.has(item.id),
-      'Invalid cached problem',
-    );
-    assert(
-      item.completed === undefined || typeof item.completed === 'boolean',
-      'Invalid cached completion',
-    );
-    assert(
-      item.note === undefined || typeof item.note === 'string',
-      'Invalid cached problem note',
-    );
-    seen.add(item.id);
-    const initial = Object.hasOwn(result, item.id)
-      ? result[item.id]
-      : { completed: false, note: '' };
-    Object.defineProperty(result, item.id, {
-      value: {
-        completed: restoreSourceCompletions
-          ? !!(initial.completed || item.completed)
-          : (item.completed ?? initial.completed),
-        note: item.note ?? initial.note,
-      },
-      enumerable: true,
-      configurable: true,
-      writable: true,
-    });
-  }
-  return result;
-}
-
-/** Migrate only explicit legacy values; the caller keeps them until cloud save succeeds. */
-export function createWorkspace(legacy = {}) {
-  assert(object(legacy), 'Invalid legacy storage');
-  const workspace = {
-    schemaVersion: 1,
-    tasks: clone(INITIAL_TASK_DATA),
-    bookmarks: bookmarks(importantBookmarks),
-    notes: [],
-    appearance: { mode: 'light', palette: 'neutral' },
-    progress: initialProgress(),
-  };
-  for (const key of LEGACY_STORAGE_KEYS) {
-    if (
-      !Object.hasOwn(legacy, key) ||
-      legacy[key] === null ||
-      legacy[key] === undefined
-    )
-      continue;
-    try {
-      const raw = legacy[key];
-      assert(typeof raw === 'string', 'Expected saved text');
-      let value;
-      if (key === 'my-space-theme' && ['light', 'dark', 'glass'].includes(raw))
-        value = raw;
-      else value = JSON.parse(raw);
-      if (key === 'faang-tracker-tasks-v1') workspace.tasks = tasks(value);
-      else if (key === 'my-space-important-bookmarks-v1') {
-        assert(
-          Array.isArray(value) ||
-            ((value?.version === undefined || value.version === 1) &&
-              Array.isArray(value?.bookmarks)),
-          'Invalid bookmark cache',
-        );
-        workspace.bookmarks = bookmarks(
-          Array.isArray(value) ? value : value.bookmarks,
-        );
-      } else if (key === 'faang-tracker-notes') {
-        assert(
-          Array.isArray(value) ||
-            ((value?.version === undefined || value.version === 1) &&
-              Array.isArray(value?.notes)),
-          'Invalid notes cache',
-        );
-        workspace.notes = notes(Array.isArray(value) ? value : value.notes);
-        if (!Array.isArray(value) && value.deletedIds !== undefined) {
-          assert(Array.isArray(value.deletedIds), 'Invalid deleted note IDs');
-          const deleted = new Set(value.deletedIds.map(entityKey));
-          workspace.notes = workspace.notes.filter(
-            (note) => !deleted.has(entityKey(note.id)),
-          );
-        }
-      } else if (key === 'my-space-theme') {
-        if (typeof value === 'string') {
-          assert(
-            ['light', 'dark', 'glass'].includes(value),
-            'Invalid saved theme',
-          );
-          workspace.appearance.mode = value === 'dark' ? 'dark' : 'light';
-        } else workspace.appearance = appearance(value);
-      } else {
-        const [name, keys] = Object.entries(PROGRESS_KEYS).find(([, keys]) =>
-          keys.includes(key),
-        );
-        // Validate older keys too, even when a newer cache takes precedence.
-        const migrated = legacyProgress(
-          value,
-          workspace.progress[name],
-          key !== keys[0],
-        );
-        if (
-          key === keys[0] ||
-          legacy[keys[0]] === null ||
-          legacy[keys[0]] === undefined
-        )
-          workspace.progress[name] = migrated;
-      }
-    } catch (error) {
-      throw new Error(`Could not migrate ${key}: ${error.message}`, {
-        cause: error,
-      });
-    }
-  }
-  return normalizeWorkspace(workspace);
-}
-
-/** One-time import into an existing account. Defaults are only for a new account. */
-export function mergeLegacyWorkspace(cloud, legacy) {
-  const current = normalizeWorkspace(cloud);
-  // Validate every supplied legacy cache before permitting cleanup of any key.
-  const imported = createWorkspace(legacy);
-  const supplied = (key) =>
-    Object.hasOwn(legacy, key) &&
-    legacy[key] !== null &&
-    legacy[key] !== undefined;
-  const union = (remote, previous) => {
-    const ids = new Set(remote.map((entry) => entityKey(entry.id)));
-    return [
-      ...remote,
-      ...previous.filter((entry) => !ids.has(entityKey(entry.id))),
-    ];
-  };
-  const next = clone(current);
-  if (supplied('faang-tracker-tasks-v1')) {
-    next.tasks.lists = union(current.tasks.lists, imported.tasks.lists);
-    next.tasks.tasks = union(current.tasks.tasks, imported.tasks.tasks);
-  }
-  if (supplied('my-space-important-bookmarks-v1'))
-    next.bookmarks = union(current.bookmarks, imported.bookmarks);
-  if (supplied('faang-tracker-notes')) {
-    const previousById = new Map(imported.notes.map((note) => [entityKey(note.id), note]));
-    const latestNotes = current.notes.map((note) => {
-      const previous = previousById.get(entityKey(note.id));
-      return previous && Date.parse(previous.updatedAt) > Date.parse(note.updatedAt)
-        ? previous
-        : note;
-    });
-    next.notes = union(latestNotes, imported.notes);
-  }
-  for (const [name, keys] of Object.entries(PROGRESS_KEYS)) {
-    const key = keys.find(supplied);
-    if (!key) continue;
-    // Only actual cached rows are evidence of previous user data. The source
-    // completions seeded by createWorkspace must never change an existing account.
-    for (const row of JSON.parse(legacy[key])) {
-      const previous = {
-        completed: row.completed ?? false,
-        note: row.note ?? '',
-      };
-      const remote = Object.hasOwn(current.progress[name], row.id)
-        ? current.progress[name][row.id]
-        : null;
-      Object.defineProperty(next.progress[name], row.id, {
-        value: remote
-          ? {
-              completed: remote.completed || previous.completed,
-              note: remote.note || previous.note,
-            }
-          : previous,
-        enumerable: true,
-        configurable: true,
-        writable: true,
-      });
-    }
-  }
-  return normalizeWorkspace(next);
-}
-
-/** Adapt the older Firestore collections without adding any new-account defaults. */
-export function legacyFirestoreValues(documents, browserLegacy = {}) {
-  assert(
-    object(documents) && object(browserLegacy),
-    'Invalid previous Firebase data',
-  );
-  const values = {};
-  const collections = {
-    dsa_progress: 'dsa',
-    lld_progress: 'lld',
-    hld_progress: 'hld',
-    concurrency_progress: 'concurrency',
-  };
-  for (const [collection, track] of Object.entries(collections)) {
-    const document = documents[collection];
-    if (document === null || document === undefined) continue;
-    try {
-      assert(object(document), 'Invalid progress document');
-      const completedIds =
-        document.completedIds === undefined ? [] : document.completedIds;
-      const itemState =
-        document.itemState === undefined ? {} : document.itemState;
-      assert(
-        Array.isArray(completedIds) &&
-          completedIds.every((id) => typeof id === 'string' && id),
-        'Invalid completed problem IDs',
-      );
-      assert(object(itemState), 'Invalid problem state');
-      const ids = new Set([...completedIds, ...Object.keys(itemState)]);
-      const completed = new Set(completedIds);
-      const rows = [...ids].map((id) => {
-        assert(id, 'Invalid problem ID');
-        const state = Object.hasOwn(itemState, id) ? itemState[id] : {};
-        assert(object(state), 'Invalid problem state');
-        assert(
-          state.completed === undefined || typeof state.completed === 'boolean',
-          'Invalid completion state',
-        );
-        assert(
-          state.note === undefined || typeof state.note === 'string',
-          'Invalid problem note',
-        );
-        return {
-          id,
-          completed: state.completed ?? completed.has(id),
-          note: state.note ?? '',
-        };
-      });
-      values[PROGRESS_KEYS[track][0]] = JSON.stringify(rows);
-    } catch (error) {
-      throw new Error(`Could not import ${collection}: ${error.message}`, {
-        cause: error,
-      });
-    }
-  }
-  if (documents.user_notes !== null && documents.user_notes !== undefined) {
-    try {
-      assert(object(documents.user_notes), 'Invalid notes document');
-      const previous = notes(documents.user_notes.notes);
-      let deleted = new Set();
-      const raw = browserLegacy['faang-tracker-notes'];
-      if (raw !== undefined && raw !== null) {
-        try {
-          assert(typeof raw === 'string', 'Expected saved text');
-          const cached = JSON.parse(raw);
-          assert(
-            Array.isArray(cached) ||
-              ((cached?.version === undefined || cached.version === 1) &&
-                Array.isArray(cached?.notes)),
-            'Invalid notes cache',
-          );
-          notes(Array.isArray(cached) ? cached : cached.notes);
-          if (!Array.isArray(cached) && cached.deletedIds !== undefined) {
-            assert(
-              Array.isArray(cached.deletedIds) &&
-                cached.deletedIds.every(
-                  (id) => (typeof id === 'string' && id) || Number.isFinite(id),
-                ),
-              'Invalid deleted note IDs',
-            );
-            deleted = new Set(cached.deletedIds.map(entityKey));
-          }
-        } catch (error) {
-          throw new Error(
-            `Could not read faang-tracker-notes: ${error.message}`,
-            { cause: error },
-          );
-        }
-      }
-      values['faang-tracker-notes'] = JSON.stringify({
-        version: 1,
-        notes: previous.filter((entry) => !deleted.has(entityKey(entry.id))),
-      });
-    } catch (error) {
-      throw new Error(`Could not import user_notes: ${error.message}`, {
-        cause: error,
-      });
-    }
-  }
-  return values;
 }
 
 function equal(left, right) {
@@ -506,7 +183,38 @@ function equal(left, right) {
   return false;
 }
 
+const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance'];
+
+// Keep unchanged sections referentially stable across cloud snapshots and acks.
+export function reuseWorkspace(previous, next) {
+  if (!previous || previous === next) return next;
+  const result = { ...next, progress: { ...next.progress } };
+  for (const section of SECTIONS) {
+    if (equal(previous[section], next[section])) result[section] = previous[section];
+  }
+  for (const track of PROGRESS_TRACKS) {
+    if (equal(previous.progress[track], next.progress[track])) result.progress[track] = previous.progress[track];
+  }
+  if (PROGRESS_TRACKS.every((track) => result.progress[track] === previous.progress[track]))
+    result.progress = previous.progress;
+  return workspaceChanges(previous, result).length ? result : previous;
+}
+
+export function workspaceChanges(previous, next) {
+  return [
+    ...SECTIONS.filter((key) => previous[key] !== next[key]),
+    ...PROGRESS_TRACKS.filter((key) => previous.progress[key] !== next.progress[key]),
+  ];
+}
+
+export function workspaceWriteFields(previous, next) {
+  return Object.fromEntries(workspaceChanges(previous, next).map((key) =>
+    PROGRESS_TRACKS.includes(key) ? [`progress.${key}`, next.progress[key]] : [key, next[key]],
+  ));
+}
+
 function fieldPatch(before, after, excluded = []) {
+  if (before === after) return { set: {}, remove: [] };
   const set = {};
   const remove = [];
   for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
@@ -522,6 +230,7 @@ function fieldPatch(before, after, excluded = []) {
 }
 
 function entityPatch(before, after, recurring = false) {
+  if (before === after) return { add: [], update: [], remove: [], order: [] };
   const previous = new Map(before.map((entry) => [entityKey(entry.id), entry]));
   const next = new Map(after.map((entry) => [entityKey(entry.id), entry]));
   const observedBefore = before
@@ -579,15 +288,17 @@ function entityPatch(before, after, recurring = false) {
 
 /** The patch contains intent relative to an observed snapshot, never a full array replacement. */
 export function makeWorkspacePatch(before, after) {
-  const previous = normalizeWorkspace(before);
-  const next = normalizeWorkspace(after);
+  return diffWorkspace(normalizeWorkspace(before), normalizeWorkspace(after));
+}
+
+// Both inputs here have already been validated.
+export function diffWorkspace(previous, next) {
   const listMoves = {};
-  const previousTasks = new Map(
-    previous.tasks.tasks.map((task) => [task.id, task]),
-  );
-  for (const removed of previous.tasks.lists.filter(
+  const removedLists = previous.tasks.lists === next.tasks.lists ? [] : previous.tasks.lists.filter(
     (list) => !next.tasks.lists.some((item) => item.id === list.id),
-  )) {
+  );
+  const previousTasks = new Map(removedLists.length ? previous.tasks.tasks.map((task) => [task.id, task]) : []);
+  for (const removed of removedLists) {
     const destinations = new Set(
       next.tasks.tasks
         .filter(
@@ -611,17 +322,17 @@ export function makeWorkspacePatch(before, after) {
     notes: entityPatch(previous.notes, next.notes),
     appearance: fieldPatch(previous.appearance, next.appearance),
     progress: Object.fromEntries(
-      Object.keys(SOURCES).map((name) => [
+      PROGRESS_TRACKS.map((name) => [
         name,
         fieldPatch(previous.progress[name], next.progress[name]),
       ]),
     ),
     // Progress fields are per problem below, so a completion cannot overwrite a concurrent note.
     progressFields: Object.fromEntries(
-      Object.keys(SOURCES).map((name) => [
+      PROGRESS_TRACKS.map((name) => [
         name,
         Object.fromEntries(
-          Object.keys(next.progress[name])
+          (previous.progress[name] === next.progress[name] ? [] : Object.keys(next.progress[name]))
             .filter(
               (id) =>
                 Object.hasOwn(previous.progress[name], id) &&
@@ -638,7 +349,12 @@ export function makeWorkspacePatch(before, after) {
   };
 }
 
+function hasFieldChanges(patch) {
+  return patch.remove.length > 0 || Object.keys(patch.set).length > 0;
+}
+
 function applyFields(value, patch) {
+  if (!hasFieldChanges(patch)) return value;
   const result = clone(value);
   for (const key of patch.remove) delete result[key];
   for (const [key, entry] of Object.entries(patch.set))
@@ -652,14 +368,14 @@ function applyFields(value, patch) {
 }
 
 function applyEntities(value, patch) {
+  if (!patch.remove.length && !patch.update.length && !patch.add.length && !patch.order?.length)
+    return value;
   const removed = new Set(patch.remove.map(entityKey));
-  let result = value
-    .filter((entry) => !removed.has(entityKey(entry.id)))
-    .map(clone);
+  let result = value.filter((entry) => !removed.has(entityKey(entry.id)));
   for (const update of patch.update) {
     result = result.map((entry) => {
       if (entityKey(entry.id) !== entityKey(update.id)) return entry;
-      const next = applyFields(entry, update);
+      const next = { ...applyFields(entry, update) };
       if (update.completedDates) {
         const dates = new Set(next.completedDates);
         for (const date of update.completedDates.remove) dates.delete(date);
@@ -707,14 +423,13 @@ function applyEntities(value, patch) {
 }
 
 function repairTaskLists(data, listMoves) {
-  const result = clone(data);
-  const listIds = new Set(result.lists.map((list) => list.id));
-  if (!result.tasks.some((task) => !listIds.has(task.listId))) return result;
-  if (!result.lists.length) {
-    result.lists.push({ id: 'inbox', name: 'Inbox', color: LIST_COLORS[0] });
+  const listIds = new Set(data.lists.map((list) => list.id));
+  if (!data.tasks.some((task) => !listIds.has(task.listId))) return data;
+  const lists = data.lists.length ? data.lists : [{ id: 'inbox', name: 'Inbox', color: LIST_COLORS[0] }];
+  if (!data.lists.length) {
     listIds.add('inbox');
   }
-  result.tasks = result.tasks.map((task) =>
+  const tasks = data.tasks.map((task) =>
     listIds.has(task.listId)
       ? task
       : {
@@ -723,20 +438,27 @@ function repairTaskLists(data, listMoves) {
             Object.hasOwn(listMoves, task.listId) &&
             listIds.has(listMoves[task.listId])
               ? listMoves[task.listId]
-              : result.lists[0].id,
+              : lists[0].id,
         },
   );
-  return result;
+  return { ...data, lists, tasks };
 }
 
 /** Apply inside a Firestore transaction to the latest server document. */
 export function applyWorkspacePatch(remote, patch) {
-  const current = normalizeWorkspace(remote);
+  return applyValidatedWorkspacePatch(normalizeWorkspace(remote), patch);
+}
+
+export function applyValidatedWorkspacePatch(current, patch) {
   assert(patch?.schemaVersion === 1, 'Unrecognized workspace patch');
   const progress = {};
-  for (const name of Object.keys(SOURCES)) {
+  for (const name of PROGRESS_TRACKS) {
     const fields = patch.progress[name];
     const changedExisting = new Set(Object.keys(patch.progressFields[name]));
+    if (!changedExisting.size && !hasFieldChanges(fields)) {
+      progress[name] = current.progress[name];
+      continue;
+    }
     const additions = Object.fromEntries(
       Object.entries(fields.set).filter(
         ([id]) =>
@@ -744,10 +466,10 @@ export function applyWorkspacePatch(remote, patch) {
           !Object.hasOwn(current.progress[name], id),
       ),
     );
-    progress[name] = applyFields(current.progress[name], {
+    progress[name] = { ...applyFields(current.progress[name], {
       set: additions,
       remove: fields.remove,
-    });
+    }) };
     for (const [id, delta] of Object.entries(patch.progressFields[name])) {
       if (Object.hasOwn(progress[name], id))
         Object.defineProperty(progress[name], id, {
@@ -758,19 +480,16 @@ export function applyWorkspacePatch(remote, patch) {
         });
     }
   }
+  const lists = applyEntities(current.tasks.lists, patch.lists);
+  const tasks = applyEntities(current.tasks.tasks, patch.tasks);
   return normalizeWorkspace({
     schemaVersion: 1,
-    tasks: repairTaskLists(
-      {
-        version: 1,
-        lists: applyEntities(current.tasks.lists, patch.lists),
-        tasks: applyEntities(current.tasks.tasks, patch.tasks),
-      },
-      patch.listMoves || {},
-    ),
+    tasks: lists === current.tasks.lists && tasks === current.tasks.tasks
+      ? current.tasks
+      : repairTaskLists({ version: 1, lists, tasks }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
     notes: applyEntities(current.notes, patch.notes),
     appearance: applyFields(current.appearance, patch.appearance),
     progress,
-  });
+  }, current);
 }

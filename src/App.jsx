@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { Component, lazy, memo, Suspense, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   LayoutDashboard,
   BookOpen,
@@ -16,81 +16,163 @@ import {
   CloudOff,
   LoaderCircle,
 } from 'lucide-react';
-import { useCloudStorage } from './hooks/useCloudStorage';
-import { useCloudNotes } from './hooks/useCloudNotes';
-import DailyHome from './components/DailyHome';
 import TaskHome from './components/TaskHome';
-import ImportantLinks from './components/ImportantLinks';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { useTheme } from './hooks/useTheme';
-import DsaTracker from './components/DsaTracker';
-import LldTracker from './components/LldTracker';
-import HldTracker from './components/HldTracker';
-import ConcurrencyTracker from './components/ConcurrencyTracker';
-import Notes from './components/Notes';
-import { dsaTopics } from './data/dsaTopics';
-import { lldTopics } from './data/lldTopics';
-import { hldTopics } from './data/hldTopics';
-import { concurrencyTopics } from './data/concurrencyTopics';
-import { useWorkspace } from './hooks/useWorkspace';
+import { useWorkspace, useWorkspaceValue } from './hooks/useWorkspace';
+
+const PAGES = {
+  dashboard: TaskHome,
+  homework: lazy(() => import('./components/DailyHome')),
+  important: lazy(() => import('./components/ImportantLinks')),
+  dsa: lazy(() => import('./components/DsaTracker')),
+  lld: lazy(() => import('./components/LldTracker')),
+  hld: lazy(() => import('./components/HldTracker')),
+  concurrency: lazy(() => import('./components/ConcurrencyTracker')),
+  notes: lazy(() => import('./components/Notes')),
+};
+
+function LoadingPage({ workspace = false, error }) {
+  return (
+    <section className="page-frame workspace-placeholder" aria-busy={!error}>
+      <p className="eyebrow">{workspace ? 'Your workspace' : 'My Space'}</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+        {workspace ? 'Make room for your day.' : 'Opening this tab…'}
+      </h1>
+      <p role="status" className="mt-4 flex items-center gap-2 text-sm text-muted">
+        {!error && <LoaderCircle size={16} className="animate-spin" />}
+        {error ? 'Your workspace will appear here once connected.' : workspace ? 'Connecting to Firebase…' : 'Loading this view…'}
+      </p>
+      {workspace && !error && (
+        <div aria-hidden="true" className="mt-10 grid gap-4 border-t border-line pt-7">
+          <span className="h-3 w-44 rounded bg-accent-soft" />
+          <span className="h-3 w-64 max-w-full rounded bg-accent-soft" />
+          <span className="h-3 w-36 rounded bg-accent-soft" />
+        </div>
+      )}
+    </section>
+  );
+}
+
+class PageErrorBoundary extends Component {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <section className="page-frame">
+        <p role="alert" className="mb-4 text-sm text-muted">This tab couldn’t load. Reload My Space to try again.</p>
+        <button type="button" className="button-secondary" onClick={() => window.location.reload()}>
+          <RefreshCw size={15} /> Reload My Space
+        </button>
+      </section>
+    );
+  }
+}
+
+const WorkspacePage = memo(function WorkspacePage({ id, active, openTab, openHomework }) {
+  const Page = PAGES[id];
+  return (
+    <div className={active ? 'block' : 'hidden'}>
+      <PageErrorBoundary>
+        <Suspense fallback={<LoadingPage />}>
+          <Page isActive={active} setActiveTab={openTab} onOpenHomework={openHomework} />
+        </Suspense>
+      </PageErrorBoundary>
+    </div>
+  );
+});
+
+function WorkspaceSync() {
+  const ready = useWorkspaceValue((state) => !!state.data);
+  const saving = useWorkspaceValue((state) => state.saving);
+  const error = useWorkspaceValue((state) => state.error);
+  const status = error ? 'Unable to sync' : saving ? 'Saving to Firebase' : ready ? 'Synced with Firebase' : 'Connecting to Firebase';
+  return (
+    <span role="status" className="header-utility" title={status}>
+      {error ? <CloudOff size={17} className="text-danger" />
+        : saving || !ready ? <LoaderCircle size={17} className="animate-spin text-muted" />
+          : <Cloud size={17} className="text-accent" />}
+      <span className="sr-only">{status}</span>
+    </span>
+  );
+}
+
+function WorkspaceNotices() {
+  const { retry } = useWorkspace();
+  const ready = useWorkspaceValue((state) => !!state.data);
+  const error = useWorkspaceValue((state) => state.error);
+  const importNotice = useWorkspaceValue((state) => state.importNotice);
+  const importPending = useWorkspaceValue((state) => state.importPending);
+  return (
+    <>
+      {error && (
+        <div
+          role="alert"
+          className="mx-3 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-danger/25 bg-danger/5 p-4 text-sm text-danger sm:mx-6"
+        >
+          <p>{error}</p>
+          <button type="button" className="button-secondary" onClick={retry}>
+            {ready ? 'Retry sync' : 'Retry connection'}
+          </button>
+        </div>
+      )}
+      {importNotice && (
+        <div role="status" className="flex flex-wrap items-center gap-3 px-3 pt-4 text-xs text-muted sm:px-6">
+          <p>{importNotice}</p>
+          {importPending && (
+            <button type="button" className="button-secondary" onClick={retry}>
+              Retry connection
+            </button>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+function ConnectingWorkspace() {
+  const error = useWorkspaceValue((state) => state.error);
+  return <LoadingPage workspace error={error} />;
+}
+
+function AppearanceControls({ ready }) {
+  const { theme, setTheme } = useTheme();
+  const error = useWorkspaceValue((state) => state.error);
+  return <ThemeSwitcher theme={theme} onChange={setTheme} disabled={!ready} syncError={ready && !!error} />;
+}
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const { theme, setTheme, storageError } = useTheme();
-  const {
-    saving,
-    error: workspaceError,
-    retry,
-    importNotice,
-    importPending,
-  } = useWorkspace();
-
-  const docId = 'my-personal-tracker';
-
-  const [dsa, setDsa, dsaLoading, dsaSyncError] = useCloudStorage(
-    'dsa_progress',
-    docId,
-    dsaTopics,
-    'faang-tracker-dsa-v10',
-    'faang-tracker-dsa-v9',
-  );
-  const [lld, setLld, lldLoading] = useCloudStorage(
-    'lld_progress',
-    docId,
-    lldTopics,
-    'faang-tracker-lld-v8',
-  );
-  const [hld, setHld, hldLoading] = useCloudStorage(
-    'hld_progress',
-    docId,
-    hldTopics,
-    'faang-tracker-hld-v8',
-  );
-  const [concurrency, setConcurrency, concurrencyLoading] = useCloudStorage(
-    'concurrency_progress',
-    docId,
-    concurrencyTopics,
-    'faang-tracker-concurrency-v1',
-  );
-  const [notes, setNotes, notesLoading, notesSyncError, notesStorageError] =
-    useCloudNotes(docId);
-
-  const isLoading =
-    dsaLoading ||
-    lldLoading ||
-    hldLoading ||
-    concurrencyLoading ||
-    notesLoading;
+  const [{ activeTab, visited }, setNavigation] = useState({
+    activeTab: 'dashboard',
+    visited: ['dashboard'],
+  });
+  const ready = useWorkspaceValue((state) => !!state.data);
+  const { updateData } = useWorkspace();
+  const currentTab = useRef('dashboard');
+  const scrollPositions = useRef(new Map());
+  const openTab = useCallback((id) => {
+    if (!Object.hasOwn(PAGES, id) || id === currentTab.current) return;
+    scrollPositions.current.set(currentTab.current, window.scrollY);
+    currentTab.current = id;
+    setNavigation((current) => ({
+      activeTab: id,
+      visited: current.visited.includes(id) ? current.visited : [...current.visited, id],
+    }));
+  }, []);
+  const openHomework = useCallback(() => openTab('homework'), [openTab]);
+  useLayoutEffect(() => {
+    window.scrollTo({ top: scrollPositions.current.get(activeTab) ?? 0, behavior: 'instant' });
+  }, [activeTab]);
 
   const resetProgress = async () => {
-    if (window.confirm('Reset ALL progress? This cannot be undone.')) {
-      await Promise.all([
-        setDsa(dsaTopics),
-        setLld(lldTopics),
-        setHld(hldTopics),
-        setConcurrency(concurrencyTopics),
-      ]);
-    }
+    if (!ready || !window.confirm('Reset ALL progress? This cannot be undone.')) return;
+    const { makeResetProgress } = await import('./lib/resetProgress');
+    updateData((current) => ({ ...current, progress: makeResetProgress(current.progress) }));
   };
 
   const tabs = [
@@ -127,40 +209,8 @@ function App() {
               </div>
             </div>
             <div className="header-tools">
-              <ThemeSwitcher
-                theme={theme}
-                onChange={setTheme}
-                syncError={
-                  workspaceError ||
-                  (storageError ? 'Appearance could not be saved.' : '')
-                }
-              />
-              <span
-                role="status"
-                className="header-utility"
-                title={
-                  workspaceError
-                    ? 'Changes need attention'
-                    : saving
-                      ? 'Saving to Firebase'
-                      : 'Synced with Firebase'
-                }
-              >
-                {workspaceError ? (
-                  <CloudOff size={17} className="text-danger" />
-                ) : saving ? (
-                  <LoaderCircle size={17} className="animate-spin text-muted" />
-                ) : (
-                  <Cloud size={17} className="text-accent" />
-                )}
-                <span className="sr-only">
-                  {workspaceError
-                    ? 'Unable to sync'
-                    : saving
-                      ? 'Saving to Firebase'
-                      : 'Synced with Firebase'}
-                </span>
-              </span>
+              <AppearanceControls ready={ready} />
+              <WorkspaceSync />
               <details className="workspace-menu">
                 <summary
                   aria-label="Workspace options"
@@ -182,7 +232,7 @@ function App() {
                     <GitBranch size={15} />
                     View source
                   </a>
-                  <button onClick={resetProgress}>
+                  <button onClick={resetProgress} disabled={!ready}>
                     <RefreshCw size={15} />
                     Reset study progress
                   </button>
@@ -194,7 +244,7 @@ function App() {
             {tabs.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id)}
+                onClick={() => openTab(id)}
                 aria-current={activeTab === id ? 'page' : undefined}
                 className="navigation-tab"
               >
@@ -208,88 +258,16 @@ function App() {
 
       {/* Main Content */}
       <main id="workspace" className="min-w-0">
-        {workspaceError && (
-          <div
-            role="alert"
-            className="mx-3 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-danger/25 bg-danger/5 p-4 text-sm text-danger sm:mx-6"
-          >
-            <p>{workspaceError}</p>
-            <button type="button" className="button-secondary" onClick={retry}>
-              Retry saving
-            </button>
-          </div>
-        )}
-        {importNotice && (
-          <div role="status" className="flex flex-wrap items-center gap-3 px-3 pt-4 text-xs text-muted sm:px-6">
-            <p>{importNotice}</p>
-            {importPending && (
-              <button type="button" className="button-secondary" onClick={retry}>
-                Retry connection
-              </button>
-            )}
-          </div>
-        )}
-        <div className={activeTab === 'dashboard' ? 'block' : 'hidden'}>
-          <TaskHome
-            isActive={activeTab === 'dashboard'}
-            onOpenHomework={() => setActiveTab('homework')}
+        <WorkspaceNotices />
+        {ready ? visited.map((id) => (
+          <WorkspacePage
+            key={id}
+            id={id}
+            active={id === activeTab}
+            openTab={openTab}
+            openHomework={openHomework}
           />
-        </div>
-        <div className={activeTab === 'important' ? 'block' : 'hidden'}>
-          <ImportantLinks isActive={activeTab === 'important'} />
-        </div>
-        {isLoading && !['dashboard', 'important'].includes(activeTab) ? (
-          <div
-            className="flex min-h-[60vh] items-center justify-center"
-            role="status"
-            aria-label="Loading study progress"
-          >
-            <RefreshCw className="animate-spin text-accent" size={28} />
-          </div>
-        ) : (
-          <>
-            <div className={activeTab === 'homework' ? 'block' : 'hidden'}>
-              <DailyHome
-                dsa={dsa}
-                lld={lld}
-                hld={hld}
-                concurrency={concurrency}
-                setDsa={setDsa}
-                setLld={setLld}
-                setHld={setHld}
-                setConcurrency={setConcurrency}
-                setActiveTab={setActiveTab}
-              />
-            </div>
-            <div className={activeTab === 'dsa' ? 'block' : 'hidden'}>
-              <DsaTracker
-                items={dsa}
-                setItems={setDsa}
-                savingLocally={!!dsaSyncError}
-              />
-            </div>
-            <div className={activeTab === 'lld' ? 'block' : 'hidden'}>
-              <LldTracker items={lld} setItems={setLld} />
-            </div>
-            <div className={activeTab === 'hld' ? 'block' : 'hidden'}>
-              <HldTracker items={hld} setItems={setHld} />
-            </div>
-            <div className={activeTab === 'concurrency' ? 'block' : 'hidden'}>
-              <ConcurrencyTracker
-                items={concurrency}
-                setItems={setConcurrency}
-              />
-            </div>
-            <div className={activeTab === 'notes' ? 'block h-full' : 'hidden'}>
-              <Notes
-                notes={notes}
-                setNotes={setNotes}
-                syncError={notesSyncError}
-                storageError={notesStorageError}
-              />
-            </div>
-          </>
-        )}
+        )) : <ConnectingWorkspace />}
       </main>
     </div>
   );

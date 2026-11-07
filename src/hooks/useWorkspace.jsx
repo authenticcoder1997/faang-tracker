@@ -1,20 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  doc,
-  getDocFromServer,
-  onSnapshot,
-  runTransaction,
-} from 'firebase/firestore';
-import { db } from '../firebase';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WorkspaceContext } from './workspaceContext';
+import { createWorkspaceStore } from './workspaceStore';
+import { LEGACY_STORAGE_KEYS } from '../lib/workspaceLegacyKeys';
+import { needsWorkspaceMigration, receiveWorkspaceSnapshots } from '../lib/workspaceInitialLoad';
 import {
-  applyWorkspacePatch,
-  createWorkspace,
-  LEGACY_STORAGE_KEYS,
-  legacyFirestoreValues,
-  makeWorkspacePatch,
-  mergeLegacyWorkspace,
+  applyValidatedWorkspacePatch,
+  diffWorkspace,
   normalizeWorkspace,
+  reuseWorkspace,
+  workspaceChanges,
+  workspaceWriteFields,
 } from '../lib/workspace';
 
 const LEGACY_COLLECTIONS = [
@@ -36,170 +31,193 @@ function explainError(problem) {
 
 function legacyData() {
   const values = {};
-  for (const key of LEGACY_STORAGE_KEYS) {
-    const value = window.localStorage.getItem(key);
-    if (value !== null) values[key] = value;
+  try {
+    for (const key of LEGACY_STORAGE_KEYS) {
+      const value = window.localStorage.getItem(key);
+      if (value !== null) values[key] = value;
+    }
+  } catch {
+    // A browser with blocked storage can still use the Firebase workspace.
+    return {};
   }
   return values;
 }
 
 async function legacyFingerprint(values) {
   if (!Object.keys(values).length) return null;
-  const bytes = new TextEncoder().encode(
-    JSON.stringify(Object.entries(values).sort()),
-  );
+  const bytes = new TextEncoder().encode(JSON.stringify(Object.entries(values).sort()));
   const hash = await crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(hash)]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function pendingSections(queue) {
+  return Object.fromEntries(queue.flatMap((job) => job.sections.map((section) => [section, true])));
 }
 
 export function WorkspaceProvider({ children }) {
-  const [data, setData] = useState(null);
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState('');
-  const [pendingCount, setPendingCount] = useState(0);
-  const [importNotice, setImportNotice] = useState('');
-  const [importPending, setImportPending] = useState(false);
-  const current = useRef(null);
+  const [store] = useState(createWorkspaceStore);
   const queue = useRef([]);
   const processing = useRef(null);
   const generation = useRef(0);
-  const reference = useRef(null);
+  const connection = useRef(null);
   const serverData = useRef(null);
-  const serverRevision = useRef(0);
+  const serverRevision = useRef(-1);
   const reconnect = useRef(null);
   const listenerLive = useRef(false);
 
+  const publish = useCallback((data, values = {}) => {
+    const previous = store.getSnapshot().data;
+    store.set({ ...values, data: reuseWorkspace(previous, data) });
+  }, [store]);
+
   const processQueue = useCallback(async () => {
-    if (processing.current || !reference.current || !queue.current.length)
-      return;
+    if (processing.current || !connection.current || !queue.current.length) return;
     const worker = { generation: generation.current };
     processing.current = worker;
-    const target = reference.current;
+    const { db, runTransaction, target } = connection.current;
     let completed = false;
     try {
       while (queue.current.length && generation.current === worker.generation) {
-        const job = queue.current[0];
+        // Edits made during the previous save share one network trip, in order.
+        const jobs = queue.current.slice();
         const confirmed = await runTransaction(db, async (transaction) => {
           const snapshot = await transaction.get(target);
           if (!snapshot.exists())
             throw new Error('Your Firebase workspace could not be found. Retry the connection.');
-          const next = applyWorkspacePatch(
-            normalizeWorkspace(snapshot.data()),
-            job.patch,
-          );
-          const revision = (snapshot.data().revision || 0) + 1;
+          const raw = snapshot.data();
+          const base = normalizeWorkspace(raw);
+          const next = reuseWorkspace(base, jobs.reduce(
+            (state, job) => applyValidatedWorkspacePatch(state, job.patch),
+            base,
+          ));
+          const revision = (raw.revision || 0) + 1;
           transaction.update(target, {
-            ...next,
+            ...workspaceWriteFields(base, next),
             revision,
             updatedAt: new Date().toISOString(),
           });
           return { next, revision };
         });
         if (generation.current !== worker.generation) return;
-        if (queue.current[0] === job) queue.current.shift();
+        queue.current.splice(0, jobs.length);
         if (confirmed.revision >= serverRevision.current) {
           serverData.current = confirmed.next;
           serverRevision.current = confirmed.revision;
         }
         const optimistic = queue.current.reduce(
-          (workspace, pending) => applyWorkspacePatch(workspace, pending.patch),
+          (workspace, pending) => applyValidatedWorkspacePatch(workspace, pending.patch),
           serverData.current,
         );
-        current.current = optimistic;
-        setData(optimistic);
-        setPendingCount(queue.current.length);
-        if (listenerLive.current) setError('');
+        publish(optimistic, {
+          pending: pendingSections(queue.current),
+          saving: !!queue.current.length,
+          ...(listenerLive.current ? { error: '' } : {}),
+        });
       }
       completed = true;
     } catch (problem) {
       if (generation.current === worker.generation)
-        setError(explainError(problem));
+        store.set({ error: explainError(problem) });
     } finally {
       if (processing.current === worker) processing.current = null;
-      // Firestore terminates a listener after its error callback. A successful
-      // retry of writes must restore realtime updates as well as drain the queue.
       if (completed && generation.current === worker.generation && !listenerLive.current)
         void reconnect.current?.();
     }
-  }, []);
+  }, [publish, store]);
 
   useEffect(() => {
     const activeGeneration = ++generation.current;
-    const target = doc(db, 'workspaces', 'main');
-    reference.current = target;
-    let unsubscribe;
-    let connecting = false;
     const isActive = () => generation.current === activeGeneration;
+    let stop = () => {};
+    let connecting = false;
 
     function adopt(snapshot) {
       if (!snapshot.exists())
         throw new Error('Your Firebase workspace could not be found. Retry the connection.');
-      const revision = snapshot.data().revision || 0;
+      const raw = snapshot.data();
+      const revision = raw.revision || 0;
       if (revision < serverRevision.current) return;
-      const workspace = normalizeWorkspace(snapshot.data());
+      const workspace = reuseWorkspace(serverData.current, normalizeWorkspace(raw));
       const optimistic = queue.current.reduce(
-        (state, job) => applyWorkspacePatch(state, job.patch),
+        (state, job) => applyValidatedWorkspacePatch(state, job.patch),
         workspace,
       );
       serverData.current = workspace;
       serverRevision.current = revision;
-      current.current = optimistic;
-      setData(optimistic);
-      setReady(true);
-      setImportPending(!snapshot.data().importedFirebaseLegacy);
+      publish(optimistic, { importPending: !raw.importedFirebaseLegacy });
     }
 
     async function connect() {
       if (!isActive() || connecting) return;
       connecting = true;
-      unsubscribe?.();
-      unsubscribe = undefined;
+      stop();
       listenerLive.current = false;
+      let closed = false;
+      let unsubscribe;
+      let firstSnapshotTimer;
+      stop = () => {
+        closed = true;
+        clearTimeout(firstSnapshotTimer);
+        unsubscribe?.();
+      };
+      const active = () => isActive() && !closed;
+      const fail = (problem) => {
+        if (!active()) return;
+        stop();
+        connecting = false;
+        listenerLive.current = false;
+        store.set({ error: explainError(problem) });
+      };
       try {
-        let older = {};
-        try {
-          older = legacyData();
-        } catch {
-          // A browser with blocked storage can still use the Firebase workspace.
-        }
+        const api = await import('../lib/workspaceBackend');
+        if (!active()) return;
+        const { db, doc, getDocFromServer, onSnapshot, runTransaction } = api;
+        const target = doc(db, 'workspaces', 'main');
+        connection.current = { db, runTransaction, target };
+        const older = legacyData();
         const fingerprint = await legacyFingerprint(older);
-        // Decode before writing anything, so malformed legacy data keeps its copy.
-        const imported = fingerprint ? createWorkspace(older) : null;
-        const previousWorkspace = await getDocFromServer(target);
-        let oldFirebase = {};
-        let canImportFirebase = false;
-        let incompleteLegacy = false;
-        if (!previousWorkspace.data()?.importedFirebaseLegacy) {
-          const results = await Promise.allSettled(
-            LEGACY_COLLECTIONS.map((name) =>
+        if (!active()) return;
+
+        async function initialize(snapshot) {
+          const initial = snapshot.data();
+          if (!needsWorkspaceMigration(initial, fingerprint)) {
+            // No extra read or transaction on a normal load. If an already
+            // imported browser copy remains, still validate it before cleanup.
+            if (fingerprint) {
+              const { createWorkspace } = await import('../lib/workspaceLegacy');
+              createWorkspace(older);
+            }
+            return snapshot;
+          }
+
+          const { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } =
+            await import('../lib/workspaceLegacy');
+          const imported = fingerprint ? createWorkspace(older) : null;
+          let oldFirebase = {};
+          let canImportFirebase = false;
+          if (!initial?.importedFirebaseLegacy) {
+            const results = await Promise.allSettled(LEGACY_COLLECTIONS.map((name) =>
               getDocFromServer(doc(db, name, 'my-personal-tracker')),
-            ),
-          );
-          const documents = {};
-          results.forEach((result, index) => {
-            if (result.status === 'fulfilled' && result.value.exists())
-              documents[LEGACY_COLLECTIONS[index]] = result.value.data();
-          });
-          // Decode all readable inputs even after a partial read failure. Never
-          // delete browser copies if a readable old document is malformed.
-          oldFirebase = legacyFirestoreValues(documents, older);
-          canImportFirebase = results.every((result) => result.status === 'fulfilled');
-          incompleteLegacy = !canImportFirebase;
-        }
-        if (!isActive()) return;
-        await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(target);
-          const raw = snapshot.exists() ? snapshot.data() : null;
-          const importedLegacy = raw?.importedLegacy || [];
-          const needsBrowserImport = fingerprint && !importedLegacy.includes(fingerprint);
-          const needsFirebaseImport = canImportFirebase && !raw?.importedFirebaseLegacy;
-          if (!raw || needsBrowserImport || needsFirebaseImport) {
+            ));
+            const documents = {};
+            results.forEach((result, index) => {
+              if (result.status === 'fulfilled' && result.value.exists())
+                documents[LEGACY_COLLECTIONS[index]] = result.value.data();
+            });
+            oldFirebase = legacyFirestoreValues(documents, older);
+            canImportFirebase = results.every((result) => result.status === 'fulfilled');
+          }
+          if (!active()) return snapshot;
+          await runTransaction(db, async (transaction) => {
+            const latest = await transaction.get(target);
+            const raw = latest.exists() ? latest.data() : null;
+            const importedLegacy = raw?.importedLegacy || [];
+            const needsBrowserImport = fingerprint && !importedLegacy.includes(fingerprint);
+            const needsFirebaseImport = canImportFirebase && !raw?.importedFirebaseLegacy;
+            if (raw && !needsBrowserImport && !needsFirebaseImport) return;
             let next = raw ? normalizeWorkspace(raw) : imported || createWorkspace();
             if (raw && needsBrowserImport) next = mergeLegacyWorkspace(next, older);
-            // A partial import without a completion marker could resurrect a
-            // deleted note on every reconnect. Wait for all five reads instead.
+            // Don't import a partial read; it could revive deleted notes on reconnect.
             if (needsFirebaseImport) next = mergeLegacyWorkspace(next, oldFirebase);
             transaction.set(target, {
               ...next,
@@ -210,61 +228,61 @@ export function WorkspaceProvider({ children }) {
             }, {
               mergeFields: [
                 'schemaVersion', 'tasks', 'bookmarks', 'notes', 'appearance',
-                'progress', 'importedLegacy', 'importedFirebaseLegacy',
-                'revision', 'updatedAt',
+                'progress', 'importedLegacy', 'importedFirebaseLegacy', 'revision', 'updatedAt',
               ],
             });
-          }
-        });
-        const confirmed = await getDocFromServer(target);
-        if (!isActive()) return;
-        // Validate and merge pending changes before cleaning old browser data.
-        adopt(confirmed);
-        let notice = '';
-        const legacyComplete = !!confirmed.data().importedFirebaseLegacy;
-        if (fingerprint && confirmed.data().importedLegacy?.includes(fingerprint)) {
-          if (legacyComplete) {
-            let removed = true;
-            for (const [key, value] of Object.entries(older)) {
-              try {
-                if (window.localStorage.getItem(key) === value) window.localStorage.removeItem(key);
-                else removed = false;
-              } catch {
-                removed = false;
-              }
-            }
-            notice = removed
-              ? 'Your previous browser data has been imported to Firebase.'
-              : 'Your previous data is saved in Firebase. This browser did not allow removal of its old copy.';
-          } else {
-            // Keep deleted-note tombstones until the old server notes can be
-            // checked too; otherwise a later import could revive deleted notes.
-            notice = 'Your browser data has been imported. Its old copy is kept until the previous Firebase data can be checked.';
-          }
+          });
+          return active() ? getDocFromServer(target) : snapshot;
         }
-        if (incompleteLegacy && !legacyComplete)
-          notice += `${notice ? ' ' : ''}Some previous Firebase data could not be checked. Retry the connection to finish importing it.`;
-        setImportNotice(notice);
-        setError('');
-        unsubscribe = onSnapshot(target, { includeMetadataChanges: true }, (snapshot) => {
-          if (!isActive() || snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return;
-          try {
-            adopt(snapshot);
-            if (!queue.current.length) setError('');
-          } catch (problem) {
-            setError(explainError(problem));
+
+        function finishImport(snapshot) {
+          const raw = snapshot.data();
+          let notice = '';
+          if (fingerprint && raw.importedLegacy?.includes(fingerprint)) {
+            if (raw.importedFirebaseLegacy) {
+              let removed = true;
+              for (const [key, value] of Object.entries(older)) {
+                try {
+                  if (window.localStorage.getItem(key) === value) window.localStorage.removeItem(key);
+                  else removed = false;
+                } catch {
+                  removed = false;
+                }
+              }
+              notice = removed
+                ? 'Your previous browser data has been imported to Firebase.'
+                : 'Your previous data is saved in Firebase. This browser did not allow removal of its old copy.';
+            } else {
+              notice = 'Your browser data has been imported. Its old copy is kept until the previous Firebase data can be checked.';
+            }
           }
-        }, (problem) => {
-          if (!isActive()) return;
-          listenerLive.current = false;
-          setError(explainError(problem));
+          if (!raw.importedFirebaseLegacy)
+            notice += `${notice ? ' ' : ''}Some previous Firebase data could not be checked. Retry the connection to finish importing it.`;
+          store.set({ importNotice: notice, error: '' });
+        }
+
+        const receive = receiveWorkspaceSnapshots({
+          active,
+          initialize,
+          adopt,
+          fail,
+          initialized(snapshot) {
+            connecting = false;
+            listenerLive.current = true;
+            finishImport(snapshot);
+            if (queue.current.length) void processQueue();
+          },
         });
-        listenerLive.current = true;
-        if (queue.current.length) void processQueue();
+        firstSnapshotTimer = window.setTimeout(() => {
+          fail(new Error('Could not reach Firebase. Check your connection and try again.'));
+        }, 12000);
+        unsubscribe = onSnapshot(target, { includeMetadataChanges: true }, (snapshot) => {
+          if (!snapshot.metadata.fromCache && !snapshot.metadata.hasPendingWrites)
+            clearTimeout(firstSnapshotTimer);
+          receive(snapshot);
+        }, fail);
       } catch (problem) {
-        if (isActive()) setError(explainError(problem));
-      } finally {
-        connecting = false;
+        fail(problem);
       }
     }
 
@@ -274,17 +292,17 @@ export function WorkspaceProvider({ children }) {
       generation.current += 1;
       listenerLive.current = false;
       processing.current = null;
+      connection.current = null;
       reconnect.current = null;
-      unsubscribe?.();
+      stop();
     };
-  }, [processQueue]);
+  }, [processQueue, publish, store]);
 
   const retry = useCallback(async () => {
-    setError('');
+    store.set({ error: '' });
     if (queue.current.length) await processQueue();
-    // This also runs with an empty queue, restoring reads after a terminal error.
     await reconnect.current?.();
-  }, [processQueue]);
+  }, [processQueue, store]);
 
   useEffect(() => {
     const online = () => { void retry(); };
@@ -303,28 +321,24 @@ export function WorkspaceProvider({ children }) {
   }, [retry]);
 
   const updateData = useCallback((updater) => {
-    if (!current.current || !reference.current) return false;
+    const previous = store.getSnapshot().data;
+    if (!previous || !connection.current) return false;
     try {
-      const next = normalizeWorkspace(updater(current.current));
-      const patch = makeWorkspacePatch(current.current, next);
-      if (!patch || JSON.stringify(next) === JSON.stringify(current.current)) return true;
-      current.current = next;
-      queue.current.push({ patch });
-      setData(next);
-      setPendingCount(queue.current.length);
+      const proposed = updater(previous);
+      if (proposed === previous) return true;
+      const next = reuseWorkspace(previous, normalizeWorkspace(proposed, previous));
+      const sections = workspaceChanges(previous, next);
+      if (!sections.length) return true;
+      queue.current.push({ patch: diffWorkspace(previous, next), sections });
+      store.set({ data: next, pending: pendingSections(queue.current), saving: true });
       void processQueue();
       return true;
     } catch (problem) {
-      setError(explainError(problem));
+      store.set({ error: explainError(problem) });
       return false;
     }
-  }, [processQueue]);
+  }, [processQueue, store]);
 
-  return (
-    <WorkspaceContext.Provider value={{
-      data, ready, saving: pendingCount > 0, error, updateData, retry, importNotice, importPending,
-    }}>
-      {children}
-    </WorkspaceContext.Provider>
-  );
+  const context = useMemo(() => ({ store, updateData, retry }), [store, updateData, retry]);
+  return <WorkspaceContext.Provider value={context}>{children}</WorkspaceContext.Provider>;
 }

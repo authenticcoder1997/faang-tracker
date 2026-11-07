@@ -7,15 +7,40 @@
     import App from '/src/App.jsx';
     import '/src/index.css';
     import {WorkspaceContext} from '/src/hooks/workspaceContext.js';
-    import {createWorkspace} from '/src/lib/workspace.js';
+    import {createWorkspace} from '/src/lib/workspaceLegacy.js';
+    import {createWorkspaceStore} from '/src/hooks/workspaceStore.js';
+    import {dateKey} from '/src/lib/tasks.js';
     import {applyTheme, DEFAULT_THEME} from '/src/lib/theme.js';
     applyTheme(DEFAULT_THEME);
     // An in-memory fixture for browser layout checks. No Firebase connection or persisted data.
+    const manual = new URLSearchParams(location.search).has('manual');
+    const makeSample = () => {
+      const data = createWorkspace();
+      const now = new Date().toISOString();
+      data.notes = [{id:'preview-note', title:'Sample note', content:'A space for your ideas.', updatedAt:now}];
+      data.tasks.tasks = [
+        {id:'review', title:'Review system design notes', listId:'learning', repeat:'none', links:['https://bytecodebrew.com/']},
+        {id:'practice', title:'Solve a practice problem', listId:'learning', repeat:'daily', links:['https://takeuforward.org/planly']},
+        {id:'week', title:'Plan the week ahead', listId:'personal', repeat:'none', links:[]},
+      ].map(task => ({...task, dueDate:dateKey(), completed:false, completedDates:[], flagged:false, createdAt:now}));
+      return data;
+    };
     function Preview() {
-      const [data, setData] = React.useState(createWorkspace);
-      const state = React.useRef(data);
-      const updateData = React.useCallback((change) => { const next = change(state.current); state.current = next; setData(next); return true; }, []);
-      return React.createElement(WorkspaceContext.Provider, {value:{data,updateData,user:{email:'Design preview'},ready:true,saving:false,error:'',retry(){},signOut(){},importNotice:''}}, React.createElement(App));
+      const [store] = React.useState(() => createWorkspaceStore({data:manual ? null : makeSample()}));
+      const [connected, setConnected] = React.useState(!manual);
+      const updateData = React.useCallback((change) => {
+        const data = store.getSnapshot().data;
+        if (!data) return false;
+        store.set({data:change(data)});
+        return true;
+      }, [store]);
+      const value = React.useMemo(() => ({store,updateData,retry(){}}), [store,updateData]);
+      return React.createElement(React.Fragment, null,
+        !connected && React.createElement('button', {
+          onClick: () => { store.set({data:makeSample()}); setConnected(true); },
+          style:{padding:'4px 14px'}
+        }, 'Connect sample workspace'),
+        React.createElement(WorkspaceContext.Provider, {value}, React.createElement(App)));
     }
     createRoot(document.getElementById('root')).render(React.createElement(Preview));
   </script></body>

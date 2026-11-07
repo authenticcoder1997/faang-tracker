@@ -9,16 +9,14 @@ import {
   Mic,
 } from 'lucide-react';
 import { EmptyState, PageHeader } from './ui/Workspace';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
+import { useCloudNotes } from '../hooks/useCloudNotes';
 import { applyNoteDraft, createNoteDraft, editNoteDraft } from '../lib/notesDraft';
 
-export default function Notes({
-  notes,
-  setNotes,
-  syncError = null,
-  storageError = null,
-}) {
-  const { saving, error: workspaceError } = useWorkspace();
+export default function Notes() {
+  const [notes, setNotes] = useCloudNotes();
+  const saving = useWorkspaceSaving('notes');
+  const workspaceError = useWorkspaceValue((state) => state.error);
   const [activeNoteId, setActiveNoteId] = useState(null);
   const [draft, setDraft] = useState(createNoteDraft);
   const draftRevision = useRef(0);
@@ -282,7 +280,7 @@ export default function Notes({
   };
 
   const saveStatus =
-    workspaceError || syncError || storageError
+    workspaceError
       ? 'Unable to save to Firebase · keep this page open'
       : draftDirty && !activeNote
         ? 'This note was deleted on another device. Copy your draft before closing.'
@@ -315,7 +313,7 @@ export default function Notes({
               {notes.length}
             </span>
           </div>
-          <div className="custom-scrollbar max-h-56 overflow-y-auto lg:max-h-[calc(100dvh-21rem)]">
+          <div className="notebook-list custom-scrollbar max-h-56 overflow-y-auto">
             {notes.length > 0 &&
               [...notes]
                 .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
@@ -361,7 +359,7 @@ export default function Notes({
           </div>
         </aside>
 
-        <div className="flex min-h-[20rem] min-w-0 flex-col lg:h-[calc(100dvh-18rem)] lg:min-h-[28rem]">
+        <div className="notebook-editor flex min-h-[20rem] min-w-0 flex-col">
           {activeNoteId ? (
             <>
               <div className="shrink-0 border-b border-line pb-5">
@@ -397,7 +395,7 @@ export default function Notes({
                   <span
                     role="status"
                     className={
-                      workspaceError || syncError || storageError
+                      workspaceError
                         ? 'text-danger'
                         : ''
                     }

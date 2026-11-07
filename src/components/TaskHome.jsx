@@ -879,7 +879,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
     return (
       <li
         key={row.key}
-        className="group flex items-start gap-3.5 border-b border-line px-1 py-4 last:border-0 sm:gap-4"
+        className="group flex items-start gap-3.5 border-b border-line px-1 py-4 last:border-0 sm:gap-4 lg:py-3.5"
       >
         {!isDeleted && (
           <input
@@ -890,48 +890,50 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
             className="task-check mt-1 h-[20px] w-[20px] shrink-0 cursor-pointer appearance-none rounded-full border transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           />
         )}
-        <div className="min-w-0 flex-1">
-          <button
-            onClick={() => setTaskEditor({ task: row.task })}
-            disabled={isDeleted}
-            aria-label={`Edit ${row.task.title}`}
-            className={`block max-w-full break-words text-left text-[15px] font-medium leading-6 ${isCompleted ? 'text-muted line-through' : 'text-ink hover:text-ink'}`}
-          >
-            {row.task.title}
-          </button>
-          {row.task.notes && (
-            <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-muted">
-              {row.task.notes}
-            </p>
-          )}
-          {!!row.task.links?.length && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {row.task.links.map((link) => (
-                <a
-                  key={link}
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open ${link}`}
-                  title={link}
-                  className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-accent-soft px-2 py-1 text-xs text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  <ExternalLink size={12} className="shrink-0" />
-                  <span className="truncate">
-                    {link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                  </span>
-                </a>
-              ))}
-            </div>
-          )}
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
+        <div className="task-row-details min-w-0 flex-1">
+          <div className="min-w-0">
+            <button
+              onClick={() => setTaskEditor({ task: row.task })}
+              disabled={isDeleted}
+              aria-label={`Edit ${row.task.title}`}
+              className={`block max-w-full break-words text-left text-[15px] font-medium leading-6 ${isCompleted ? 'text-muted line-through' : 'text-ink hover:text-ink'}`}
+            >
+              {row.task.title}
+            </button>
+            {row.task.notes && (
+              <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-xs leading-5 text-muted">
+                {row.task.notes}
+              </p>
+            )}
+            {!!row.task.links?.length && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {row.task.links.map((link) => (
+                  <a
+                    key={link}
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${link}`}
+                    title={link}
+                    className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-accent-soft px-2 py-1 text-xs text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  >
+                    <ExternalLink size={12} className="shrink-0" />
+                    <span className="truncate">
+                      {link.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="task-row-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
             {!selectedList && (
-              <span className="flex items-center gap-1.5">
+              <span className="flex min-w-0 items-center gap-1.5">
                 <span
                   style={{ backgroundColor: list?.color }}
-                  className="h-1.5 w-1.5 rounded-full"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full"
                 />
-                {list?.name}
+                <span className="break-anywhere">{list?.name}</span>
               </span>
             )}
             {row.date && (
@@ -1014,10 +1016,10 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           {error}
         </p>
       )}
-      <div className="grid grid-cols-1 gap-7 lg:min-h-[calc(100dvh-330px)] lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-10">
+      <div className="task-workspace grid grid-cols-1 gap-7">
         <aside
           aria-label="Task lists"
-          className="min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-7 lg:pb-0"
+          className="task-sidebar min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-5 lg:pb-0"
         >
           <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
             {SMART_VIEWS.map((item) => {
@@ -1155,7 +1157,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
                 </button>
               )}
             </div>
-            <div className="relative w-full sm:w-48">
+            <div className="relative w-full sm:w-48 lg:w-64">
               <Search
                 size={14}
                 className="pointer-events-none absolute top-3 left-3 text-faint"

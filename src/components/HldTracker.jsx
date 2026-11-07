@@ -1,6 +1,9 @@
+import { useCloudStorage } from '../hooks/useCloudStorage';
+import { hldTopics } from '../data/hldTopics';
 import StudyTracker from './StudyTracker';
 
-export default function HldTracker({ items, setItems }) {
+export default function HldTracker() {
+  const [items, setItems] = useCloudStorage('hld', hldTopics);
   return (
     <StudyTracker
       id="hld"

@@ -1,13 +1,14 @@
-import { useCallback, useEffect } from 'react';
-import { applyTheme, isValidTheme } from '../lib/theme';
-import { useWorkspace } from './useWorkspace';
+import { useCallback, useLayoutEffect } from 'react';
+import { applyTheme, DEFAULT_THEME, isValidTheme } from '../lib/theme';
+import { useWorkspace, useWorkspaceValue } from './useWorkspace';
 
 export function useTheme() {
-  const { data, updateData } = useWorkspace();
+  const { updateData } = useWorkspace();
+  const theme = useWorkspaceValue((state) => state.data?.appearance ?? DEFAULT_THEME);
 
-  useEffect(() => {
-    applyTheme(data.appearance);
-  }, [data.appearance]);
+  useLayoutEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
 
   const setTheme = useCallback(
     (theme) => {
@@ -17,5 +18,5 @@ export function useTheme() {
     [updateData],
   );
 
-  return { theme: data.appearance, setTheme, storageError: false };
+  return { theme, setTheme };
 }

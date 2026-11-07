@@ -1,8 +1,11 @@
 import { useCallback } from 'react';
-import { useWorkspace } from './useWorkspace';
+import { useWorkspace, useWorkspaceSaving, useWorkspaceValue } from './useWorkspace';
 
 export function useTasks() {
-  const { data, updateData: updateWorkspace, saving, error } = useWorkspace();
+  const { updateData: updateWorkspace } = useWorkspace();
+  const data = useWorkspaceValue((state) => state.data.tasks);
+  const saving = useWorkspaceSaving('tasks');
+  const error = useWorkspaceValue((state) => state.error);
   const updateData = useCallback(
     (change) =>
       updateWorkspace((current) => ({
@@ -12,5 +15,5 @@ export function useTasks() {
     [updateWorkspace],
   );
 
-  return { data: data.tasks, updateData, error, saving };
+  return { data, updateData, error, saving };
 }

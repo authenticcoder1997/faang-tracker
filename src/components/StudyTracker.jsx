@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import NoteModal from './NoteModal';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 
 function Difficulty({ value }) {
   const tone =
@@ -66,9 +66,9 @@ export default function StudyTracker({
   renderContext,
   priorityFilter = false,
   accessFilter = false,
-  savingLocally = false,
 }) {
-  const { saving, error } = useWorkspace();
+  const saving = useWorkspaceSaving(id);
+  const error = useWorkspaceValue((state) => state.error);
   const [query, setQuery] = useState('');
   const [difficulty, setDifficulty] = useState('All');
   const [context, setContext] = useState('All');
@@ -334,8 +334,8 @@ export default function StudyTracker({
         <div className="progress-fill" style={{ width: `${percent}%` }} />
       </div>
 
-      <p className={`mb-5 text-xs ${error || savingLocally ? 'text-warning' : 'text-muted'}`} role="status">
-        {error || savingLocally ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
+      <p className={`mb-5 text-xs ${error ? 'text-warning' : 'text-muted'}`} role="status">
+        {error ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
       </p>
 
       <div className="mb-6 space-y-4">

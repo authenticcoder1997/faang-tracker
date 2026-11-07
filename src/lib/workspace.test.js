@@ -1,14 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createWorkspace,
-  legacyFirestoreValues,
-  mergeLegacyWorkspace,
   normalizeWorkspace,
   makeWorkspacePatch,
   applyWorkspacePatch,
-  LEGACY_STORAGE_KEYS,
+  applyValidatedWorkspacePatch,
+  diffWorkspace,
+  reuseWorkspace,
+  workspaceChanges,
+  workspaceWriteFields,
 } from './workspace.js';
+import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './workspaceLegacy.js';
+import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList } from './tasks.js';
 
@@ -803,4 +806,48 @@ test('noop patches preserve all current remote edits', () => {
     applyWorkspacePatch(remote, makeWorkspacePatch(before, copy(before))),
     remote,
   );
+});
+
+test('a task edit keeps other views stable through optimistic update and Firebase acknowledgement', () => {
+  const before = normalizeWorkspace(base());
+  const proposed = { ...before, tasks: {
+    ...before.tasks,
+    tasks: [{ ...before.tasks.tasks[0], title: 'Read today' }],
+  } };
+  const edited = reuseWorkspace(before, normalizeWorkspace(proposed, before));
+  assert.deepEqual(workspaceChanges(before, edited), ['tasks']);
+  assert.equal(edited.progress, before.progress);
+  assert.equal(edited.notes, before.notes);
+  assert.equal(edited.bookmarks, before.bookmarks);
+  const confirmed = applyValidatedWorkspacePatch(before, diffWorkspace(before, edited));
+  assert.equal(reuseWorkspace(edited, normalizeWorkspace(copy(confirmed))), edited);
+  assert.deepEqual(workspaceWriteFields(before, reuseWorkspace(before, confirmed)), { tasks: confirmed.tasks });
+});
+
+test('queued edits rebase in order while cloud writes touch only their own sections', () => {
+  const before = normalizeWorkspace(base());
+  const [id, entry] = Object.entries(before.progress.dsa)[0];
+  const checked = normalizeWorkspace({
+    ...before, progress: { ...before.progress, dsa: {
+      ...before.progress.dsa, [id]: { ...entry, completed: !entry.completed },
+    } },
+  }, before);
+  const restored = normalizeWorkspace({
+    ...checked, progress: { ...checked.progress, dsa: {
+      ...checked.progress.dsa, [id]: entry,
+    } },
+  }, checked);
+  const remote = normalizeWorkspace({
+    ...before, progress: { ...before.progress, dsa: {
+      ...before.progress.dsa, [id]: { ...entry, note: 'From the phone' },
+    } },
+    appearance: { mode: 'dark', palette: 'ocean' },
+  }, before);
+  const checkedPatch = diffWorkspace(before, checked);
+  const restoredPatch = diffWorkspace(checked, restored);
+  const afterCheck = reuseWorkspace(remote, applyValidatedWorkspacePatch(remote, checkedPatch));
+  assert.deepEqual(Object.keys(workspaceWriteFields(remote, afterCheck)), ['progress.dsa']);
+  const combined = reuseWorkspace(remote, [checkedPatch, restoredPatch].reduce(applyValidatedWorkspacePatch, remote));
+  assert.equal(combined, remote);
+  assert.equal(combined.progress.dsa[id].note, 'From the phone');
 });

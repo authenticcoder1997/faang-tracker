@@ -17,7 +17,7 @@ const palettes = [
   { id: 'amber', label: 'Amber', Icon: Sunset },
 ];
 
-export default function ThemeSwitcher({ theme, onChange, syncError = false }) {
+export default function ThemeSwitcher({ theme, onChange, syncError = false, disabled = false }) {
   const appearance = normalizeTheme(theme);
   const isDark = appearance.mode === 'dark';
   const ModeIcon = isDark ? Moon : Sun;
@@ -27,6 +27,7 @@ export default function ThemeSwitcher({ theme, onChange, syncError = false }) {
       <div className="theme-mode-toggle">
         <button
           type="button"
+          disabled={disabled}
           role="switch"
           className="theme-mode-button"
           aria-label="Dark mode"
@@ -45,6 +46,7 @@ export default function ThemeSwitcher({ theme, onChange, syncError = false }) {
           <button
             key={id}
             type="button"
+            disabled={disabled}
             className={`theme-palette-button theme-palette-${id}`}
             aria-label={`${label} glass`}
             aria-pressed={appearance.palette === id}

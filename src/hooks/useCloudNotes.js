@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
-import { useWorkspace } from './useWorkspace';
+import { useWorkspace, useWorkspaceValue } from './useWorkspace';
 
 export function useCloudNotes() {
-  const { data, updateData, error } = useWorkspace();
+  const { updateData } = useWorkspace();
+  const notes = useWorkspaceValue((state) => state.data.notes);
   const setNotes = useCallback(
     (value) =>
       Promise.resolve(
@@ -14,5 +15,5 @@ export function useCloudNotes() {
     [updateData],
   );
 
-  return [data.notes, setNotes, false, error, null];
+  return [notes, setNotes];
 }

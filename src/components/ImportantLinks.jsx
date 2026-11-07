@@ -11,7 +11,7 @@ import {
 import BookmarkEditor from './BookmarkEditor';
 import { EmptyState, PageHeader } from './ui/Workspace';
 import { importantBookmarks } from '../data/importantBookmarks';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace, useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import {
   buildBookmarkTree,
   normalizeBookmarks,
@@ -107,8 +107,10 @@ function WebsiteCard({ bookmark, priority = false }) {
 }
 
 export default function ImportantLinks({ isActive = true }) {
-  const { data, updateData, saving, error: syncError } = useWorkspace();
-  const bookmarks = data.bookmarks;
+  const { updateData } = useWorkspace();
+  const bookmarks = useWorkspaceValue((state) => state.data.bookmarks);
+  const saving = useWorkspaceSaving('bookmarks');
+  const syncError = useWorkspaceValue((state) => state.error);
   const [operationError, setOperationError] = useState(null);
   const error = syncError || operationError;
   const [editor, setEditor] = useState(null);
@@ -321,7 +323,7 @@ export default function ImportantLinks({ isActive = true }) {
                   {section.bookmarks.length}
                 </span>
               </div>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {section.bookmarks.map((bookmark, bookmarkIndex) => (
                   <WebsiteCard
                     key={bookmark.id}

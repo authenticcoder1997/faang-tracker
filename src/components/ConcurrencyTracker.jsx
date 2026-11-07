@@ -1,6 +1,9 @@
+import { useCloudStorage } from '../hooks/useCloudStorage';
+import { concurrencyTopics } from '../data/concurrencyTopics';
 import StudyTracker from './StudyTracker';
 
-export default function ConcurrencyTracker({ items, setItems }) {
+export default function ConcurrencyTracker() {
+  const [items, setItems] = useCloudStorage('concurrency', concurrencyTopics);
   return (
     <StudyTracker
       id="concurrency"

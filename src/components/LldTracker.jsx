@@ -1,3 +1,5 @@
+import { useCloudStorage } from '../hooks/useCloudStorage';
+import { lldTopics } from '../data/lldTopics';
 import React from 'react';
 import StudyTracker from './StudyTracker';
 
@@ -59,7 +61,8 @@ function PatternTags({ item }) {
   });
 }
 
-export default function LldTracker({ items, setItems }) {
+export default function LldTracker() {
+  const [items, setItems] = useCloudStorage('lld', lldTopics);
   return (
     <StudyTracker
       id="lld"
