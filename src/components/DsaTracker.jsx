@@ -3,7 +3,7 @@ import { ArrowUpRight, BookmarkCheck, ListTodo, Upload } from 'lucide-react';
 import { useCloudStorage } from '../hooks/useCloudStorage';
 import { useWorkspace, useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import {
-  allDsaSections, mergeDsaSolved, parseDsaSolvedLinks, PLANLY_DSA_URL, planlyDsaTopics,
+  allDsaSections, mergeDsaSolved, parseDsaSolvedLinks, STRIVER_DSA_URL,
 } from '../lib/dsaPlan';
 import DsaProblemList from './DsaProblemList';
 import DsaRevisionQueue from './DsaRevisionQueue';
@@ -13,14 +13,12 @@ import { queueDsaRevision, reviewDsaProblem } from '../lib/dsaRevision';
 import { dateKey } from '../lib/tasks';
 import { PageHeader, StatsStrip } from './ui/Workspace';
 
-const planlyIds = new Set(planlyDsaTopics.map((item) => item.id));
 const sourceCounts = Object.fromEntries(DSA_SOURCES.map(([source]) => [
   source, dsaCatalog.filter((item) => item.sources[source]).length,
 ]));
 
 export default function DsaTracker() {
   const [sources, setSources] = useState(['tuf']);
-  const [planlyOnly, setPlanlyOnly] = useState(false);
   const [filters, setFilters] = useState(EMPTY_DSA_FILTERS);
   const [view, setView] = useState('problems');
   const [today, setToday] = useState(dateKey);
@@ -35,9 +33,7 @@ export default function DsaTracker() {
   const [catalog, setItems] = useCloudStorage('dsa', dsaCatalog);
   const revisions = useWorkspaceValue((state) => state.data.revisions);
   const queuedIds = useMemo(() => new Set(revisions.map((record) => record.id)), [revisions]);
-  const onlyPlanly = planlyOnly && sources.length === 1 && sources[0] === 'tuf';
-  const items = useMemo(() => catalog.filter((item) => matchesDsaSources(item, sources) &&
-    (!onlyPlanly || planlyIds.has(item.id))), [catalog, sources, onlyPlanly]);
+  const items = useMemo(() => catalog.filter((item) => matchesDsaSources(item, sources)), [catalog, sources]);
   const matchingItems = useMemo(() => filterDsaProblems(items, filters, sources), [items, filters, sources]);
   const solved = matchingItems.filter((item) => item.completed).length;
   const percent = matchingItems.length ? Math.round(solved / matchingItems.length * 100) : 0;
@@ -97,8 +93,8 @@ export default function DsaTracker() {
         title="Data structures & algorithms"
         description="Choose a source, find a pattern, and save problems you want to revisit."
         actions={
-          <a href={PLANLY_DSA_URL} target="_blank" rel="noopener noreferrer" className="button-secondary">
-            Open Planly DSA <ArrowUpRight size={15} aria-hidden="true" />
+          <a href={STRIVER_DSA_URL} target="_blank" rel="noopener noreferrer" className="button-secondary">
+            Open Striver’s 180 <ArrowUpRight size={15} aria-hidden="true" />
           </a>
         }
       />
@@ -149,8 +145,8 @@ export default function DsaTracker() {
         </p>
         <DsaProblemList items={items} matchingItems={matchingItems} setItems={setItems}
           filters={filters} setFilters={setFilters} sections={allDsaSections}
-          sources={sources} setSources={setSources} sourceCounts={sourceCounts} planlyOnly={planlyOnly}
-          setPlanlyOnly={setPlanlyOnly} queuedIds={queuedIds} onRevision={toggleRevision} />
+          sources={sources} setSources={setSources} sourceCounts={sourceCounts}
+          queuedIds={queuedIds} onRevision={toggleRevision} />
       </div>
       <div hidden={view !== 'revision'}>
         <p role="status" className={`mb-4 text-xs ${error ? 'text-warning' : 'text-muted'}`}>

@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dsaCatalog, dsaPatternsFor, dsaSourceFor, matchesDsaSources } from './dsaCatalog.js';
 import { filterDsaProblems } from './dsaFilters.js';
-import { allDsaTopics } from './dsaPlan.js';
+import { striverDsaTopics } from './dsaPlan.js';
 
 test('catalog membership is complete and overlapping source selections show unique problems', () => {
-  const expected = { 'am-600': 600, 'am-300': 300, 'am-150': 150, 'am-75': 75, tuf: 238, whoami: 127 };
+  const expected = { 'am-600': 600, 'am-300': 300, 'am-150': 150, 'am-75': 75, tuf: 179, whoami: 127 };
   assert.equal(new Set(dsaCatalog.map((item) => item.id)).size, dsaCatalog.length);
   for (const [source, count] of Object.entries(expected)) {
     const items = dsaCatalog.filter((item) => matchesDsaSources(item, [source]));
@@ -19,14 +19,17 @@ test('catalog membership is complete and overlapping source selections show uniq
   assert.equal(dsaCatalog.filter((item) => matchesDsaSources(item, ['am-600', 'am-75'])).length, 600);
 });
 
-test('TUF IDs, titles, and links stay intact, and the chosen source controls the link', () => {
+test('TUF shows exactly the Striver sheet while existing LeetCode aliases keep their IDs', () => {
   const items = new Map(dsaCatalog.map((item) => [item.id, item]));
-  for (const old of allDsaTopics) {
-    const entry = items.get(old.id);
-    assert.equal(entry.sources.tuf.url, old.url);
-    assert.equal(entry.sources.tuf.title, old.title);
-    assert.deepEqual(entry.sources.tuf.patterns, [old.section]);
+  for (const sheetItem of striverDsaTopics) {
+    const entry = items.get(sheetItem.id);
+    assert.equal(entry.sources.tuf.url, sheetItem.url);
+    assert.equal(entry.sources.tuf.title, sheetItem.title);
+    assert.deepEqual(entry.sources.tuf.patterns, [sheetItem.section]);
   }
+  assert.equal(items.has('dsa-1'), false);
+  assert.equal(items.get('dsa-114').sources.tuf, undefined);
+  assert.equal(items.get('dsa-114').sources['am-600'].url, 'https://leetcode.com/problems/binary-search-tree-iterator/');
   const kadane = items.get('dsa-5');
   assert.equal(dsaSourceFor(kadane, ['tuf']), 'tuf');
   const leet = dsaSourceFor(kadane, ['am-600', 'tuf']);

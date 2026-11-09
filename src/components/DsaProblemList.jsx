@@ -109,7 +109,7 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
 
 export default function DsaProblemList({
   items, matchingItems, setItems, filters, setFilters, sections, sources, setSources,
-  sourceCounts, planlyOnly, setPlanlyOnly, queuedIds, onRevision,
+  sourceCounts, queuedIds, onRevision,
 }) {
   const [noteId, setNoteId] = useState(null);
   const [patternQuery, setPatternQuery] = useState('');
@@ -145,12 +145,11 @@ export default function DsaProblemList({
     (!patternQuery.trim() || filters.patterns.includes(name) || name.toLowerCase().includes(patternQuery.trim().toLowerCase())));
   const visibleLimit = Math.min(limit, matchingItems.length);
   const filtering = !!filters.query.trim() || filters.statuses.length > 0 ||
-    filters.patterns.length > 0 || filters.difficulties.length > 0 || sources.length > 0 || planlyOnly;
+    filters.patterns.length > 0 || filters.difficulties.length > 0 || sources.length > 0;
 
   function clearFilters() {
     setFilters(EMPTY_DSA_FILTERS);
     setSources([]);
-    setPlanlyOnly(false);
     setPatternQuery('');
     setLimit(PAGE_SIZE);
   }
@@ -201,13 +200,6 @@ export default function DsaProblemList({
                 active={sources.includes(source)} onClick={() => toggleSource(source)} />
             ))}
           </div>
-          {sources.length === 1 && sources[0] === 'tuf' && (
-            <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-muted">
-              <input type="checkbox" checked={planlyOnly} className="accent-accent"
-                onChange={(event) => { setPlanlyOnly(event.target.checked); setLimit(PAGE_SIZE); }} />
-              Planly only
-            </label>
-          )}
         </div>
         <div role="group" aria-labelledby="dsa-status-filters" className="mb-4">
           <h3 id="dsa-status-filters" className="eyebrow mb-2">Status</h3>

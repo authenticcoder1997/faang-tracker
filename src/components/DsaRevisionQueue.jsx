@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpRight, CalendarCheck, Check, Trash2 } from 'lucide-react';
 import { DSA_SOURCE_LABELS, dsaSourceFor } from '../lib/dsaCatalog';
+import { allDsaTopics } from '../lib/dsaPlan';
 import { EmptyState } from './ui/Workspace';
+
+const earlierTufItems = new Map(allDsaTopics.map((item) => [item.id, item]));
 
 function formatDate(value) {
   return new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -42,8 +45,11 @@ export default function DsaRevisionQueue({ revisions, catalog, today, onReviewed
         <ul className="study-section divide-y divide-line">
           {rows.map((record) => {
             const item = byId.get(record.id);
-            const source = item && (item.sources[record.source] ? record.source : dsaSourceFor(item));
-            const entry = item?.sources[source];
+            const earlierTuf = !item || (record.source === 'tuf' && !item.sources.tuf)
+              ? earlierTufItems.get(record.id)
+              : undefined;
+            const source = earlierTuf ? 'tuf' : item && (item.sources[record.source] ? record.source : dsaSourceFor(item));
+            const entry = earlierTuf || item?.sources[source];
             const reviewedToday = record.reviewedOn === today;
             return (
               <li key={record.id} className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-5">

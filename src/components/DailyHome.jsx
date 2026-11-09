@@ -1,9 +1,10 @@
 import { useCloudStorage } from '../hooks/useCloudStorage';
-import { DSA_SECTIONS_LIST, dsaTopics } from '../data/dsaTopics';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
-import { concurrencyTopics } from '../data/concurrencyTopics';
-import React, { useState } from 'react';
+import { striverDsaTopics } from '../lib/dsaPlan';
+import { buildHomeworkSchedule } from '../lib/homeworkSchedule';
+import { dateKey } from '../lib/tasks';
+import { useMemo, useState } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -12,61 +13,26 @@ import {
   ChevronLeft,
   ChevronRight,
   Circle,
-  Coffee,
   ExternalLink,
   Layers,
-  Lock,
   Monitor,
 } from 'lucide-react';
-import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
+import { PageHeader, StatsStrip } from './ui/Workspace';
 
-const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
-// All scheduled dayIndex values are offsets from 31 July 2026.
-const EPOCH = new Date(2026, 6, 31);
+const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
+const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
+const atNoon = (date) => new Date(date + 'T12:00:00');
 
-function dateFromIndex(index) {
-  const date = new Date(EPOCH);
-  date.setDate(date.getDate() + index);
-  return date;
-}
-
-function formatIndex(index) {
-  const date = dateFromIndex(index);
-  return `${String(date.getDate()).padStart(2, '0')} ${MONTHS[date.getMonth()]}`;
-}
-
-function todayIndex() {
-  const now = new Date();
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  );
-  return Math.round((startOfToday - EPOCH) / 86400000);
-}
-
-function nextScheduledIndex(items, fromIndex) {
-  let best = null;
-  for (const item of items) {
-    if (typeof item.dayIndex === 'number' && item.dayIndex > fromIndex) {
-      if (best === null || item.dayIndex < best) best = item.dayIndex;
-    }
-  }
-  return best;
-}
+const DESIGN_TRACKS = {
+  lld: {
+    id: 'lld', label: 'LLD', title: 'Low-level design', icon: Layers,
+    subtitle: 'Design patterns and practice · AlgoMaster', source: 'AlgoMaster',
+  },
+  hld: {
+    id: 'hld', label: 'HLD', title: 'System design', icon: Monitor,
+    subtitle: 'System breakdown · Hello Interview', source: 'Hello Interview',
+  },
+};
 
 function AgendaSection({ track, onOpen }) {
   const Icon = track.icon;
@@ -84,11 +50,9 @@ function AgendaSection({ track, onOpen }) {
             <h3 id={`agenda-${track.id}`} className="section-heading">
               {track.title}
             </h3>
-            {track.items.length > 0 && (
-              <span className="status-pill tabular-nums">
-                {completed}/{track.items.length}
-              </span>
-            )}
+            <span className="status-pill tabular-nums">
+              {completed}/{track.items.length}
+            </span>
           </div>
           <p className="max-w-lg text-xs leading-5 text-muted">
             {track.subtitle}
@@ -104,153 +68,91 @@ function AgendaSection({ track, onOpen }) {
         </button>
       </header>
 
-      {track.items.length > 0 ? (
-        <ul className="divide-y divide-line">
-          {track.items.map((item, index) => (
-            <li
-              key={item.id}
-              className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
+      <ul className="divide-y divide-line">
+        {track.items.map((item, index) => (
+          <li
+            key={item.id}
+            className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
+          >
+            <button
+              type="button"
+              onClick={() => track.toggle(item.id)}
+              aria-pressed={!!item.completed}
+              aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
+              title={item.completed ? 'Mark incomplete' : 'Mark complete'}
+              className="completion-button mt-0.5 shrink-0"
             >
-              <button
-                type="button"
-                onClick={() => track.toggle(item.id)}
-                aria-pressed={!!item.completed}
-                aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
-                title={item.completed ? 'Mark incomplete' : 'Mark complete'}
-                className="completion-button mt-0.5 shrink-0"
-              >
-                {item.completed ? (
-                  <CheckCircle2 size={21} />
-                ) : (
-                  <Circle size={21} />
-                )}
-              </button>
-              <div className="min-w-0 flex-1">
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`break-words text-sm font-semibold leading-6 transition-colors hover:text-accent ${item.completed ? 'text-muted line-through' : 'text-ink'}`}
-                >
-                  {item.title}
-                </a>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
-                  {track.id === 'dsa' ? (
-                    <span className="tabular-nums">Question {index + 1}</span>
-                  ) : (
-                    <span>{item.topic || item.section || 'Breakdown'}</span>
-                  )}
-                  {item.difficulty && (
-                    <span className="status-pill">{item.difficulty}</span>
-                  )}
-                  {item.premium && (
-                    <span className="status-pill text-warning">Premium</span>
-                  )}
-                </div>
-                {item.description && (
-                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
-                    {item.description}
-                  </p>
-                )}
-              </div>
+              {item.completed ? (
+                <CheckCircle2 size={21} />
+              ) : (
+                <Circle size={21} />
+              )}
+            </button>
+            <div className="min-w-0 flex-1">
               <a
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Open ${item.title} on ${track.source}`}
-                title={`Open on ${track.source}`}
-                className="icon-button -mr-1 shrink-0"
+                className={`break-words text-sm font-semibold leading-6 transition-colors hover:text-accent ${item.completed ? 'text-muted line-through' : 'text-ink'}`}
               >
-                <ExternalLink size={15} />
+                {item.title}
               </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="agenda-empty">
-          <EmptyState
-            icon={track.allDone ? CheckCircle2 : Coffee}
-            title={track.allDone ? `${track.label} complete` : 'A lighter day'}
-            description={
-              track.allDone
-                ? `All ${track.total} ${track.completionLabel} completed.`
-                : track.nextIndex !== null
-                  ? `Your next ${track.label} session is on ${formatIndex(track.nextIndex)}.`
-                  : `No more ${track.label} sessions are scheduled.`
-            }
-          />
-        </div>
-      )}
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
+                {track.id === 'dsa' ? (
+                  <span className="tabular-nums">Question {index + 1}</span>
+                ) : (
+                  <span>{item.topic || item.section || 'Breakdown'}</span>
+                )}
+                {item.difficulty && (
+                  <span className="status-pill">{item.difficulty}</span>
+                )}
+                {item.premium && (
+                  <span className="status-pill text-warning">Premium</span>
+                )}
+              </div>
+              {item.description && (
+                <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                  {item.description}
+                </p>
+              )}
+            </div>
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${item.title} on ${track.source}`}
+              title={`Open on ${track.source}`}
+              className="icon-button -mr-1 shrink-0"
+            >
+              <ExternalLink size={15} />
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
 export default function DailyHome({ setActiveTab }) {
-  const [dsa, setDsa] = useCloudStorage('dsa', dsaTopics);
+  const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
   const [lld, setLld] = useCloudStorage('lld', lldTopics);
   const [hld, setHld] = useCloudStorage('hld', hldTopics);
-  const [concurrency, setConcurrency] = useCloudStorage('concurrency', concurrencyTopics);
-  const todayIdx = todayIndex();
-  const totalDays =
-    Math.max(
-      todayIdx + 1,
-      ...DSA_SECTIONS_LIST.map((section) =>
-        typeof section.dayIndex === 'number' ? section.dayIndex : -1,
-      ),
-      ...lld.map((item) =>
-        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
-      ),
-      ...hld.map((item) =>
-        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
-      ),
-      ...concurrency.map((item) =>
-        typeof item.dayIndex === 'number' ? item.dayIndex : -1,
-      ),
-    ) + 1;
-  const [selectedDayIndex, setSelectedDayIndex] = useState(
-    Math.min(Math.max(todayIdx, 0), totalDays - 1),
-  );
+  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld), [dsa, lld, hld]);
+  const [chosenDay, setChosenDay] = useState(null);
+  const today = dateKey();
+  const nextDay = schedule.findIndex((day) => day.date >= today);
+  const todayIdx = nextDay === -1 ? schedule.length - 1 : nextDay;
+  const selectedDayIndex = chosenDay ?? todayIdx;
+  const day = schedule[selectedDayIndex];
+  const totalDays = schedule.length;
 
-  const selectedSectionNames = DSA_SECTIONS_LIST.filter(
-    (section) => section.dayIndex === selectedDayIndex,
-  ).map((section) => section.name);
-  const todayDsaQuestions = selectedSectionNames.length
-    ? dsa.filter((item) => selectedSectionNames.includes(item.section))
-    : [];
-  const nextLld = lld.filter((item) => item.dayIndex === selectedDayIndex);
-  const nextHld = hld.filter((item) => item.dayIndex === selectedDayIndex);
-  const nextConcurrency = concurrency.filter(
-    (item) => item.dayIndex === selectedDayIndex,
-  );
-
-  function toggle(items, setItems, id) {
-    if (!setItems) return;
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item,
-      ),
-    );
-  }
-
-  const totalDsa = dsa.filter((item) => item.completed).length;
-  const totalLld = lld.filter((item) => item.completed).length;
-  const totalHld = hld.filter((item) => item.completed).length;
-  const totalConcurrency = concurrency.filter((item) => item.completed).length;
-  const selectedItems = [
-    ...todayDsaQuestions,
-    ...nextLld,
-    ...nextHld,
-    ...nextConcurrency,
-  ];
-  const selectedCompleted = selectedItems.filter(
-    (item) => item.completed,
-  ).length;
-  const selectedProgress = selectedItems.length
-    ? Math.round((selectedCompleted / selectedItems.length) * 100)
-    : 0;
-  const selectedWeekday = new Intl.DateTimeFormat('en', {
-    weekday: 'long',
-  }).format(dateFromIndex(selectedDayIndex));
+  const toggle = (setItems, id) => setItems((items) => items.map((item) =>
+    item.id === id ? { ...item, completed: !item.completed } : item,
+  ));
+  const selectedItems = [...day.dsa, day.design.item];
+  const selectedCompleted = selectedItems.filter((item) => item.completed).length;
+  const selectedProgress = Math.round((selectedCompleted / selectedItems.length) * 100);
+  const designSetter = day.design.track === 'lld' ? setLld : setHld;
 
   const tracks = [
     {
@@ -258,58 +160,15 @@ export default function DailyHome({ setActiveTab }) {
       label: 'DSA',
       title: 'DSA practice',
       icon: BookOpen,
-      subtitle: selectedSectionNames.length
-        ? selectedSectionNames.join(' & ')
-        : 'Concept revision · TakeUForward',
-      items: todayDsaQuestions,
-      total: dsa.length,
-      allDone: totalDsa === dsa.length,
-      nextIndex: nextScheduledIndex(DSA_SECTIONS_LIST, selectedDayIndex),
-      toggle: (id) => toggle(dsa, setDsa, id),
+      subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
+      items: day.dsa,
+      toggle: (id) => toggle(setDsa, id),
       source: 'TakeUForward',
-      completionLabel: 'DSA problems',
     },
     {
-      id: 'lld',
-      label: 'LLD',
-      title: 'Low-level design',
-      icon: Layers,
-      subtitle: 'Design patterns & practice · Algomaster',
-      items: nextLld,
-      total: lld.length,
-      allDone: totalLld === lld.length,
-      nextIndex: nextScheduledIndex(lld, selectedDayIndex),
-      toggle: (id) => toggle(lld, setLld, id),
-      source: 'Algomaster',
-      completionLabel: 'LLD problems',
-    },
-    {
-      id: 'hld',
-      label: 'HLD',
-      title: 'System design',
-      icon: Monitor,
-      subtitle: 'System breakdowns · HelloInterview',
-      items: nextHld,
-      total: hld.length,
-      allDone: totalHld === hld.length,
-      nextIndex: nextScheduledIndex(hld, selectedDayIndex),
-      toggle: (id) => toggle(hld, setHld, id),
-      source: 'HelloInterview',
-      completionLabel: 'HLD breakdowns',
-    },
-    {
-      id: 'concurrency',
-      label: 'Concurrency',
-      title: 'Concurrency',
-      icon: Lock,
-      subtitle: 'Threading & coordination · Algomaster',
-      items: nextConcurrency,
-      total: concurrency.length,
-      allDone: totalConcurrency === concurrency.length,
-      nextIndex: nextScheduledIndex(concurrency, selectedDayIndex),
-      toggle: (id) => toggle(concurrency, setConcurrency, id),
-      source: 'Algomaster',
-      completionLabel: 'concurrency problems',
+      ...DESIGN_TRACKS[day.design.track],
+      items: [day.design.item],
+      toggle: (id) => toggle(designSetter, id),
     },
   ];
 
@@ -318,12 +177,12 @@ export default function DailyHome({ setActiveTab }) {
       <PageHeader
         eyebrow={`Study plan · Day ${selectedDayIndex + 1} of ${totalDays}`}
         title="Homework"
-        description="A focused daily agenda for algorithms, design, and concurrency."
+        description="Two or three Striver DSA questions and one LLD or HLD exercise per day."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setSelectedDayIndex(todayIdx)}
+              onClick={() => setChosenDay(null)}
               className="button-secondary"
             >
               Today
@@ -332,7 +191,7 @@ export default function DailyHome({ setActiveTab }) {
               <button
                 type="button"
                 onClick={() =>
-                  setSelectedDayIndex((previous) => Math.max(0, previous - 1))
+                  setChosenDay(Math.max(0, selectedDayIndex - 1))
                 }
                 disabled={selectedDayIndex <= 0}
                 aria-label="Previous study day"
@@ -347,23 +206,21 @@ export default function DailyHome({ setActiveTab }) {
                 id="date-selector"
                 value={selectedDayIndex}
                 onChange={(event) =>
-                  setSelectedDayIndex(Number(event.target.value))
+                  setChosenDay(Number(event.target.value))
                 }
                 className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
                 style={{ textAlignLast: 'center' }}
               >
-                {Array.from({ length: totalDays }, (_, index) => (
-                  <option key={index} value={index}>
-                    {formatIndex(index)}
+                {schedule.map(({ date }, index) => (
+                  <option key={date} value={index}>
+                    {shortDate.format(atNoon(date))}
                   </option>
                 ))}
               </select>
               <button
                 type="button"
                 onClick={() =>
-                  setSelectedDayIndex((previous) =>
-                    Math.min(totalDays - 1, previous + 1),
-                  )
+                  setChosenDay(Math.min(totalDays - 1, selectedDayIndex + 1))
                 }
                 disabled={selectedDayIndex >= totalDays - 1}
                 aria-label="Next study day"
@@ -380,23 +237,18 @@ export default function DailyHome({ setActiveTab }) {
         items={[
           {
             label: 'DSA',
-            value: `${totalDsa}/${dsa.length}`,
+            value: `${dsa.filter((item) => item.completed).length}/${dsa.length}`,
             detail: 'problems completed',
           },
           {
             label: 'LLD',
-            value: `${totalLld}/${lld.length}`,
+            value: `${lld.filter((item) => item.completed).length}/${lld.length}`,
             detail: 'problems completed',
           },
           {
             label: 'HLD',
-            value: `${totalHld}/${hld.length}`,
+            value: `${hld.filter((item) => item.completed).length}/${hld.length}`,
             detail: 'breakdowns completed',
-          },
-          {
-            label: 'Concurrency',
-            value: `${totalConcurrency}/${concurrency.length}`,
-            detail: 'problems completed',
           },
         ]}
       />
@@ -406,21 +258,15 @@ export default function DailyHome({ setActiveTab }) {
           <p className="eyebrow mb-2">Daily agenda</p>
           <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
             <CalendarDays size={17} className="text-accent" />
-            {selectedWeekday}, {formatIndex(selectedDayIndex)}
+            {agendaDate.format(atNoon(day.date))}
           </h2>
         </div>
         <div className="w-full sm:w-52" aria-label="Selected day progress">
           <div className="mb-2 flex items-center justify-between gap-4 text-xs">
             <span className="text-muted">
-              {selectedItems.length
-                ? `${selectedCompleted} of ${selectedItems.length} complete`
-                : 'No study scheduled'}
+              {selectedCompleted} of {selectedItems.length} complete
             </span>
-            {selectedItems.length > 0 && (
-              <span className="font-medium tabular-nums text-accent">
-                {selectedProgress}%
-              </span>
-            )}
+            <span className="font-medium tabular-nums text-accent">{selectedProgress}%</span>
           </div>
           <div className="progress-track">
             <div

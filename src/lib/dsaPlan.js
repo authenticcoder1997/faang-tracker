@@ -2,7 +2,7 @@ import { dsaTopics } from '../data/dsaTopics.js';
 import { PLANLY_ROWS } from '../data/dsaPlanly.js';
 import { dsaCategory, dsaCategorySections } from '../data/dsaCategories.js';
 
-export const PLANLY_DSA_URL = 'https://takeuforward.org/planly/dsa';
+export const STRIVER_DSA_URL = 'https://takeuforward.org/prep-hub/strivers-180-master-dsa-patterns';
 const PRACTICE_BASE = 'https://takeuforward.org/practice/dsa/';
 const OLD_EDIT_DISTANCE = 'dsa-189b';
 const EDIT_DISTANCE = 'dsa-183';
@@ -10,16 +10,18 @@ const difficulties = { Basic: 'Easy', Core: 'Medium', Pro: 'Hard' };
 const planById = new Map(PLANLY_ROWS.map((row) => [row[0], row]));
 const oldById = new Map(dsaTopics.map((item) => [item.id, item]));
 
-export const planlyDsaTopics = PLANLY_ROWS.map(([id, title, slug, level]) => ({
+// The 179 practice slugs match the official Striver's 180 sheet.
+export const striverDsaTopics = PLANLY_ROWS.map(([id, title, slug, level]) => ({
   id, title, url: PRACTICE_BASE + slug,
   difficulty: difficulties[level],
   section: dsaCategory(id, oldById.get(id)?.section),
   completed: !!oldById.get(id)?.completed,
 }));
 
-export const planlyDsaSections = dsaCategorySections(planlyDsaTopics);
+export const striverDsaSections = dsaCategorySections(striverDsaTopics);
 
-const planlyOnly = planlyDsaTopics.filter((item) => !oldById.has(item.id));
+const sheetAdditions = striverDsaTopics.filter((item) => !oldById.has(item.id));
+// Keep the older IDs available for LeetCode aliases, imports, and saved reviews.
 export const allDsaTopics = [
   ...dsaTopics.filter((item) => item.id !== OLD_EDIT_DISTANCE).map((item) => ({
     ...item,
@@ -27,7 +29,7 @@ export const allDsaTopics = [
     url: planById.has(item.id) ? PRACTICE_BASE + planById.get(item.id)[2]
       : item.url,
   })),
-  ...planlyOnly,
+  ...sheetAdditions,
 ];
 export const allDsaSections = dsaCategorySections(allDsaTopics);
 
@@ -46,7 +48,7 @@ function problemSlug(address) {
 const bySlug = new Map([
   ...dsaTopics.filter((item) => item.id !== OLD_EDIT_DISTANCE),
   ...allDsaTopics,
-  ...planlyDsaTopics,
+  ...striverDsaTopics,
 ].map((item) => [problemSlug(item.url), item.id]));
 
 export function parseDsaSolvedLinks(text) {

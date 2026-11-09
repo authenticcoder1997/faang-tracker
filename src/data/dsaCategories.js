@@ -1,5 +1,4 @@
-// Broad study topics for the DSA library. The Homework schedule still uses its
-// original day and section assignments.
+// Broad study topics for the DSA library and Homework.
 const topics = [
   ['Arrays & Hashing', /^(Sorting & Arrays|Arrays?\b)/, [], [
     "sort-an-array-of-0's-1's-and-2's", 'next-permutation',

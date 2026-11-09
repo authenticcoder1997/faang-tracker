@@ -1,5 +1,5 @@
 import { LEETCODE_DSA_ROWS } from '../data/leetcodeDsaSources.js';
-import { allDsaTopics } from './dsaPlan.js';
+import { allDsaTopics, striverDsaTopics } from './dsaPlan.js';
 
 export const DSA_SOURCES = [
   ['am-600', 'AlgoMaster 600'],
@@ -121,9 +121,17 @@ function algoTopic(pattern) {
   return pattern;
 }
 
-const byId = new Map(allDsaTopics.map((item) => [
-  item.id, { ...item, sources: { tuf: { url: item.url, patterns: [item.section], title: item.title } } },
-]));
+const sheetById = new Map(striverDsaTopics.map((item) => [item.id, item]));
+const byId = new Map(allDsaTopics.map((item) => {
+  const sheetItem = sheetById.get(item.id);
+  return [item.id, {
+    ...item,
+    ...sheetItem,
+    sources: sheetItem ? {
+      tuf: { url: sheetItem.url, patterns: [sheetItem.section], title: sheetItem.title },
+    } : {},
+  }];
+}));
 for (const [slug, title, difficulty, sizes, patterns, whoami] of LEETCODE_DSA_ROWS) {
   const id = tufBySlug.get(slug) || `lc-${slug}`;
   const url = LEETCODE + slug + '/';
@@ -139,7 +147,7 @@ for (const [slug, title, difficulty, sizes, patterns, whoami] of LEETCODE_DSA_RO
     : { id, title: lcTitle, url, difficulty: difficulty || 'Unrated',
         section: algoPatterns[0] || whoami[0], completed: false, sources });
 }
-export const dsaCatalog = [...byId.values()];
+export const dsaCatalog = [...byId.values()].filter((item) => Object.keys(item.sources).length);
 
 export function matchesDsaSources(item, sources) {
   return !sources.length || sources.some((source) => !!item.sources?.[source]);
