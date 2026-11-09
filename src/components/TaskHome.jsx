@@ -1139,7 +1139,7 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           </button>
         </aside>
         <section aria-label={title} className="flex min-w-0 flex-col">
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
+          <div className="task-agenda-toolbar flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold tracking-tight text-ink">
                 {title}
