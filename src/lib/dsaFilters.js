@@ -1,5 +1,7 @@
 import { dsaPatternsFor } from './dsaCatalog.js';
 
+export const EMPTY_DSA_FILTERS = { query: '', statuses: [], patterns: [], difficulties: [] };
+
 export function filterDsaProblems(items, { query, statuses, patterns, difficulties }, sources = []) {
   const text = query.trim().toLowerCase();
   return items.filter((item) => {

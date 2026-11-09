@@ -1,11 +1,10 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { BookOpen, BookmarkCheck, BookmarkPlus, Check, CheckCircle2, Circle, FileText, Search, SlidersHorizontal, X } from 'lucide-react';
-import { filterDsaProblems } from '../lib/dsaFilters';
+import { EMPTY_DSA_FILTERS, filterDsaProblems } from '../lib/dsaFilters';
 import { DSA_SOURCES, DSA_SOURCE_LABELS, dsaPatternsFor, dsaSourceFor } from '../lib/dsaCatalog';
 import NoteModal from './NoteModal';
 import { EmptyState } from './ui/Workspace';
 
-const initialFilters = { query: '', statuses: [], patterns: [], difficulties: [] };
 const PAGE_SIZE = 60;
 
 function FilterTag({ label, count, active, onClick, pattern = false }) {
@@ -109,36 +108,47 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
 });
 
 export default function DsaProblemList({
-  items, setItems, sections, sources, setSources, sourceCounts,
-  planlyOnly, setPlanlyOnly, queuedIds, onRevision,
+  items, matchingItems, setItems, filters, setFilters, sections, sources, setSources,
+  sourceCounts, planlyOnly, setPlanlyOnly, queuedIds, onRevision,
 }) {
-  const [filters, setFilters] = useState(initialFilters);
   const [noteId, setNoteId] = useState(null);
   const [patternQuery, setPatternQuery] = useState('');
   const [limit, setLimit] = useState(PAGE_SIZE);
   const activeNote = items.find((item) => item.id === noteId);
-  const counts = useMemo(() => {
-    const patterns = new Map();
-    const difficulties = new Map();
-    let solved = 0;
+  const available = useMemo(() => {
+    const patterns = new Set();
+    const difficulties = new Set();
     for (const item of items) {
-      if (item.completed) solved++;
-      for (const name of dsaPatternsFor(item, sources)) patterns.set(name, (patterns.get(name) || 0) + 1);
-      difficulties.set(item.difficulty, (difficulties.get(item.difficulty) || 0) + 1);
+      for (const name of dsaPatternsFor(item, sources)) patterns.add(name);
+      difficulties.add(item.difficulty);
     }
-    return { patterns, difficulties, solved };
+    return { patterns, difficulties };
   }, [items, sources]);
-  const matchingItems = useMemo(() => filterDsaProblems(items, filters, sources), [items, filters, sources]);
+  // Each group counts the options available with the other filters applied.
+  const statusItems = useMemo(() => filters.statuses.length
+    ? filterDsaProblems(items, { ...filters, statuses: [] }, sources)
+    : matchingItems, [items, filters, sources, matchingItems]);
+  const solvedOptionCount = statusItems.filter((item) => item.completed).length;
+  const patternCounts = useMemo(() => {
+    const patternItems = filters.patterns.length
+      ? filterDsaProblems(items, { ...filters, patterns: [] }, sources)
+      : matchingItems;
+    const counts = new Map();
+    for (const item of patternItems) {
+      for (const name of dsaPatternsFor(item, sources)) counts.set(name, (counts.get(name) || 0) + 1);
+    }
+    return counts;
+  }, [items, filters, sources, matchingItems]);
   const patternOptions = [...new Set([
-    ...sections.map(({ name }) => name), ...[...counts.patterns.keys()].sort(), ...filters.patterns,
-  ])].filter((name) => (counts.patterns.has(name) || filters.patterns.includes(name)) &&
+    ...sections.map(({ name }) => name), ...[...available.patterns].sort(), ...filters.patterns,
+  ])].filter((name) => (available.patterns.has(name) || filters.patterns.includes(name)) &&
     (!patternQuery.trim() || filters.patterns.includes(name) || name.toLowerCase().includes(patternQuery.trim().toLowerCase())));
   const visibleLimit = Math.min(limit, matchingItems.length);
   const filtering = !!filters.query.trim() || filters.statuses.length > 0 ||
     filters.patterns.length > 0 || filters.difficulties.length > 0 || sources.length > 0 || planlyOnly;
 
   function clearFilters() {
-    setFilters(initialFilters);
+    setFilters(EMPTY_DSA_FILTERS);
     setSources([]);
     setPlanlyOnly(false);
     setPatternQuery('');
@@ -202,16 +212,16 @@ export default function DsaProblemList({
         <div role="group" aria-labelledby="dsa-status-filters" className="mb-4">
           <h3 id="dsa-status-filters" className="eyebrow mb-2">Status</h3>
           <div className="flex flex-wrap gap-1.5">
-            <FilterTag label="Solved" count={counts.solved} active={filters.statuses.includes('Solved')}
+            <FilterTag label="Solved" count={solvedOptionCount} active={filters.statuses.includes('Solved')}
               onClick={() => toggleFilter('statuses', 'Solved')} />
-            <FilterTag label="Unsolved" count={items.length - counts.solved} active={filters.statuses.includes('Unsolved')}
+            <FilterTag label="Unsolved" count={statusItems.length - solvedOptionCount} active={filters.statuses.includes('Unsolved')}
               onClick={() => toggleFilter('statuses', 'Unsolved')} />
           </div>
         </div>
         <div role="group" aria-labelledby="dsa-difficulty-filters" className="mb-4">
           <h3 id="dsa-difficulty-filters" className="eyebrow mb-2">Difficulty</h3>
           <div className="flex flex-wrap gap-1.5">
-            {['Easy', 'Medium', 'Hard', 'Unrated'].filter((level) => counts.difficulties.has(level)).map((level) => (
+            {['Easy', 'Medium', 'Hard', 'Unrated'].filter((level) => available.difficulties.has(level)).map((level) => (
               <FilterTag key={level} label={level} active={filters.difficulties.includes(level)}
                 onClick={() => toggleFilter('difficulties', level)} />
             ))}
@@ -222,14 +232,14 @@ export default function DsaProblemList({
             <h3 id="dsa-pattern-filters" className="eyebrow mb-0">Patterns</h3>
             <span className="text-[11px] text-muted">Select any</span>
           </div>
-          {(counts.patterns.size > 18 || patternQuery) && (
+          {(available.patterns.size > 18 || patternQuery) && (
             <input type="search" className="input-control mb-2 py-1.5 text-xs"
               aria-label="Find a pattern" placeholder="Find a pattern…" value={patternQuery}
               onChange={(event) => setPatternQuery(event.target.value)} />
           )}
           <div className="flex flex-wrap gap-1 lg:grid">
             {patternOptions.map((name) => (
-              <FilterTag key={name} label={name} count={counts.patterns.get(name) || 0} pattern
+              <FilterTag key={name} label={name} count={patternCounts.get(name) || 0} pattern
                 active={filters.patterns.includes(name)} onClick={() => toggleFilter('patterns', name)} />
             ))}
           </div>
@@ -243,7 +253,8 @@ export default function DsaProblemList({
               <BookOpen size={16} className="text-accent" aria-hidden="true" /> Problems
             </h2>
             <span role="status" className="text-xs text-muted">
-              {matchingItems.length} of {items.length} shown
+              Showing {visibleLimit}{visibleLimit < matchingItems.length && ` of ${matchingItems.length}`}{' '}
+              {matchingItems.length === 1 ? 'problem' : 'problems'}
             </span>
           </div>
           <div className="search-field w-full sm:w-72">
@@ -292,7 +303,7 @@ export default function DsaProblemList({
             {visibleLimit < matchingItems.length && (
               <div className="flex flex-wrap items-center justify-center gap-3 border-t border-line p-3">
                 <span className="text-xs text-muted">Showing {visibleLimit} of {matchingItems.length}</span>
-                <button type="button" className="button-secondary" onClick={() => setLimit(limit + PAGE_SIZE)}>
+                <button type="button" className="button-secondary" onClick={() => setLimit((current) => current + PAGE_SIZE)}>
                   Show more
                 </button>
               </div>

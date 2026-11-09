@@ -8,6 +8,7 @@ import {
 import DsaProblemList from './DsaProblemList';
 import DsaRevisionQueue from './DsaRevisionQueue';
 import { dsaCatalog, DSA_SOURCES, matchesDsaSources } from '../lib/dsaCatalog';
+import { EMPTY_DSA_FILTERS, filterDsaProblems } from '../lib/dsaFilters';
 import { queueDsaRevision, reviewDsaProblem } from '../lib/dsaRevision';
 import { dateKey } from '../lib/tasks';
 import { PageHeader, StatsStrip } from './ui/Workspace';
@@ -20,6 +21,7 @@ const sourceCounts = Object.fromEntries(DSA_SOURCES.map(([source]) => [
 export default function DsaTracker() {
   const [sources, setSources] = useState(['tuf']);
   const [planlyOnly, setPlanlyOnly] = useState(false);
+  const [filters, setFilters] = useState(EMPTY_DSA_FILTERS);
   const [view, setView] = useState('problems');
   const [today, setToday] = useState(dateKey);
   const [showImport, setShowImport] = useState(false);
@@ -36,6 +38,9 @@ export default function DsaTracker() {
   const onlyPlanly = planlyOnly && sources.length === 1 && sources[0] === 'tuf';
   const items = useMemo(() => catalog.filter((item) => matchesDsaSources(item, sources) &&
     (!onlyPlanly || planlyIds.has(item.id))), [catalog, sources, onlyPlanly]);
+  const matchingItems = useMemo(() => filterDsaProblems(items, filters, sources), [items, filters, sources]);
+  const solved = matchingItems.filter((item) => item.completed).length;
+  const percent = matchingItems.length ? Math.round(solved / matchingItems.length * 100) : 0;
   const due = revisions.filter((record) => record.dueDate <= today).length;
 
   useEffect(() => {
@@ -58,9 +63,6 @@ export default function DsaTracker() {
   const removeRevision = (id) => updateData((current) => ({
     ...current, revisions: current.revisions.filter((record) => record.id !== id),
   }));
-  const solved = items.filter((item) => item.completed).length;
-  const percent = items.length ? Math.round(solved / items.length * 100) : 0;
-
   function importSolved(event) {
     event.preventDefault();
     const { ids, unmatched } = parseDsaSolvedLinks(links);
@@ -134,18 +136,19 @@ export default function DsaTracker() {
       </div>
       <div hidden={view !== 'problems'}>
         <StatsStrip items={[
-          { label: 'Solved', value: solved, detail: `of ${items.length} problems` },
-          { label: 'Unsolved', value: items.length - solved, detail: 'Ready to practice' },
-          { label: 'Your progress', value: `${percent}%`, detail: 'Synced across devices' },
+          { label: 'Solved', value: solved, detail: `of ${matchingItems.length} matching problems` },
+          { label: 'Unsolved', value: matchingItems.length - solved, detail: 'Within current filters' },
+          { label: 'Your progress', value: `${percent}%`, detail: 'Within current filters' },
         ]} />
-        <div className="progress-track mt-[-1px] mb-4" role="progressbar" aria-label="DSA progress"
+        <div className="progress-track mt-[-1px] mb-4" role="progressbar" aria-label="Filtered DSA progress"
           aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
           <div className="progress-fill" style={{ width: `${percent}%` }} />
         </div>
         <p className={`mb-5 text-xs ${error ? 'text-warning' : 'text-muted'}`} role="status">
           {error ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
         </p>
-        <DsaProblemList items={items} setItems={setItems} sections={allDsaSections}
+        <DsaProblemList items={items} matchingItems={matchingItems} setItems={setItems}
+          filters={filters} setFilters={setFilters} sections={allDsaSections}
           sources={sources} setSources={setSources} sourceCounts={sourceCounts} planlyOnly={planlyOnly}
           setPlanlyOnly={setPlanlyOnly} queuedIds={queuedIds} onRevision={toggleRevision} />
       </div>
