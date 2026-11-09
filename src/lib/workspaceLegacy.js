@@ -201,6 +201,7 @@ export function mergeLegacyWorkspace(cloud, legacy) {
       Object.defineProperty(next.progress[name], row.id, {
         value: remote
           ? {
+              ...remote,
               completed: remote.completed || previous.completed,
               note: remote.note || previous.note,
             }

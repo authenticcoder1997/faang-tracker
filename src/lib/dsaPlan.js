@@ -71,6 +71,7 @@ export function mergeDsaSolved(progress, ids) {
   if (oldEdit?.completed || oldEdit?.note) {
     const current = progress[EDIT_DISTANCE];
     next[EDIT_DISTANCE] = {
+      ...current,
       completed: !!(current?.completed || oldEdit.completed),
       note: current?.note || oldEdit.note || '',
     };

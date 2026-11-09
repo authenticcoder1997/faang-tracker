@@ -1,6 +1,6 @@
 import { normalizeDsaRevision } from './dsaRevision.js';
 import { normalizeBookmark } from './bookmarks.js';
-import { LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
+import { isValidDate, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 import { isValidTheme } from './theme.js';
 
 export const PROGRESS_TRACKS = Object.freeze(['dsa', 'lld', 'hld', 'concurrency']);
@@ -129,10 +129,15 @@ function progressState(value) {
         id &&
           object(state) &&
           typeof state.completed === 'boolean' &&
-          (state.note === undefined || typeof state.note === 'string'),
+          (state.note === undefined || typeof state.note === 'string') &&
+          (state.homeworkDate === undefined || isValidDate(state.homeworkDate)),
         'Invalid problem progress',
       );
-      return [id, { completed: state.completed, note: state.note ?? '' }];
+      return [id, {
+        completed: state.completed,
+        note: state.note ?? '',
+        ...(state.completed && state.homeworkDate ? { homeworkDate: state.homeworkDate } : {}),
+      }];
     }),
   );
 }
@@ -460,11 +465,17 @@ export function applyValidatedWorkspacePatch(current, patch) {
       continue;
     }
     const additions = Object.fromEntries(
-      Object.entries(fields.set).filter(
-        ([id]) =>
-          !changedExisting.has(id) &&
-          !Object.hasOwn(current.progress[name], id),
-      ),
+      Object.entries(fields.set).flatMap(([id, state]) => {
+        if (changedExisting.has(id)) return [];
+        if (!Object.hasOwn(current.progress[name], id)) return [[id, state]];
+        const existing = current.progress[name][id];
+        // A first-time note and Homework completion can arrive in either order.
+        if (state.homeworkDate && !existing.completed)
+          return [[id, { ...existing, completed: true, homeworkDate: state.homeworkDate }]];
+        if (existing.homeworkDate && !existing.note && state.note)
+          return [[id, { ...existing, note: state.note }]];
+        return [];
+      }),
     );
     progress[name] = { ...applyFields(current.progress[name], {
       set: additions,

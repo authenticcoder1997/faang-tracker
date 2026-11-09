@@ -802,6 +802,18 @@ test('per-problem progress deltas preserve concurrent notes and other completion
   assert.equal(result.progress.dsa['dsa-2'].completed, true);
 });
 
+test('a first Homework completion and a first note on the same problem merge in either order', () => {
+  const before = base();
+  const id = 'planly-next-permutation';
+  const checked = copy(before);
+  const annotated = copy(before);
+  checked.progress.dsa[id] = { completed: true, note: '', homeworkDate: '2026-11-09' };
+  annotated.progress.dsa[id] = { completed: false, note: 'Practice note' };
+  const expected = { ...checked.progress.dsa[id], note: 'Practice note' };
+  assert.deepEqual(applyWorkspacePatch(annotated, makeWorkspacePatch(before, checked)).progress.dsa[id], expected);
+  assert.deepEqual(applyWorkspacePatch(checked, makeWorkspacePatch(before, annotated)).progress.dsa[id], expected);
+});
+
 test('noop patches preserve all current remote edits', () => {
   const before = base();
   const remote = copy(before);

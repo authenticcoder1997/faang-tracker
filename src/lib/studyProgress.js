@@ -4,8 +4,10 @@ export function mergeChangedStudyProgress(progress, previous, next) {
     const old = oldItems.get(item.id);
     const note = item.note || '';
     const completed = !!item.completed;
-    if (old && !!old.completed === completed && (old.note || '') === note) return [];
-    return [[item.id, { completed, note }]];
+    const homeworkDate = completed ? item.homeworkDate : undefined;
+    if (old && !!old.completed === completed && (old.note || '') === note && old.homeworkDate === homeworkDate)
+      return [];
+    return [[item.id, { completed, note, ...(homeworkDate ? { homeworkDate } : {}) }]];
   });
   return changed.length ? { ...progress, ...Object.fromEntries(changed) } : progress;
 }

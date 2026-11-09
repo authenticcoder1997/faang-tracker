@@ -2,7 +2,7 @@ import { useCloudStorage } from '../hooks/useCloudStorage';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { striverDsaTopics } from '../lib/dsaPlan';
-import { buildHomeworkSchedule } from '../lib/homeworkSchedule';
+import { buildHomeworkSchedule, homeworkPoints, HOMEWORK_TARGET } from '../lib/homeworkSchedule';
 import { dateKey } from '../lib/tasks';
 import { useMemo, useState } from 'react';
 import {
@@ -17,11 +17,12 @@ import {
   Layers,
   Monitor,
 } from 'lucide-react';
-import { PageHeader, StatsStrip } from './ui/Workspace';
+import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
 
 const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
 const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
 const atNoon = (date) => new Date(date + 'T12:00:00');
+const pointsLabel = (points) => `${points} ${points === 1 ? 'pt' : 'pts'}`;
 
 const DESIGN_TRACKS = {
   lld: {
@@ -36,7 +37,7 @@ const DESIGN_TRACKS = {
 
 function AgendaSection({ track, onOpen }) {
   const Icon = track.icon;
-  const completed = track.items.filter((item) => item.completed).length;
+  const points = track.items.reduce((sum, item) => sum + homeworkPoints(track.id, item), 0);
 
   return (
     <section
@@ -51,7 +52,7 @@ function AgendaSection({ track, onOpen }) {
               {track.title}
             </h3>
             <span className="status-pill tabular-nums">
-              {completed}/{track.items.length}
+              {pointsLabel(points)}
             </span>
           </div>
           <p className="max-w-lg text-xs leading-5 text-muted">
@@ -76,24 +77,19 @@ function AgendaSection({ track, onOpen }) {
           >
             <button
               type="button"
-              onClick={() => track.toggle(item.id)}
-              aria-pressed={!!item.completed}
-              aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
-              title={item.completed ? 'Mark incomplete' : 'Mark complete'}
+              onClick={() => track.complete(item.id)}
+              aria-label={`Mark complete: ${item.title}`}
+              title="Mark complete"
               className="completion-button mt-0.5 shrink-0"
             >
-              {item.completed ? (
-                <CheckCircle2 size={21} />
-              ) : (
-                <Circle size={21} />
-              )}
+              <Circle size={21} aria-hidden="true" />
             </button>
             <div className="min-w-0 flex-1">
               <a
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`break-words text-sm font-semibold leading-6 transition-colors hover:text-accent ${item.completed ? 'text-muted line-through' : 'text-ink'}`}
+                className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
               >
                 {item.title}
               </a>
@@ -106,6 +102,9 @@ function AgendaSection({ track, onOpen }) {
                 {item.difficulty && (
                   <span className="status-pill">{item.difficulty}</span>
                 )}
+                <span className="status-pill text-accent">
+                  {pointsLabel(homeworkPoints(track.id, item))}
+                </span>
                 {item.premium && (
                   <span className="status-pill text-warning">Premium</span>
                 )}
@@ -137,52 +136,51 @@ export default function DailyHome({ setActiveTab }) {
   const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
   const [lld, setLld] = useCloudStorage('lld', lldTopics);
   const [hld, setHld] = useCloudStorage('hld', hldTopics);
-  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld), [dsa, lld, hld]);
-  const [chosenDay, setChosenDay] = useState(null);
   const today = dateKey();
-  const nextDay = schedule.findIndex((day) => day.date >= today);
-  const todayIdx = nextDay === -1 ? schedule.length - 1 : nextDay;
-  const selectedDayIndex = chosenDay ?? todayIdx;
+  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld, today), [dsa, lld, hld, today]);
+  const [chosenDate, setChosenDate] = useState(null);
+  const chosenIndex = schedule.findIndex((day) => day.date === chosenDate);
+  const selectedDayIndex = chosenIndex === -1
+    ? schedule.findIndex((day) => day.date >= today)
+    : chosenIndex;
   const day = schedule[selectedDayIndex];
-  const totalDays = schedule.length;
 
-  const toggle = (setItems, id) => setItems((items) => items.map((item) =>
-    item.id === id ? { ...item, completed: !item.completed } : item,
+  const complete = (setItems, id) => setItems((items) => items.map((item) =>
+    item.id === id && !item.completed ? { ...item, completed: true, homeworkDate: day.date } : item,
   ));
-  const selectedItems = [...day.dsa, day.design.item];
-  const selectedCompleted = selectedItems.filter((item) => item.completed).length;
-  const selectedProgress = Math.round((selectedCompleted / selectedItems.length) * 100);
-  const designSetter = day.design.track === 'lld' ? setLld : setHld;
 
   const tracks = [
-    {
+    day.dsa.length > 0 && {
       id: 'dsa',
       label: 'DSA',
       title: 'DSA practice',
       icon: BookOpen,
       subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
       items: day.dsa,
-      toggle: (id) => toggle(setDsa, id),
+      complete: (id) => complete(setDsa, id),
       source: 'TakeUForward',
     },
-    {
+    day.design && {
       ...DESIGN_TRACKS[day.design.track],
       items: [day.design.item],
-      toggle: (id) => toggle(designSetter, id),
+      complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
     },
-  ];
+  ].filter(Boolean);
+  const remainingPoints = tracks.reduce((sum, track) =>
+    sum + track.items.reduce((points, item) => points + homeworkPoints(track.id, item), 0), 0);
+  const progress = Math.min(100, Math.round(day.earned / HOMEWORK_TARGET * 100));
 
   return (
     <div className="page-frame">
       <PageHeader
-        eyebrow={`Study plan · Day ${selectedDayIndex + 1} of ${totalDays}`}
+        eyebrow="Study plan"
         title="Homework"
-        description="Two or three Striver DSA questions and one LLD or HLD exercise per day."
+        description="Unfinished Striver DSA practice and one design exercise per day."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setChosenDay(null)}
+              onClick={() => setChosenDate(null)}
               className="button-secondary"
             >
               Today
@@ -190,9 +188,7 @@ export default function DailyHome({ setActiveTab }) {
             <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
               <button
                 type="button"
-                onClick={() =>
-                  setChosenDay(Math.max(0, selectedDayIndex - 1))
-                }
+                onClick={() => setChosenDate(schedule[selectedDayIndex - 1].date)}
                 disabled={selectedDayIndex <= 0}
                 aria-label="Previous study day"
                 className="icon-button disabled:cursor-default disabled:opacity-30"
@@ -204,25 +200,21 @@ export default function DailyHome({ setActiveTab }) {
               </label>
               <select
                 id="date-selector"
-                value={selectedDayIndex}
-                onChange={(event) =>
-                  setChosenDay(Number(event.target.value))
-                }
+                value={day.date}
+                onChange={(event) => setChosenDate(event.target.value)}
                 className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
                 style={{ textAlignLast: 'center' }}
               >
-                {schedule.map(({ date }, index) => (
-                  <option key={date} value={index}>
+                {schedule.map(({ date }) => (
+                  <option key={date} value={date}>
                     {shortDate.format(atNoon(date))}
                   </option>
                 ))}
               </select>
               <button
                 type="button"
-                onClick={() =>
-                  setChosenDay(Math.min(totalDays - 1, selectedDayIndex + 1))
-                }
-                disabled={selectedDayIndex >= totalDays - 1}
+                onClick={() => setChosenDate(schedule[selectedDayIndex + 1].date)}
+                disabled={selectedDayIndex >= schedule.length - 1}
                 aria-label="Next study day"
                 className="icon-button disabled:cursor-default disabled:opacity-30"
               >
@@ -236,19 +228,19 @@ export default function DailyHome({ setActiveTab }) {
       <StatsStrip
         items={[
           {
-            label: 'DSA',
-            value: `${dsa.filter((item) => item.completed).length}/${dsa.length}`,
-            detail: 'problems completed',
+            label: 'Daily target',
+            value: `${HOMEWORK_TARGET} pts`,
+            detail: 'DSA plus one design exercise',
           },
           {
-            label: 'LLD',
-            value: `${lld.filter((item) => item.completed).length}/${lld.length}`,
-            detail: 'problems completed',
+            label: 'DSA scoring',
+            value: '1 / 3 / 5 pts',
+            detail: 'Easy / Medium / Hard',
           },
           {
-            label: 'HLD',
-            value: `${hld.filter((item) => item.completed).length}/${hld.length}`,
-            detail: 'breakdowns completed',
+            label: 'Design scoring',
+            value: '5 pts',
+            detail: 'Each LLD or HLD exercise',
           },
         ]}
       />
@@ -261,27 +253,33 @@ export default function DailyHome({ setActiveTab }) {
             {agendaDate.format(atNoon(day.date))}
           </h2>
         </div>
-        <div className="w-full sm:w-52" aria-label="Selected day progress">
+        <div className="w-full sm:w-60" aria-label="Selected day progress">
           <div className="mb-2 flex items-center justify-between gap-4 text-xs">
             <span className="text-muted">
-              {selectedCompleted} of {selectedItems.length} complete
+              {day.earned} / {HOMEWORK_TARGET} pts earned
             </span>
-            <span className="font-medium tabular-nums text-accent">{selectedProgress}%</span>
+            <span className="font-medium tabular-nums text-accent">{remainingPoints} pts left</span>
           </div>
-          <div className="progress-track">
+          <div className="progress-track" role="progressbar" aria-label="Daily points"
+            aria-valuenow={Math.min(HOMEWORK_TARGET, day.earned)} aria-valuemin={0} aria-valuemax={HOMEWORK_TARGET}>
             <div
               className="progress-fill"
-              style={{ width: `${selectedProgress}%` }}
+              style={{ width: `${progress}%` }}
             />
           </div>
         </div>
       </div>
 
-      <div className="grid items-start gap-5 xl:grid-cols-2">
-        {tracks.map((track) => (
-          <AgendaSection key={track.id} track={track} onOpen={setActiveTab} />
-        ))}
-      </div>
+      {tracks.length ? (
+        <div className={`grid items-start gap-5 ${tracks.length > 1 ? 'xl:grid-cols-2' : ''}`}>
+          {tracks.map((track) => (
+            <AgendaSection key={track.id} track={track} onOpen={setActiveTab} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState icon={CheckCircle2}
+          title={day.earned >= HOMEWORK_TARGET ? 'Daily target reached' : 'No unfinished work for this day'} />
+      )}
     </div>
   );
 }
