@@ -1,20 +1,20 @@
 import {
-  Droplets,
-  Flower2,
+  Flame,
+  Gem,
   Moon,
   Orbit,
+  Snowflake,
   Sun,
-  Sunset,
-  Waves,
+  Zap,
 } from 'lucide-react';
 import { normalizeTheme } from '../lib/theme';
 
 const palettes = [
-  { id: 'neutral', label: 'Silver', Icon: Droplets },
-  { id: 'ocean', label: 'Ocean', Icon: Waves },
-  { id: 'violet', label: 'Iris', Icon: Orbit },
-  { id: 'rose', label: 'Rose', Icon: Flower2 },
-  { id: 'amber', label: 'Amber', Icon: Sunset },
+  { id: 'neutral', label: 'Frost', Icon: Snowflake },
+  { id: 'ocean', label: 'Voltage', Icon: Zap },
+  { id: 'violet', label: 'After Hours', Icon: Orbit },
+  { id: 'rose', label: 'Velvet', Icon: Gem },
+  { id: 'amber', label: 'Ember', Icon: Flame },
 ];
 
 export default function ThemeSwitcher({ theme, onChange, syncError = false, disabled = false }) {
@@ -41,16 +41,17 @@ export default function ThemeSwitcher({ theme, onChange, syncError = false, disa
         </button>
       </div>
       <span className="theme-control-divider" aria-hidden="true" />
-      <div className="theme-palette-rail" role="group" aria-label="Glass color">
+      <div className="theme-palette-rail" role="group" aria-label="Glass themes">
         {palettes.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
             disabled={disabled}
-            className={`theme-palette-button theme-palette-${id}`}
-            aria-label={`${label} glass`}
+            className="theme-palette-button"
+            data-swatch={id}
+            aria-label={label}
             aria-pressed={appearance.palette === id}
-            title={`${label} glass`}
+            title={label}
             onClick={() => onChange({ ...appearance, palette: id })}
           >
             <span className="theme-palette-swatch">

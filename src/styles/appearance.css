@@ -1,0 +1,186 @@
+/* Each palette supplies its own glass, ink and light for both appearances. */
+:root,
+[data-swatch='neutral'] {
+  --light-base: #edf3f7;
+  --light-pane: #f7fcff;
+  --light-ink: #1c2b3b;
+  --light-accent: #245b78;
+  --light-shift: #137167;
+  --light-glow: #91c6e1;
+  --light-flare: #b1dcd7;
+  --dark-base: #111a24;
+  --dark-pane: #202f40;
+  --dark-ink: #edf4fb;
+  --dark-accent: #a2ddf7;
+  --dark-shift: #90dfcc;
+  --dark-glow: #315570;
+  --dark-flare: #2d5b60;
+  --glow-origin: 6% -10rem;
+  --flare-origin: 99% 21rem;
+  --sheen-angle: 150deg;
+}
+
+/* Voltage */
+[data-palette='ocean'],
+[data-swatch='ocean'] {
+  --light-base: #e7efff;
+  --light-pane: #eef5ff;
+  --light-ink: #182245;
+  --light-accent: #2b48ad;
+  --light-shift: #176676;
+  --light-glow: #8da5ff;
+  --light-flare: #7de4de;
+  --dark-base: #090f29;
+  --dark-pane: #151f43;
+  --dark-ink: #eef2ff;
+  --dark-accent: #aebaff;
+  --dark-shift: #5be6e4;
+  --dark-glow: #3b40ab;
+  --dark-flare: #076b7c;
+  --glow-origin: 72% -12rem;
+  --flare-origin: 0% 20rem;
+  --sheen-angle: 112deg;
+}
+
+/* After Hours */
+[data-palette='violet'],
+[data-swatch='violet'] {
+  --light-base: #f0e7fb;
+  --light-pane: #faf2ff;
+  --light-ink: #302141;
+  --light-accent: #6f299f;
+  --light-shift: #a82c68;
+  --light-glow: #c39af4;
+  --light-flare: #f5a8d3;
+  --dark-base: #1a102a;
+  --dark-pane: #2b1b41;
+  --dark-ink: #fcf2ff;
+  --dark-accent: #dfafff;
+  --dark-shift: #ffa0d4;
+  --dark-glow: #783ca5;
+  --dark-flare: #8b2c66;
+  --glow-origin: 10% -7rem;
+  --flare-origin: 100% 12rem;
+  --sheen-angle: 136deg;
+}
+
+/* Velvet */
+[data-palette='rose'],
+[data-swatch='rose'] {
+  --light-base: #faeae9;
+  --light-pane: #fff3ef;
+  --light-ink: #3a2634;
+  --light-accent: #893052;
+  --light-shift: #684881;
+  --light-glow: #f0a0ae;
+  --light-flare: #d5b3ef;
+  --dark-base: #21141e;
+  --dark-pane: #382637;
+  --dark-ink: #fff0f3;
+  --dark-accent: #ffb5cb;
+  --dark-shift: #dec2fa;
+  --dark-glow: #87364e;
+  --dark-flare: #6e458e;
+  --glow-origin: 88% -9rem;
+  --flare-origin: 2% 19rem;
+  --sheen-angle: 212deg;
+}
+
+/* Ember */
+[data-palette='amber'],
+[data-swatch='amber'] {
+  --light-base: #f7eddb;
+  --light-pane: #fff6e3;
+  --light-ink: #392b20;
+  --light-accent: #8c411e;
+  --light-shift: #765516;
+  --light-glow: #f6ae74;
+  --light-flare: #f1d179;
+  --dark-base: #211711;
+  --dark-pane: #39291f;
+  --dark-ink: #fff0dc;
+  --dark-accent: #ffc089;
+  --dark-shift: #ead282;
+  --dark-glow: #9b4c29;
+  --dark-flare: #806326;
+  --glow-origin: 34% -10rem;
+  --flare-origin: 100% 24rem;
+  --sheen-angle: 123deg;
+}
+
+:root {
+  color-scheme: light;
+  --page-base: var(--light-base);
+  --pane: var(--light-pane);
+  --text: var(--light-ink);
+  --accent: var(--light-accent);
+  --accent-shift: var(--light-shift);
+  --glow: var(--light-glow);
+  --flare: var(--light-flare);
+  --glow-strength: 48%;
+  --flare-strength: 42%;
+  --glass-rim: rgb(255 255 255 / 0.92);
+  --glass-highlight: rgb(255 255 255 / 0.68);
+  --glass-sheen: color-mix(in srgb, white 52%, transparent);
+  --glass-shadow: rgb(20 32 57 / 0.065);
+  --accent-ink: #fff;
+  --accent-hover: color-mix(in srgb, var(--accent) 84%, var(--text));
+  --accent-mix-strength: 56%;
+  --success: #226448;
+  --warning: #7c4a11;
+  --danger: #a02b44;
+  --overlay: rgb(23 29 45 / 0.38);
+  --border-strength: 20%;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --page-base: var(--dark-base);
+  --pane: var(--dark-pane);
+  --text: var(--dark-ink);
+  --accent: var(--dark-accent);
+  --accent-shift: var(--dark-shift);
+  --glow: var(--dark-glow);
+  --flare: var(--dark-flare);
+  --glow-strength: 66%;
+  --flare-strength: 50%;
+  --glass-rim: color-mix(in srgb, var(--accent) 24%, transparent);
+  --glass-highlight: color-mix(in srgb, var(--accent) 13%, transparent);
+  --glass-sheen: color-mix(in srgb, var(--accent) 10%, transparent);
+  --glass-shadow: rgb(0 0 0 / 0.18);
+  --accent-ink: var(--page-base);
+  --accent-hover: color-mix(in srgb, var(--accent) 82%, white);
+  --accent-mix-strength: 27%;
+  --success: #9be2b6;
+  --warning: #f3ce91;
+  --danger: #f8a3b5;
+  --overlay: rgb(5 8 17 / 0.69);
+  --border-strength: 21%;
+}
+
+:root {
+  --page-background:
+    radial-gradient(ellipse 72rem 40rem at var(--glow-origin), color-mix(in srgb, var(--glow) var(--glow-strength), transparent), transparent),
+    radial-gradient(ellipse 63rem 44rem at var(--flare-origin), color-mix(in srgb, var(--flare) var(--flare-strength), transparent), transparent),
+    var(--page-base);
+  --canvas: transparent;
+  --surface: color-mix(in srgb, var(--pane) 80%, transparent);
+  --elevated: color-mix(in srgb, var(--pane) 95%, transparent);
+  --field: color-mix(in srgb, var(--pane) 70%, transparent);
+  --well: color-mix(in srgb, var(--page-base) 56%, var(--pane));
+  --selected: color-mix(in srgb, var(--accent) 15%, var(--pane));
+  --hover: color-mix(in srgb, var(--accent) 8%, transparent);
+  --header: color-mix(in srgb, var(--page-base) 79%, transparent);
+  --modal: color-mix(in srgb, var(--pane) 98%, transparent);
+  --text-secondary: color-mix(in srgb, var(--text) 92%, var(--page-base));
+  --text-muted: color-mix(in srgb, var(--text) 86%, var(--page-base));
+  --text-faint: color-mix(in srgb, var(--text) 82%, var(--page-base));
+  --border: color-mix(in srgb, var(--accent) var(--border-strength), transparent);
+  --accent-soft: color-mix(in srgb, var(--accent) 13%, transparent);
+  --accent-mix: var(--text);
+  --option: var(--pane);
+  --scroll-thumb: color-mix(in srgb, var(--accent) 32%, var(--pane));
+  --control-border: color-mix(in srgb, var(--text) 60%, var(--pane));
+  --material-shadow: 0 8px 28px var(--glass-shadow);
+  --glass-spark: color-mix(in srgb, var(--accent-shift) 17%, transparent);
+}
