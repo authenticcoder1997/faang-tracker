@@ -1,3 +1,4 @@
+import { normalizeDsaRevision } from './dsaRevision.js';
 import { normalizeBookmark } from './bookmarks.js';
 import { LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 
@@ -151,6 +152,8 @@ export function normalizeWorkspace(value, previous) {
     schemaVersion: 1,
     tasks: previous && value.tasks === previous.tasks ? previous.tasks : tasks(value.tasks),
     bookmarks: previous && value.bookmarks === previous.bookmarks ? previous.bookmarks : bookmarks(value.bookmarks),
+    revisions: previous && value.revisions === previous.revisions ? previous.revisions
+      : uniqueEntities(value.revisions === undefined ? [] : value.revisions, 'DSA revisions', normalizeDsaRevision),
     notes: previous && value.notes === previous.notes ? previous.notes : notes(value.notes),
     appearance: previous && value.appearance === previous.appearance ? previous.appearance : appearance(value.appearance),
     progress: Object.fromEntries(
@@ -183,7 +186,7 @@ function equal(left, right) {
   return false;
 }
 
-const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance'];
+const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions'];
 
 // Keep unchanged sections referentially stable across cloud snapshots and acks.
 export function reuseWorkspace(previous, next) {
@@ -319,6 +322,7 @@ export function diffWorkspace(previous, next) {
     lists: entityPatch(previous.tasks.lists, next.tasks.lists),
     tasks: entityPatch(previous.tasks.tasks, next.tasks.tasks, true),
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
+    revisions: entityPatch(previous.revisions, next.revisions),
     notes: entityPatch(previous.notes, next.notes),
     appearance: fieldPatch(previous.appearance, next.appearance),
     progress: Object.fromEntries(
@@ -488,6 +492,7 @@ export function applyValidatedWorkspacePatch(current, patch) {
       ? current.tasks
       : repairTaskLists({ version: 1, lists, tasks }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
+    revisions: patch.revisions ? applyEntities(current.revisions, patch.revisions) : current.revisions,
     notes: applyEntities(current.notes, patch.notes),
     appearance: applyFields(current.appearance, patch.appearance),
     progress,

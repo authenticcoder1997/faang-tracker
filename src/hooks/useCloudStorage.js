@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useWorkspace, useWorkspaceValue } from './useWorkspace';
+import { mergeChangedStudyProgress } from '../lib/studyProgress';
 
 function combineItems(initialValue, progress = {}) {
   return initialValue.map((item) => ({ ...item, ...progress[item.id] }));
@@ -15,14 +16,13 @@ export function useCloudStorage(key, initialValue) {
       updateData((current) => {
         const previous = combineItems(initialValue, current.progress[key]);
         const next = typeof value === 'function' ? value(previous) : value;
-        const fields = Object.fromEntries(next.map((item) => [
-          item.id, { completed: !!item.completed, note: item.note || '' },
-        ]));
+        const progress = mergeChangedStudyProgress(current.progress[key], previous, next);
+        if (progress === current.progress[key]) return current;
         return {
           ...current,
           progress: {
             ...current.progress,
-            [key]: { ...current.progress[key], ...fields },
+            [key]: progress,
           },
         };
       }),

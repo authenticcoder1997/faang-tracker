@@ -1,25 +1,63 @@
-import { useState } from 'react';
-import { ArrowUpRight, Upload } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, BookmarkCheck, ListTodo, Upload } from 'lucide-react';
 import { useCloudStorage } from '../hooks/useCloudStorage';
 import { useWorkspace, useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import {
-  allDsaSections, allDsaTopics, mergeDsaSolved, parseDsaSolvedLinks,
-  PLANLY_DSA_URL, planlyDsaSections, planlyDsaTopics,
+  allDsaSections, mergeDsaSolved, parseDsaSolvedLinks, PLANLY_DSA_URL, planlyDsaTopics,
 } from '../lib/dsaPlan';
 import DsaProblemList from './DsaProblemList';
+import DsaRevisionQueue from './DsaRevisionQueue';
+import { dsaCatalog, DSA_SOURCES, matchesDsaSources } from '../lib/dsaCatalog';
+import { queueDsaRevision, reviewDsaProblem } from '../lib/dsaRevision';
+import { dateKey } from '../lib/tasks';
 import { PageHeader, StatsStrip } from './ui/Workspace';
 
+const planlyIds = new Set(planlyDsaTopics.map((item) => item.id));
+const sourceCounts = Object.fromEntries(DSA_SOURCES.map(([source]) => [
+  source, dsaCatalog.filter((item) => item.sources[source]).length,
+]));
+
 export default function DsaTracker() {
-  const [scope, setScope] = useState('planly');
+  const [sources, setSources] = useState(['tuf']);
+  const [planlyOnly, setPlanlyOnly] = useState(false);
+  const [view, setView] = useState('problems');
+  const [today, setToday] = useState(dateKey);
   const [showImport, setShowImport] = useState(false);
   const [links, setLinks] = useState('');
   const [notice, setNotice] = useState('');
   const { updateData } = useWorkspace();
-  const saving = useWorkspaceSaving('dsa');
+  const progressSaving = useWorkspaceSaving('dsa');
+  const revisionSaving = useWorkspaceSaving('revisions');
+  const saving = progressSaving || revisionSaving;
   const error = useWorkspaceValue((state) => state.error);
-  const isPlanly = scope === 'planly';
-  const [items, setItems] = useCloudStorage('dsa', isPlanly ? planlyDsaTopics : allDsaTopics);
-  const sections = isPlanly ? planlyDsaSections : allDsaSections;
+  const [catalog, setItems] = useCloudStorage('dsa', dsaCatalog);
+  const revisions = useWorkspaceValue((state) => state.data.revisions);
+  const queuedIds = useMemo(() => new Set(revisions.map((record) => record.id)), [revisions]);
+  const onlyPlanly = planlyOnly && sources.length === 1 && sources[0] === 'tuf';
+  const items = useMemo(() => catalog.filter((item) => matchesDsaSources(item, sources) &&
+    (!onlyPlanly || planlyIds.has(item.id))), [catalog, sources, onlyPlanly]);
+  const due = revisions.filter((record) => record.dueDate <= today).length;
+
+  useEffect(() => {
+    const refresh = () => setToday(dateKey());
+    window.addEventListener('focus', refresh);
+    const timer = window.setInterval(refresh, 60000);
+    return () => { window.removeEventListener('focus', refresh); window.clearInterval(timer); };
+  }, []);
+
+  const toggleRevision = useCallback((id, source) => updateData((current) => ({
+    ...current,
+    revisions: current.revisions.some((record) => record.id === id)
+      ? current.revisions.filter((record) => record.id !== id)
+      : queueDsaRevision(current.revisions, id, source, dateKey()),
+  })), [updateData]);
+
+  const markReviewed = (id) => updateData((current) => ({
+    ...current, revisions: reviewDsaProblem(current.revisions, id, dateKey()),
+  }));
+  const removeRevision = (id) => updateData((current) => ({
+    ...current, revisions: current.revisions.filter((record) => record.id !== id),
+  }));
   const solved = items.filter((item) => item.completed).length;
   const percent = items.length ? Math.round(solved / items.length * 100) : 0;
 
@@ -55,7 +93,7 @@ export default function DsaTracker() {
       <PageHeader
         eyebrow="Learning library"
         title="Data structures & algorithms"
-        description="Pick the patterns you want to practice, then mark problems solved here."
+        description="Choose a source, find a pattern, and save problems you want to revisit."
         actions={
           <a href={PLANLY_DSA_URL} target="_blank" rel="noopener noreferrer" className="button-secondary">
             Open Planly DSA <ArrowUpRight size={15} aria-hidden="true" />
@@ -64,23 +102,26 @@ export default function DsaTracker() {
       />
       <div className="mb-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div role="group" aria-label="DSA problem list" className="inline-flex gap-1 rounded-xl border border-line bg-well p-1">
+          <div role="group" aria-label="DSA view" className="glass-segment inline-flex flex-wrap gap-1 rounded-xl border border-line p-1">
             {[
-              ['planly', 'Planly problems'],
-              ['all', 'All tracked'],
-            ].map(([id, label]) => (
-              <button key={id} type="button" aria-pressed={scope === id} onClick={() => setScope(id)}
-                className={`rounded-lg px-3 py-2 text-sm ${scope === id ? 'bg-accent-soft font-medium text-accent' : 'text-muted hover:bg-hover hover:text-ink'}`}>
-                {label}
+              ['problems', 'Problems', ListTodo],
+              ['revision', 'Revision', BookmarkCheck],
+            ].map(([id, label, Icon]) => (
+              <button key={id} type="button" aria-pressed={view === id} onClick={() => setView(id)}
+                className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${view === id ? 'bg-accent-soft font-medium text-accent' : 'text-muted hover:bg-hover hover:text-ink'}`}>
+                <Icon size={15} aria-hidden="true" /> {label}
+                {id === 'revision' && due > 0 && <span aria-hidden="true" className="status-pill">{due} due</span>}
               </button>
             ))}
           </div>
-          <button type="button" className="button-secondary" aria-expanded={showImport} aria-controls="dsa-import"
-            onClick={() => { setShowImport(!showImport); setNotice(''); }}>
-            <Upload size={15} /> Import solved links
-          </button>
+          {view === 'problems' && (
+            <button type="button" className="button-secondary" aria-expanded={showImport} aria-controls="dsa-import"
+              onClick={() => { setShowImport(!showImport); setNotice(''); }}>
+              <Upload size={15} aria-hidden="true" /> Import solved links
+            </button>
+          )}
         </div>
-        {showImport && (
+        {view === 'problems' && showImport && (
           <form id="dsa-import" onSubmit={importSolved} className="panel space-y-3 p-4">
             <label htmlFor="dsa-solved-links" className="block text-sm font-medium">Solved TakeUForward problem links</label>
             <p className="text-xs text-muted">Paste one link per line. This only adds solves and keeps existing notes and progress.</p>
@@ -89,21 +130,32 @@ export default function DsaTracker() {
             <button type="submit" className="button-primary" disabled={!links.trim() || saving}>Mark imported problems solved</button>
           </form>
         )}
-        {notice && <p role="status" className="text-xs text-muted">{notice}</p>}
+        {view === 'problems' && notice && <p role="status" className="text-xs text-muted">{notice}</p>}
       </div>
-      <StatsStrip items={[
-        { label: 'Solved', value: solved, detail: `of ${items.length} problems` },
-        { label: 'Unsolved', value: items.length - solved, detail: 'Ready to practice' },
-        { label: 'Your progress', value: `${percent}%`, detail: 'Synced across devices' },
-      ]} />
-      <div className="progress-track mt-[-1px] mb-4" role="progressbar" aria-label="DSA progress"
-        aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
-        <div className="progress-fill" style={{ width: `${percent}%` }} />
+      <div hidden={view !== 'problems'}>
+        <StatsStrip items={[
+          { label: 'Solved', value: solved, detail: `of ${items.length} problems` },
+          { label: 'Unsolved', value: items.length - solved, detail: 'Ready to practice' },
+          { label: 'Your progress', value: `${percent}%`, detail: 'Synced across devices' },
+        ]} />
+        <div className="progress-track mt-[-1px] mb-4" role="progressbar" aria-label="DSA progress"
+          aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+          <div className="progress-fill" style={{ width: `${percent}%` }} />
+        </div>
+        <p className={`mb-5 text-xs ${error ? 'text-warning' : 'text-muted'}`} role="status">
+          {error ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
+        </p>
+        <DsaProblemList items={items} setItems={setItems} sections={allDsaSections}
+          sources={sources} setSources={setSources} sourceCounts={sourceCounts} planlyOnly={planlyOnly}
+          setPlanlyOnly={setPlanlyOnly} queuedIds={queuedIds} onRevision={toggleRevision} />
       </div>
-      <p className={`mb-5 text-xs ${error ? 'text-warning' : 'text-muted'}`} role="status">
-        {error ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
-      </p>
-      <DsaProblemList items={items} setItems={setItems} sections={sections} />
+      <div hidden={view !== 'revision'}>
+        <p role="status" className={`mb-4 text-xs ${error ? 'text-warning' : 'text-muted'}`}>
+          {error ? 'Unable to save revisions to Firebase.' : revisionSaving ? 'Saving revisions…' : 'Revisions saved to Firebase'}
+        </p>
+        <DsaRevisionQueue revisions={revisions} catalog={catalog} today={today}
+          onReviewed={markReviewed} onRemove={removeRevision} onBrowse={() => setView('problems')} />
+      </div>
     </div>
   );
 }

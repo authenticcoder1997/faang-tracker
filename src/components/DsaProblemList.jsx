@@ -1,10 +1,12 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { BookOpen, Check, CheckCircle2, Circle, FileText, Search, SlidersHorizontal, X } from 'lucide-react';
+import { BookOpen, BookmarkCheck, BookmarkPlus, Check, CheckCircle2, Circle, FileText, Search, SlidersHorizontal, X } from 'lucide-react';
 import { filterDsaProblems } from '../lib/dsaFilters';
+import { DSA_SOURCES, DSA_SOURCE_LABELS, dsaPatternsFor, dsaSourceFor } from '../lib/dsaCatalog';
 import NoteModal from './NoteModal';
 import { EmptyState } from './ui/Workspace';
 
 const initialFilters = { query: '', statuses: [], patterns: [], difficulties: [] };
+const PAGE_SIZE = 60;
 
 function FilterTag({ label, count, active, onClick, pattern = false }) {
   return (
@@ -22,7 +24,7 @@ function FilterTag({ label, count, active, onClick, pattern = false }) {
 }
 
 function DifficultyTag({ level }) {
-  const tone = level === 'Easy' ? 'success' : level === 'Hard' ? 'danger' : 'warning';
+  const tone = level === 'Easy' ? 'success' : level === 'Hard' ? 'danger' : level === 'Medium' ? 'warning' : 'text-muted';
   return <span className="status-pill" style={{ color: `var(--${tone})` }}>{level}</span>;
 }
 
@@ -30,8 +32,14 @@ function StatusTag({ solved }) {
   return <span className={`status-pill${solved ? ' border-success/25 bg-success/8 text-success' : ''}`}>{solved ? 'Solved' : 'Unsolved'}</span>;
 }
 
-const ProblemRow = memo(function ProblemRow({ item, onToggle, onNote }) {
+const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, onToggle, onNote, onRevision }) {
   const solved = !!item.completed;
+  const source = dsaSourceFor(item, sources);
+  const link = item.sources[source];
+  const available = dsaPatternsFor(item, sources);
+  const pattern = available.find((name) => patterns.includes(name)) || available[0] || item.section;
+  const sourceLabel = DSA_SOURCE_LABELS[source];
+  const sourceNames = Object.keys(item.sources).map((key) => DSA_SOURCE_LABELS[key]);
   const label = solved ? 'Mark unsolved' : 'Mark solved';
   return (
     <tr className="border-t border-line transition-colors hover:bg-hover">
@@ -40,7 +48,7 @@ const ProblemRow = memo(function ProblemRow({ item, onToggle, onNote }) {
           type="button"
           className="completion-button"
           aria-pressed={solved}
-          aria-label={`${label}: ${item.title}`}
+          aria-label={`${label}: ${link.title}`}
           title={label}
           onClick={() => onToggle(item.id)}
         >
@@ -49,21 +57,22 @@ const ProblemRow = memo(function ProblemRow({ item, onToggle, onNote }) {
       </td>
       <td className="min-w-0 py-3 pr-3">
         <a
-          href={item.url}
+          href={link.url}
           target="_blank"
           rel="noopener noreferrer"
           className="break-words text-sm font-medium leading-6 text-ink hover:text-accent hover:underline underline-offset-4"
         >
-          {item.title}
+          {link.title}
         </a>
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 md:hidden">
-          <span className="status-pill">{item.section}</span>
+          <span className="status-pill">{pattern}</span>
           <DifficultyTag level={item.difficulty} />
           <StatusTag solved={solved} />
+          <span className="status-pill" title={sourceNames.join(', ')}>{sourceLabel}</span>
         </div>
       </td>
       <td className="hidden px-3 py-3 md:table-cell">
-        <span className="status-pill">{item.section}</span>
+        <span className="status-pill">{pattern}</span>
       </td>
       <td className="hidden px-3 py-3 md:table-cell">
         <DifficultyTag level={item.difficulty} />
@@ -71,7 +80,20 @@ const ProblemRow = memo(function ProblemRow({ item, onToggle, onNote }) {
       <td className="hidden px-3 py-3 md:table-cell">
         <StatusTag solved={solved} />
       </td>
-      <td className="w-12 pr-3 text-right">
+      <td className="hidden px-3 py-3 md:table-cell">
+        <span className="status-pill" title={sourceNames.join(', ')}>{sourceLabel}</span>
+      </td>
+      <td className="w-16 pr-2 text-right sm:w-22">
+        <button
+          type="button"
+          className={`icon-button ${queued ? 'text-accent' : ''}`}
+          aria-pressed={queued}
+          aria-label={`${queued ? 'Remove from revision' : 'Add to revision'}: ${link.title}`}
+          title={queued ? 'Remove from revision' : 'Add to revision'}
+          onClick={() => onRevision(item.id, source)}
+        >
+          {queued ? <BookmarkCheck size={16} aria-hidden="true" /> : <BookmarkPlus size={16} aria-hidden="true" />}
+        </button>
         <button
           type="button"
           className={`icon-button ${item.note ? 'text-accent' : ''}`}
@@ -86,9 +108,14 @@ const ProblemRow = memo(function ProblemRow({ item, onToggle, onNote }) {
   );
 });
 
-export default function DsaProblemList({ items, setItems, sections }) {
+export default function DsaProblemList({
+  items, setItems, sections, sources, setSources, sourceCounts,
+  planlyOnly, setPlanlyOnly, queuedIds, onRevision,
+}) {
   const [filters, setFilters] = useState(initialFilters);
   const [noteId, setNoteId] = useState(null);
+  const [patternQuery, setPatternQuery] = useState('');
+  const [limit, setLimit] = useState(PAGE_SIZE);
   const activeNote = items.find((item) => item.id === noteId);
   const counts = useMemo(() => {
     const patterns = new Map();
@@ -96,16 +123,37 @@ export default function DsaProblemList({ items, setItems, sections }) {
     let solved = 0;
     for (const item of items) {
       if (item.completed) solved++;
-      patterns.set(item.section, (patterns.get(item.section) || 0) + 1);
+      for (const name of dsaPatternsFor(item, sources)) patterns.set(name, (patterns.get(name) || 0) + 1);
       difficulties.set(item.difficulty, (difficulties.get(item.difficulty) || 0) + 1);
     }
     return { patterns, difficulties, solved };
-  }, [items]);
-  const matchingItems = useMemo(() => filterDsaProblems(items, filters), [items, filters]);
+  }, [items, sources]);
+  const matchingItems = useMemo(() => filterDsaProblems(items, filters, sources), [items, filters, sources]);
+  const patternOptions = [...new Set([
+    ...sections.map(({ name }) => name), ...[...counts.patterns.keys()].sort(), ...filters.patterns,
+  ])].filter((name) => (counts.patterns.has(name) || filters.patterns.includes(name)) &&
+    (!patternQuery.trim() || filters.patterns.includes(name) || name.toLowerCase().includes(patternQuery.trim().toLowerCase())));
+  const visibleLimit = Math.min(limit, matchingItems.length);
   const filtering = !!filters.query.trim() || filters.statuses.length > 0 ||
-    filters.patterns.length > 0 || filters.difficulties.length > 0;
+    filters.patterns.length > 0 || filters.difficulties.length > 0 || sources.length > 0 || planlyOnly;
+
+  function clearFilters() {
+    setFilters(initialFilters);
+    setSources([]);
+    setPlanlyOnly(false);
+    setPatternQuery('');
+    setLimit(PAGE_SIZE);
+  }
+
+  function toggleSource(source) {
+    setLimit(PAGE_SIZE);
+    setSources((current) => current.includes(source)
+      ? current.filter((value) => value !== source)
+      : [...current, source]);
+  }
 
   function toggleFilter(group, value) {
+    setLimit(PAGE_SIZE);
     setFilters((current) => {
       const selected = current[group];
       return {
@@ -130,9 +178,25 @@ export default function DsaProblemList({ items, setItems, sections }) {
           </h2>
           {filtering && (
             <button type="button" className="shrink-0 text-xs text-accent hover:underline"
-              onClick={() => setFilters(initialFilters)}>
+              onClick={clearFilters}>
               Clear all
             </button>
+          )}
+        </div>
+        <div role="group" aria-labelledby="dsa-source-filters" className="mb-4">
+          <h3 id="dsa-source-filters" className="eyebrow mb-2">Source</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {DSA_SOURCES.map(([source, label]) => (
+              <FilterTag key={source} label={label} count={sourceCounts[source]}
+                active={sources.includes(source)} onClick={() => toggleSource(source)} />
+            ))}
+          </div>
+          {sources.length === 1 && sources[0] === 'tuf' && (
+            <label className="mt-2.5 inline-flex items-center gap-2 text-xs text-muted">
+              <input type="checkbox" checked={planlyOnly} className="accent-accent"
+                onChange={(event) => { setPlanlyOnly(event.target.checked); setLimit(PAGE_SIZE); }} />
+              Planly only
+            </label>
           )}
         </div>
         <div role="group" aria-labelledby="dsa-status-filters" className="mb-4">
@@ -147,7 +211,7 @@ export default function DsaProblemList({ items, setItems, sections }) {
         <div role="group" aria-labelledby="dsa-difficulty-filters" className="mb-4">
           <h3 id="dsa-difficulty-filters" className="eyebrow mb-2">Difficulty</h3>
           <div className="flex flex-wrap gap-1.5">
-            {['Easy', 'Medium', 'Hard'].filter((level) => counts.difficulties.has(level)).map((level) => (
+            {['Easy', 'Medium', 'Hard', 'Unrated'].filter((level) => counts.difficulties.has(level)).map((level) => (
               <FilterTag key={level} label={level} active={filters.difficulties.includes(level)}
                 onClick={() => toggleFilter('difficulties', level)} />
             ))}
@@ -158,9 +222,14 @@ export default function DsaProblemList({ items, setItems, sections }) {
             <h3 id="dsa-pattern-filters" className="eyebrow mb-0">Patterns</h3>
             <span className="text-[11px] text-muted">Select any</span>
           </div>
+          {(counts.patterns.size > 18 || patternQuery) && (
+            <input type="search" className="input-control mb-2 py-1.5 text-xs"
+              aria-label="Find a pattern" placeholder="Find a pattern…" value={patternQuery}
+              onChange={(event) => setPatternQuery(event.target.value)} />
+          )}
           <div className="flex flex-wrap gap-1 lg:grid">
-            {sections.map(({ name }) => (
-              <FilterTag key={name} label={name} count={counts.patterns.get(name)} pattern
+            {patternOptions.map((name) => (
+              <FilterTag key={name} label={name} count={counts.patterns.get(name) || 0} pattern
                 active={filters.patterns.includes(name)} onClick={() => toggleFilter('patterns', name)} />
             ))}
           </div>
@@ -183,11 +252,17 @@ export default function DsaProblemList({ items, setItems, sections }) {
               aria-label="Search data structures & algorithms problems"
               placeholder="Find a problem…"
               value={filters.query}
-              onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
+              onChange={(event) => {
+                setLimit(PAGE_SIZE);
+                setFilters((current) => ({ ...current, query: event.target.value }));
+              }}
             />
             {filters.query && (
               <button type="button" aria-label="Clear search" className="hover:text-ink"
-                onClick={() => setFilters((current) => ({ ...current, query: '' }))}>
+                onClick={() => {
+                  setLimit(PAGE_SIZE);
+                  setFilters((current) => ({ ...current, query: '' }));
+                }}>
                 <X size={14} aria-hidden="true" />
               </button>
             )}
@@ -203,20 +278,30 @@ export default function DsaProblemList({ items, setItems, sections }) {
                   <th scope="col" className="hidden px-3 md:table-cell">Pattern</th>
                   <th scope="col" className="hidden px-3 md:table-cell">Difficulty</th>
                   <th scope="col" className="hidden px-3 md:table-cell">Status</th>
-                  <th scope="col" className="w-12"><span className="sr-only">Notes</span></th>
+                  <th scope="col" className="hidden px-3 md:table-cell">Source</th>
+                  <th scope="col" className="w-16 sm:w-22"><span className="sr-only">Revision and notes</span></th>
                 </tr>
               </thead>
               <tbody>
-                {matchingItems.map((item) => (
-                  <ProblemRow key={item.id} item={item} onToggle={toggleProblem} onNote={setNoteId} />
+                {matchingItems.slice(0, visibleLimit).map((item) => (
+                  <ProblemRow key={item.id} item={item} sources={sources} patterns={filters.patterns}
+                    queued={queuedIds.has(item.id)} onToggle={toggleProblem} onNote={setNoteId} onRevision={onRevision} />
                 ))}
               </tbody>
             </table>
+            {visibleLimit < matchingItems.length && (
+              <div className="flex flex-wrap items-center justify-center gap-3 border-t border-line p-3">
+                <span className="text-xs text-muted">Showing {visibleLimit} of {matchingItems.length}</span>
+                <button type="button" className="button-secondary" onClick={() => setLimit(limit + PAGE_SIZE)}>
+                  Show more
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <EmptyState icon={SlidersHorizontal} title="No matching problems"
             description="Try a different search or remove a filter."
-            action={<button type="button" className="button-secondary" onClick={() => setFilters(initialFilters)}>Clear filters</button>} />
+            action={<button type="button" className="button-secondary" onClick={clearFilters}>Clear filters</button>} />
         )}
       </section>
 
