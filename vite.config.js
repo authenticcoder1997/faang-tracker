@@ -8,4 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Keep the catalogs cacheable while loading them with the app.
+        codeSplitting: {
+          groups: [{ name: 'catalogs', test: /\/src\/data\// }],
+        },
+      },
+    },
+  },
 })

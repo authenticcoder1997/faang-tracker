@@ -1,4 +1,4 @@
-import { Component, lazy, memo, Suspense, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Component, memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   LayoutDashboard,
   BookOpen,
@@ -17,42 +17,29 @@ import {
   LoaderCircle,
 } from 'lucide-react';
 import TaskHome from './components/TaskHome';
+import DailyHome from './components/DailyHome';
+import ImportantLinks from './components/ImportantLinks';
+import DsaTracker from './components/DsaTracker';
+import LldTracker from './components/LldTracker';
+import HldTracker from './components/HldTracker';
+import ConcurrencyTracker from './components/ConcurrencyTracker';
+import Notes from './components/Notes';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { useTheme } from './hooks/useTheme';
 import { useWorkspace, useWorkspaceValue } from './hooks/useWorkspace';
+import { makeResetProgress } from './lib/resetProgress';
 
+// Load the tab code with the workspace so open sessions can outlast a deployment.
 const PAGES = {
   dashboard: TaskHome,
-  homework: lazy(() => import('./components/DailyHome')),
-  important: lazy(() => import('./components/ImportantLinks')),
-  dsa: lazy(() => import('./components/DsaTracker')),
-  lld: lazy(() => import('./components/LldTracker')),
-  hld: lazy(() => import('./components/HldTracker')),
-  concurrency: lazy(() => import('./components/ConcurrencyTracker')),
-  notes: lazy(() => import('./components/Notes')),
+  homework: DailyHome,
+  important: ImportantLinks,
+  dsa: DsaTracker,
+  lld: LldTracker,
+  hld: HldTracker,
+  concurrency: ConcurrencyTracker,
+  notes: Notes,
 };
-
-function LoadingPage({ workspace = false, error }) {
-  return (
-    <section className="page-frame workspace-placeholder" aria-busy={!error}>
-      <p className="eyebrow">{workspace ? 'Your workspace' : 'My Space'}</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-        {workspace ? 'Make room for your day.' : 'Opening this tab…'}
-      </h1>
-      <p role="status" className="mt-4 flex items-center gap-2 text-sm text-muted">
-        {!error && <LoaderCircle size={16} className="animate-spin" />}
-        {error ? 'Your workspace will appear here once connected.' : workspace ? 'Connecting to Firebase…' : 'Loading this view…'}
-      </p>
-      {workspace && !error && (
-        <div aria-hidden="true" className="mt-10 grid gap-4 border-t border-line pt-7">
-          <span className="h-3 w-44 rounded bg-accent-soft" />
-          <span className="h-3 w-64 max-w-full rounded bg-accent-soft" />
-          <span className="h-3 w-36 rounded bg-accent-soft" />
-        </div>
-      )}
-    </section>
-  );
-}
 
 class PageErrorBoundary extends Component {
   state = { failed: false };
@@ -65,9 +52,9 @@ class PageErrorBoundary extends Component {
     if (!this.state.failed) return this.props.children;
     return (
       <section className="page-frame">
-        <p role="alert" className="mb-4 text-sm text-muted">This tab couldn’t load. Reload My Space to try again.</p>
-        <button type="button" className="button-secondary" onClick={() => window.location.reload()}>
-          <RefreshCw size={15} /> Reload My Space
+        <p role="alert" className="mb-4 text-sm text-muted">This tab couldn’t open.</p>
+        <button type="button" className="button-secondary" onClick={() => this.setState({ failed: false })}>
+          <RefreshCw size={15} aria-hidden="true" /> Retry tab
         </button>
       </section>
     );
@@ -79,9 +66,7 @@ const WorkspacePage = memo(function WorkspacePage({ id, active, openTab, openHom
   return (
     <div className={active ? 'block' : 'hidden'}>
       <PageErrorBoundary>
-        <Suspense fallback={<LoadingPage />}>
-          <Page isActive={active} setActiveTab={openTab} onOpenHomework={openHomework} />
-        </Suspense>
+        <Page isActive={active} setActiveTab={openTab} onOpenHomework={openHomework} />
       </PageErrorBoundary>
     </div>
   );
@@ -137,7 +122,23 @@ function WorkspaceNotices() {
 
 function ConnectingWorkspace() {
   const error = useWorkspaceValue((state) => state.error);
-  return <LoadingPage workspace error={error} />;
+  return (
+    <section className="page-frame workspace-placeholder" aria-busy={!error}>
+      <p className="eyebrow">Your workspace</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Make room for your day.</h1>
+      <p role="status" className="mt-4 flex items-center gap-2 text-sm text-muted">
+        {!error && <LoaderCircle size={16} className="animate-spin" />}
+        {error ? 'Your workspace will appear here once connected.' : 'Connecting to Firebase…'}
+      </p>
+      {!error && (
+        <div aria-hidden="true" className="mt-10 grid gap-4 border-t border-line pt-7">
+          <span className="h-3 w-44 rounded bg-accent-soft" />
+          <span className="h-3 w-64 max-w-full rounded bg-accent-soft" />
+          <span className="h-3 w-36 rounded bg-accent-soft" />
+        </div>
+      )}
+    </section>
+  );
 }
 
 function AppearanceControls({ ready }) {
@@ -169,9 +170,8 @@ function App() {
     window.scrollTo({ top: scrollPositions.current.get(activeTab) ?? 0, behavior: 'instant' });
   }, [activeTab]);
 
-  const resetProgress = async () => {
+  const resetProgress = () => {
     if (!ready || !window.confirm('Reset ALL progress? This cannot be undone.')) return;
-    const { makeResetProgress } = await import('./lib/resetProgress');
     updateData((current) => ({ ...current, progress: makeResetProgress(current.progress) }));
   };
 
