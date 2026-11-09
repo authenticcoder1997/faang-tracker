@@ -3,7 +3,6 @@ import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { striverDsaTopics } from '../lib/dsaPlan';
 import { buildHomeworkSchedule } from '../lib/homeworkSchedule';
-import { dateKey } from '../lib/tasks';
 import { useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -17,7 +16,6 @@ import {
   Layers,
   Monitor,
 } from 'lucide-react';
-import { EmptyState, PageHeader } from './ui/Workspace';
 
 const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
 const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
@@ -129,11 +127,10 @@ function AgendaSection({ track, onOpen }) {
   );
 }
 
-export default function DailyHome({ setActiveTab }) {
+export default function HomeworkAgenda({ today, setActiveTab }) {
   const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
   const [lld, setLld] = useCloudStorage('lld', lldTopics);
   const [hld, setHld] = useCloudStorage('hld', hldTopics);
-  const today = dateKey();
   const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld, today), [dsa, lld, hld, today]);
   const [chosenDate, setChosenDate] = useState(null);
   const chosenIndex = schedule.findIndex((day) => day.date === chosenDate);
@@ -165,77 +162,74 @@ export default function DailyHome({ setActiveTab }) {
   ].filter(Boolean);
 
   return (
-    <div className="page-frame">
-      <PageHeader
-        eyebrow="Study plan"
-        title="Homework"
-        description="Unfinished Striver DSA practice and one design exercise per day."
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
+    <section aria-labelledby="homework-title" className="mb-8">
+      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="homework-title" className="text-lg font-semibold tracking-tight text-ink">Homework</h2>
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+            <CalendarDays size={14} className="text-accent" aria-hidden="true" />
+            {agendaDate.format(atNoon(day.date))}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setChosenDate(null)}
+            className="button-secondary"
+          >
+            Today
+          </button>
+          <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
             <button
               type="button"
-              onClick={() => setChosenDate(null)}
-              className="button-secondary"
+              onClick={() => setChosenDate(schedule[selectedDayIndex - 1].date)}
+              disabled={selectedDayIndex <= 0}
+              aria-label="Previous study day"
+              className="icon-button disabled:cursor-default disabled:opacity-30"
             >
-              Today
+              <ChevronLeft size={16} />
             </button>
-            <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
-              <button
-                type="button"
-                onClick={() => setChosenDate(schedule[selectedDayIndex - 1].date)}
-                disabled={selectedDayIndex <= 0}
-                aria-label="Previous study day"
-                className="icon-button disabled:cursor-default disabled:opacity-30"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <label htmlFor="date-selector" className="sr-only">
-                Study date
-              </label>
-              <select
-                id="date-selector"
-                value={day.date}
-                onChange={(event) => setChosenDate(event.target.value)}
-                className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
-                style={{ textAlignLast: 'center' }}
-              >
-                {schedule.map(({ date }) => (
-                  <option key={date} value={date}>
-                    {shortDate.format(atNoon(date))}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => setChosenDate(schedule[selectedDayIndex + 1].date)}
-                disabled={selectedDayIndex >= schedule.length - 1}
-                aria-label="Next study day"
-                className="icon-button disabled:cursor-default disabled:opacity-30"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
+            <label htmlFor="date-selector" className="sr-only">
+              Study date
+            </label>
+            <select
+              id="date-selector"
+              value={day.date}
+              onChange={(event) => setChosenDate(event.target.value)}
+              className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
+              style={{ textAlignLast: 'center' }}
+            >
+              {schedule.map(({ date }) => (
+                <option key={date} value={date}>
+                  {shortDate.format(atNoon(date))}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setChosenDate(schedule[selectedDayIndex + 1].date)}
+              disabled={selectedDayIndex >= schedule.length - 1}
+              aria-label="Next study day"
+              className="icon-button disabled:cursor-default disabled:opacity-30"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
-        }
-      />
-
-      <div className="mb-5">
-        <p className="eyebrow mb-2">Daily agenda</p>
-        <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
-          <CalendarDays size={17} className="text-accent" />
-          {agendaDate.format(atNoon(day.date))}
-        </h2>
-      </div>
+        </div>
+      </header>
 
       {tracks.length ? (
-        <div className={`grid items-start gap-5 ${tracks.length > 1 ? 'xl:grid-cols-2' : ''}`}>
+        <div className={`grid items-start gap-4 ${tracks.length > 1 ? 'lg:grid-cols-2' : ''}`}>
           {tracks.map((track) => (
             <AgendaSection key={track.id} track={track} onOpen={setActiveTab} />
           ))}
         </div>
       ) : (
-        <EmptyState icon={CheckCircle2} title="No unfinished work for this day" />
+        <p className="flex items-center gap-2 border-b border-line pb-4 text-sm text-muted">
+          <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
+          No unfinished work for this day.
+        </p>
       )}
-    </div>
+    </section>
   );
 }

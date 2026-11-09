@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ArrowRight,
   CalendarDays,
   CalendarClock,
   Check,
@@ -23,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { PageHeader } from './ui/Workspace';
+import HomeworkAgenda from './HomeworkAgenda';
 import { createTaskDictation } from '../lib/taskDictation';
 import {
   completeTask,
@@ -614,7 +614,7 @@ function DeleteListDialog({
   );
 }
 
-export default function TaskHome({ onOpenHomework, isActive = true }) {
+export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
   const [view, setView] = useState('today');
   const [query, setQuery] = useState('');
@@ -1016,7 +1016,9 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
           {error}
         </p>
       )}
-      <div className="task-workspace grid grid-cols-1 gap-7">
+      <HomeworkAgenda today={today} setActiveTab={setActiveTab} />
+      <h2 id="home-tasks-title" className="mb-4 text-lg font-semibold tracking-tight text-ink">Tasks</h2>
+      <div className="task-workspace grid grid-cols-1 gap-7" role="region" aria-labelledby="home-tasks-title">
         <aside
           aria-label="Task lists"
           className="task-sidebar min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-5 lg:pb-0"
@@ -1257,18 +1259,11 @@ export default function TaskHome({ onOpenHomework, isActive = true }) {
               )}
             </div>
           )}
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-[11px] text-faint">
+          <div className="mt-auto border-t border-line pt-5 text-[11px] text-faint">
             <span className="mt-5 flex items-center gap-1.5">
               <span className={`h-1 w-1 rounded-full ${error ? 'bg-warning' : saving ? 'bg-accent' : 'bg-success/70'}`} />
               {error ? 'Unable to save to Firebase' : saving ? 'Saving to Firebase…' : 'Saved to Firebase'}
             </span>
-            <button
-              onClick={onOpenHomework}
-              className="mt-5 flex items-center gap-1.5 text-muted hover:text-ink"
-            >
-              Your study plan is in Homework
-              <ArrowRight size={12} />
-            </button>
           </div>
         </section>
       </div>

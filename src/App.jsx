@@ -1,6 +1,5 @@
 import { Component, memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
-  LayoutDashboard,
   BookOpen,
   Layers,
   Monitor,
@@ -17,7 +16,6 @@ import {
   LoaderCircle,
 } from 'lucide-react';
 import TaskHome from './components/TaskHome';
-import DailyHome from './components/DailyHome';
 import ImportantLinks from './components/ImportantLinks';
 import DsaTracker from './components/DsaTracker';
 import LldTracker from './components/LldTracker';
@@ -32,7 +30,6 @@ import { makeResetProgress } from './lib/resetProgress';
 // Load the tab code with the workspace so open sessions can outlast a deployment.
 const PAGES = {
   dashboard: TaskHome,
-  homework: DailyHome,
   important: ImportantLinks,
   dsa: DsaTracker,
   lld: LldTracker,
@@ -61,12 +58,12 @@ class PageErrorBoundary extends Component {
   }
 }
 
-const WorkspacePage = memo(function WorkspacePage({ id, active, openTab, openHomework }) {
+const WorkspacePage = memo(function WorkspacePage({ id, active, openTab }) {
   const Page = PAGES[id];
   return (
     <div className={active ? 'block' : 'hidden'}>
       <PageErrorBoundary>
-        <Page isActive={active} setActiveTab={openTab} onOpenHomework={openHomework} />
+        <Page isActive={active} setActiveTab={openTab} />
       </PageErrorBoundary>
     </div>
   );
@@ -165,7 +162,6 @@ function App() {
       visited: current.visited.includes(id) ? current.visited : [...current.visited, id],
     }));
   }, []);
-  const openHomework = useCallback(() => openTab('homework'), [openTab]);
   useLayoutEffect(() => {
     window.scrollTo({ top: scrollPositions.current.get(activeTab) ?? 0, behavior: 'instant' });
   }, [activeTab]);
@@ -177,7 +173,6 @@ function App() {
 
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: ListTodo },
-    { id: 'homework', label: 'Homework', icon: LayoutDashboard },
     { id: 'important', label: 'Important links', icon: Bookmark },
     { id: 'dsa', label: 'DSA', icon: BookOpen },
     { id: 'lld', label: 'LLD', icon: Layers },
@@ -265,7 +260,6 @@ function App() {
             id={id}
             active={id === activeTab}
             openTab={openTab}
-            openHomework={openHomework}
           />
         )) : <ConnectingWorkspace />}
       </main>
