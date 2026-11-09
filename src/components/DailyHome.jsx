@@ -2,7 +2,7 @@ import { useCloudStorage } from '../hooks/useCloudStorage';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { striverDsaTopics } from '../lib/dsaPlan';
-import { buildHomeworkSchedule, homeworkPoints, HOMEWORK_TARGET } from '../lib/homeworkSchedule';
+import { buildHomeworkSchedule } from '../lib/homeworkSchedule';
 import { dateKey } from '../lib/tasks';
 import { useMemo, useState } from 'react';
 import {
@@ -17,27 +17,27 @@ import {
   Layers,
   Monitor,
 } from 'lucide-react';
-import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
+import { EmptyState, PageHeader } from './ui/Workspace';
 
 const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
 const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
 const atNoon = (date) => new Date(date + 'T12:00:00');
-const pointsLabel = (points) => `${points} ${points === 1 ? 'pt' : 'pts'}`;
 
 const DESIGN_TRACKS = {
   lld: {
-    id: 'lld', label: 'LLD', title: 'Low-level design', icon: Layers,
-    subtitle: 'Design patterns and practice · AlgoMaster', source: 'AlgoMaster',
+    id: 'lld', label: 'LLD', title: 'LLD', icon: Layers,
+    subtitle: 'Low-level design · AlgoMaster', source: 'AlgoMaster',
   },
   hld: {
-    id: 'hld', label: 'HLD', title: 'System design', icon: Monitor,
-    subtitle: 'System breakdown · Hello Interview', source: 'Hello Interview',
+    id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor,
+    subtitle: 'System design · Hello Interview', source: 'Hello Interview',
   },
 };
 
 function AgendaSection({ track, onOpen }) {
   const Icon = track.icon;
-  const points = track.items.reduce((sum, item) => sum + homeworkPoints(track.id, item), 0);
+  const count = track.items.length;
+  const unit = track.id === 'dsa' ? 'question' : 'exercise';
 
   return (
     <section
@@ -52,7 +52,7 @@ function AgendaSection({ track, onOpen }) {
               {track.title}
             </h3>
             <span className="status-pill tabular-nums">
-              {pointsLabel(points)}
+              {count} {unit}{count === 1 ? '' : 's'}
             </span>
           </div>
           <p className="max-w-lg text-xs leading-5 text-muted">
@@ -102,9 +102,6 @@ function AgendaSection({ track, onOpen }) {
                 {item.difficulty && (
                   <span className="status-pill">{item.difficulty}</span>
                 )}
-                <span className="status-pill text-accent">
-                  {pointsLabel(homeworkPoints(track.id, item))}
-                </span>
                 {item.premium && (
                   <span className="status-pill text-warning">Premium</span>
                 )}
@@ -153,7 +150,7 @@ export default function DailyHome({ setActiveTab }) {
     day.dsa.length > 0 && {
       id: 'dsa',
       label: 'DSA',
-      title: 'DSA practice',
+      title: 'DSA questions',
       icon: BookOpen,
       subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
       items: day.dsa,
@@ -166,9 +163,6 @@ export default function DailyHome({ setActiveTab }) {
       complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
     },
   ].filter(Boolean);
-  const remainingPoints = tracks.reduce((sum, track) =>
-    sum + track.items.reduce((points, item) => points + homeworkPoints(track.id, item), 0), 0);
-  const progress = Math.min(100, Math.round(day.earned / HOMEWORK_TARGET * 100));
 
   return (
     <div className="page-frame">
@@ -225,49 +219,12 @@ export default function DailyHome({ setActiveTab }) {
         }
       />
 
-      <StatsStrip
-        items={[
-          {
-            label: 'Daily target',
-            value: `${HOMEWORK_TARGET} pts`,
-            detail: 'DSA plus one design exercise',
-          },
-          {
-            label: 'DSA scoring',
-            value: '1 / 3 / 5 pts',
-            detail: 'Easy / Medium / Hard',
-          },
-          {
-            label: 'Design scoring',
-            value: '5 pts',
-            detail: 'Each LLD or HLD exercise',
-          },
-        ]}
-      />
-
-      <div className="mb-5 mt-9 flex flex-wrap items-center justify-between gap-5">
-        <div>
-          <p className="eyebrow mb-2">Daily agenda</p>
-          <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
-            <CalendarDays size={17} className="text-accent" />
-            {agendaDate.format(atNoon(day.date))}
-          </h2>
-        </div>
-        <div className="w-full sm:w-60" aria-label="Selected day progress">
-          <div className="mb-2 flex items-center justify-between gap-4 text-xs">
-            <span className="text-muted">
-              {day.earned} / {HOMEWORK_TARGET} pts earned
-            </span>
-            <span className="font-medium tabular-nums text-accent">{remainingPoints} pts left</span>
-          </div>
-          <div className="progress-track" role="progressbar" aria-label="Daily points"
-            aria-valuenow={Math.min(HOMEWORK_TARGET, day.earned)} aria-valuemin={0} aria-valuemax={HOMEWORK_TARGET}>
-            <div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
+      <div className="mb-5">
+        <p className="eyebrow mb-2">Daily agenda</p>
+        <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-ink">
+          <CalendarDays size={17} className="text-accent" />
+          {agendaDate.format(atNoon(day.date))}
+        </h2>
       </div>
 
       {tracks.length ? (
@@ -277,8 +234,7 @@ export default function DailyHome({ setActiveTab }) {
           ))}
         </div>
       ) : (
-        <EmptyState icon={CheckCircle2}
-          title={day.earned >= HOMEWORK_TARGET ? 'Daily target reached' : 'No unfinished work for this day'} />
+        <EmptyState icon={CheckCircle2} title="No unfinished work for this day" />
       )}
     </div>
   );
