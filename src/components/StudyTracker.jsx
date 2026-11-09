@@ -64,6 +64,7 @@ export default function StudyTracker({
   contextLabel,
   contextField,
   renderContext,
+  contextAsTags = false,
   priorityFilter = false,
   accessFilter = false,
 }) {
@@ -400,7 +401,7 @@ export default function StudyTracker({
             options={['To do', 'Completed']}
             onChange={updateFilter(setCompletion)}
           />
-          {contextField && (
+          {contextField && !contextAsTags && (
             <Filter
               label={contextLabel}
               value={context}
@@ -435,6 +436,26 @@ export default function StudyTracker({
             </button>
           )}
         </div>
+        {contextAsTags && contextOptions.length > 0 && (
+          <div
+            role="group"
+            aria-label={contextLabel}
+            className="flex flex-wrap items-center gap-2"
+          >
+            <span className="mr-1 text-xs text-muted">{contextLabel}</span>
+            {['All', ...contextOptions].map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={context === option}
+                className="filter-tag"
+                onClick={() => updateFilter(setContext)(option)}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {matchingItems.length ? (

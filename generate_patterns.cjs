@@ -49,22 +49,23 @@ const topics = [
 ];
 
 const patternsMap = {
-  "lld-1": "Strategy", "lld-2": "Singleton, Factory", "lld-3": "Observer", "lld-4": "Command, Strategy", 
-  "lld-5": "Backtracking, Factory", "lld-6": "Observer", "lld-7": "State, Strategy", "lld-8": "State",
-  "lld-9": "Strategy", "lld-10": "Chain of Responsibility", "lld-11": "Strategy, Factory", "lld-12": "Observer, Singleton",
-  "lld-13": "Observer", "lld-14": "Singleton", "lld-15": "Strategy, Token Bucket", "lld-16": "Singleton, Object Pool",
-  "lld-17": "State, Proxy", "lld-18": "Strategy, Composite", "lld-19": "Command, Priority Queue", "lld-20": "State",
-  "lld-21": "State, Factory", "lld-22": "State, Strategy", "lld-23": "Strategy, Factory", "lld-24": "Factory, Observer",
-  "lld-25": "Factory", "lld-26": "Factory, Decorator", "lld-27": "Concurrency, State", "lld-28": "Observer",
-  "lld-29": "Strategy (Settlement)", "lld-30": "Observer, Pub-Sub", "lld-31": "Strategy, Observer", "lld-32": "Observer, State",
-  "lld-33": "Singleton", "lld-34": "Hash Functions", "lld-35": "Trie", "lld-36": "State", "lld-37": "State, Observer",
-  "lld-38": "Observer", "lld-39": "State, Factory", "lld-40": "Graph, Observer", "lld-41": "Observer", "lld-42": "Proxy, Flyweight",
+  "lld-1": "Strategy", "lld-2": "Singleton, Factory Method", "lld-3": "Observer", "lld-4": "Command, Strategy",
+  "lld-5": "", "lld-6": "Observer", "lld-7": "State, Strategy", "lld-8": "State",
+  "lld-9": "Strategy", "lld-10": "Chain of Responsibility", "lld-11": "Strategy, Factory Method", "lld-12": "Observer, Singleton",
+  "lld-13": "Observer", "lld-14": "Singleton", "lld-15": "Strategy", "lld-16": "Singleton",
+  "lld-17": "State, Proxy", "lld-18": "Strategy, Composite", "lld-19": "Command", "lld-20": "State",
+  "lld-21": "State, Factory Method", "lld-22": "State, Strategy", "lld-23": "Strategy, Factory Method", "lld-24": "Factory Method, Observer",
+  "lld-25": "Factory Method", "lld-26": "Factory Method, Decorator", "lld-27": "State", "lld-28": "Observer",
+  "lld-29": "Strategy", "lld-30": "Observer", "lld-31": "Strategy, Observer", "lld-32": "Observer, State",
+  "lld-33": "Singleton", "lld-34": "", "lld-35": "", "lld-36": "State", "lld-37": "State, Observer",
+  "lld-38": "Observer", "lld-39": "State, Factory Method", "lld-40": "Observer", "lld-41": "Observer", "lld-42": "Proxy, Flyweight",
   "lld-43": "Observer, Strategy", "lld-44": "Strategy, Facade", "lld-45": "Command, Observer"
 };
 
 let content = fs.readFileSync('src/data/lldTopics.js', 'utf8');
 
 Object.entries(patternsMap).forEach(([id, pattern]) => {
+  if (!pattern) return;
   const regex = new RegExp(`("id":\\s*"${id}"[\\s\\S]*?"completed":\\s*false)`);
   content = content.replace(regex, `$1,\n    "pattern": "${pattern}"`);
 });

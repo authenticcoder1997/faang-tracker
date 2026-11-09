@@ -31,7 +31,7 @@ export default function DsaRevisionQueue({ revisions, catalog, today, onReviewed
             {[['due', 'Due', due], ['upcoming', 'Upcoming', ordered.length - due], ['all', 'All', ordered.length]]
               .map(([value, label, count]) => (
                 <button key={value} type="button" aria-pressed={filter === value}
-                  className="dsa-filter-tag" onClick={() => setFilter(value)}>
+                  className="filter-tag" onClick={() => setFilter(value)}>
                   {label}<span className="dsa-filter-count">{count}</span>
                 </button>
               ))}

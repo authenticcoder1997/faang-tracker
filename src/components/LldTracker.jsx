@@ -1,11 +1,9 @@
 import { useCloudStorage } from '../hooks/useCloudStorage';
 import { lldTopics } from '../data/lldTopics';
-import React from 'react';
 import StudyTracker from './StudyTracker';
 
 const PATTERN_SLUGS = {
   singleton: 'singleton',
-  factory: 'factory-method',
   'factory method': 'factory-method',
   'abstract factory': 'abstract-factory',
   builder: 'builder',
@@ -30,35 +28,22 @@ const PATTERN_SLUGS = {
 };
 
 function PatternTags({ item }) {
-  const parts = (item.pattern || '')
-    .split(',')
-    .map((part) => part.trim())
-    .filter(Boolean);
-  return parts.map((part, index) => {
-    const key = part
-      .toLowerCase()
-      .replace(/\s*\([^)]*\)\s*/g, '')
-      .trim();
-    const slug = PATTERN_SLUGS[key];
-    return (
-      <React.Fragment key={part}>
-        {index > 0 && ', '}
-        {slug ? (
-          <a
-            href={`https://algomaster.io/learn/lld/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-secondary hover:text-accent hover:underline underline-offset-4"
-            title={`View ${part} pattern on AlgoMaster`}
-          >
-            {part}
-          </a>
-        ) : (
-          part
-        )}
-      </React.Fragment>
-    );
-  });
+  return (
+    <span className="inline-flex flex-wrap gap-1.5">
+      {item.pattern.split(', ').map((pattern) => (
+        <a
+          key={pattern}
+          href={`https://algomaster.io/learn/lld/${PATTERN_SLUGS[pattern.toLowerCase()]}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="status-pill hover:border-accent hover:text-accent"
+          title={`View ${pattern} pattern on AlgoMaster`}
+        >
+          {pattern}
+        </a>
+      ))}
+    </span>
+  );
 }
 
 export default function LldTracker() {
@@ -70,9 +55,10 @@ export default function LldTracker() {
       description="Turn good ideas into clear, maintainable object oriented designs."
       sourceLabel="AlgoMaster"
       sourceUrl="https://algomaster.io/learn/lld"
-      contextLabel="Pattern"
+      contextLabel="Design patterns"
       contextField="pattern"
       renderContext={(item) => <PatternTags item={item} />}
+      contextAsTags
       priorityFilter
       items={items}
       setItems={setItems}

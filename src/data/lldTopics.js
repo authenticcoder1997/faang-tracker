@@ -21,7 +21,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-snake-and-ladder",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Singleton, Factory",
+    "pattern": "Singleton, Factory Method",
     "date": "12 Sep",
     "dayIndex": 43
   },
@@ -60,7 +60,6 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-lru-cache",
     "priority": "High",
     "completed": false,
-    "pattern": "Backtracking, Factory",
     "date": "20 Sep",
     "dayIndex": 51
   },
@@ -138,7 +137,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-elevator-system",
     "priority": "High",
     "completed": false,
-    "pattern": "Strategy, Factory",
+    "pattern": "Strategy, Factory Method",
     "date": "10 Oct",
     "dayIndex": 71
   },
@@ -190,7 +189,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-task-management-system",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Strategy, Token Bucket",
+    "pattern": "Strategy",
     "date": "18 Oct",
     "dayIndex": 79
   },
@@ -203,7 +202,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-inventory-management-system",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Singleton, Object Pool",
+    "pattern": "Singleton",
     "date": "22 Oct",
     "dayIndex": 83
   },
@@ -242,7 +241,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-stack-overflow",
     "priority": "High",
     "completed": false,
-    "pattern": "Command, Priority Queue",
+    "pattern": "Command",
     "date": "03 Nov",
     "dayIndex": 95
   },
@@ -268,7 +267,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-learning-platform",
     "priority": "Low",
     "completed": false,
-    "pattern": "State, Factory",
+    "pattern": "State, Factory Method",
     "date": "07 Nov",
     "dayIndex": 99
   },
@@ -294,7 +293,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-linkedin",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Strategy, Factory",
+    "pattern": "Strategy, Factory Method",
     "date": "15 Nov",
     "dayIndex": 107
   },
@@ -307,7 +306,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-spotify",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Factory, Observer",
+    "pattern": "Factory Method, Observer",
     "date": "15 Nov",
     "dayIndex": 107
   },
@@ -320,7 +319,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-notification-system",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Factory",
+    "pattern": "Factory Method",
     "date": "19 Nov",
     "dayIndex": 111
   },
@@ -333,7 +332,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-pub-sub",
     "priority": "High",
     "completed": false,
-    "pattern": "Factory, Decorator",
+    "pattern": "Factory Method, Decorator",
     "date": "23 Nov",
     "dayIndex": 115
   },
@@ -346,7 +345,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-chat-application",
     "priority": "High",
     "completed": false,
-    "pattern": "Concurrency, State",
+    "pattern": "State",
     "date": "27 Nov",
     "dayIndex": 119
   },
@@ -372,7 +371,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-payment-gateway",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Strategy (Settlement)",
+    "pattern": "Strategy",
     "date": "05 Dec",
     "dayIndex": 127
   },
@@ -385,7 +384,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-online-stock-exchange",
     "priority": "Medium",
     "completed": false,
-    "pattern": "Observer, Pub-Sub",
+    "pattern": "Observer",
     "date": "05 Dec",
     "dayIndex": 127
   },
@@ -437,7 +436,6 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-online-food-delivery-service",
     "priority": "High",
     "completed": false,
-    "pattern": "Hash Functions",
     "date": "17 Dec",
     "dayIndex": 139
   },
@@ -450,7 +448,6 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-uber",
     "priority": "High",
     "completed": false,
-    "pattern": "Trie",
     "date": "21 Dec",
     "dayIndex": 143
   },
@@ -502,7 +499,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-meeting-room-scheduler",
     "priority": "Medium",
     "completed": false,
-    "pattern": "State, Factory",
+    "pattern": "State, Factory Method",
     "date": "02 Jan",
     "dayIndex": 155
   },
@@ -515,7 +512,7 @@ export const lldTopics = [
     "url": "https://algomaster.io/learn/lld/design-url-shortener",
     "priority": "High",
     "completed": false,
-    "pattern": "Graph, Observer",
+    "pattern": "Observer",
     "date": "06 Jan",
     "dayIndex": 159
   },

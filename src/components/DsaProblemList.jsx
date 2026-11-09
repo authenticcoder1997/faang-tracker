@@ -13,7 +13,7 @@ function FilterTag({ label, count, active, onClick, pattern = false }) {
     <button
       type="button"
       aria-pressed={active}
-      className={`dsa-filter-tag${pattern ? ' dsa-filter-pattern' : ''}`}
+      className={`filter-tag${pattern ? ' dsa-filter-pattern' : ''}`}
       onClick={onClick}
     >
       <span>{label}</span>
