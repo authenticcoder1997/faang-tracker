@@ -173,12 +173,12 @@ function App() {
 
   const tabs = [
     { id: 'dashboard', label: 'Home', icon: ListTodo },
-    { id: 'important', label: 'Important links', icon: Bookmark },
     { id: 'dsa', label: 'DSA', icon: BookOpen },
     { id: 'lld', label: 'LLD', icon: Layers },
     { id: 'hld', label: 'HLD', icon: Monitor },
     { id: 'concurrency', label: 'Concurrency', icon: Lock },
     { id: 'notes', label: 'Notes', icon: FileText },
+    { id: 'important', label: 'Important links', icon: Bookmark },
   ];
 
   return (
