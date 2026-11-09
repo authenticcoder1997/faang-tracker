@@ -1,9 +1,9 @@
 import { normalizeDsaRevision } from './dsaRevision.js';
 import { normalizeBookmark } from './bookmarks.js';
 import { LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
+import { isValidTheme } from './theme.js';
 
 export const PROGRESS_TRACKS = Object.freeze(['dsa', 'lld', 'hld', 'concurrency']);
-const PALETTES = ['neutral', 'ocean', 'violet', 'rose', 'amber'];
 
 export function object(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -116,13 +116,9 @@ export function notes(value) {
 }
 
 export function appearance(value) {
-  assert(
-    object(value) &&
-      ['light', 'dark'].includes(value.mode) &&
-      PALETTES.includes(value.palette),
-    'Invalid appearance',
-  );
-  return { mode: value.mode, palette: value.palette };
+  assert(object(value) && isValidTheme(value), 'Invalid appearance');
+  const { mode, palette, material } = value;
+  return { mode, palette, ...(material === undefined ? {} : { material }) };
 }
 
 function progressState(value) {

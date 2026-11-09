@@ -698,10 +698,16 @@ test('note fields and appearance fields merge independently across devices', () 
   const remote = copy(before);
   remote.notes[0].content = 'Edited on phone';
   remote.appearance.mode = 'dark';
+  remote.appearance.material = 'solid';
   const result = applyWorkspacePatch(remote, makeWorkspacePatch(before, after));
   assert.equal(result.notes[0].title, 'Renamed on laptop');
   assert.equal(result.notes[0].content, 'Edited on phone');
-  assert.deepEqual(result.appearance, { mode: 'dark', palette: 'ocean' });
+  assert.deepEqual(result.appearance, { mode: 'dark', palette: 'ocean', material: 'solid' });
+  const afterToggle = copy(result);
+  afterToggle.appearance.material = 'glass';
+  const patch = makeWorkspacePatch(result, afterToggle);
+  assert.deepEqual(patch.appearance, { set: { material: 'glass' }, remove: [] });
+  assert.deepEqual(applyWorkspacePatch(result, patch).appearance, afterToggle.appearance);
 });
 
 test('recurring completion changes apply as set deltas and retain phone completion dates', () => {

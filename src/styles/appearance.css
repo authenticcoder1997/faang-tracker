@@ -171,6 +171,7 @@
   --selected: color-mix(in srgb, var(--accent) 15%, var(--pane));
   --hover: color-mix(in srgb, var(--accent) 8%, transparent);
   --header: color-mix(in srgb, var(--page-base) 79%, transparent);
+  --header-backdrop: blur(12px) saturate(135%);
   --modal: color-mix(in srgb, var(--pane) 98%, transparent);
   --text-secondary: color-mix(in srgb, var(--text) 92%, var(--page-base));
   --text-muted: color-mix(in srgb, var(--text) 86%, var(--page-base));
@@ -183,4 +184,19 @@
   --control-border: color-mix(in srgb, var(--text) 60%, var(--pane));
   --material-shadow: 0 8px 28px var(--glass-shadow);
   --glass-spark: color-mix(in srgb, var(--accent-shift) 17%, transparent);
+}
+
+:root[data-material='solid'] {
+  --page-background: var(--page-base);
+  --surface: var(--pane);
+  --elevated: var(--pane);
+  --field: color-mix(in srgb, var(--pane) 72%, var(--page-base));
+  --header: var(--pane);
+  --header-backdrop: none;
+  --modal: var(--pane);
+  --glass-rim: transparent;
+  --glass-highlight: transparent;
+  --glass-sheen: transparent;
+  --glass-spark: transparent;
+  --material-shadow: none;
 }

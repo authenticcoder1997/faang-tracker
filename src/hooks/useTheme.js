@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect } from 'react';
-import { applyTheme, DEFAULT_THEME, isValidTheme } from '../lib/theme';
+import { applyTheme, DEFAULT_THEME } from '../lib/theme';
 import { useWorkspace, useWorkspaceValue } from './useWorkspace';
 
 export function useTheme() {
@@ -11,10 +11,10 @@ export function useTheme() {
   }, [theme]);
 
   const setTheme = useCallback(
-    (theme) => {
-      if (!isValidTheme(theme)) return false;
-      return updateData((current) => ({ ...current, appearance: theme }));
-    },
+    (changes) => updateData((current) => ({
+      ...current,
+      appearance: { ...current.appearance, ...changes },
+    })),
     [updateData],
   );
 
