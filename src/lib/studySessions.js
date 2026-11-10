@@ -25,18 +25,32 @@ export function stopStudySession(sessions, id, now) {
     : session);
 }
 
+export function deleteStudySession(sessions, id) {
+  const entry = sessions.find((session) => session.id === id && session.stoppedAt !== null);
+  return entry ? sessions.filter((session) => session !== entry) : sessions;
+}
+
 export function diffStudySessions(previous, next) {
   if (previous === next) return null;
   const before = activeStudySession(previous);
   const after = activeStudySession(next);
-  if (before?.id === after?.id) return null;
+  const activeChanged = before?.id !== after?.id;
+  const nextIds = new Set(next.map((session) => session.id));
+  const remove = previous.filter((session) => session.stoppedAt !== null && !nextIds.has(session.id))
+    .map((session) => session.id);
+  if (!activeChanged && !remove.length) return null;
+  const stopped = activeChanged && before
+    ? next.find((session) => session.id === before.id && session.stoppedAt !== null)
+    : null;
   return {
-    start: after ?? null,
-    stop: (before && next.find((session) => session.id === before.id && session.stoppedAt !== null)) ?? null,
+    start: activeChanged ? after ?? null : null,
+    stop: stopped ?? null,
+    remove,
   };
 }
 
 export function applyStudySessionPatch(sessions, patch) {
-  const stopped = patch?.stop ? stopStudySession(sessions, patch.stop.id, patch.stop.stoppedAt) : sessions;
+  const remaining = patch?.remove?.reduce(deleteStudySession, sessions) ?? sessions;
+  const stopped = patch?.stop ? stopStudySession(remaining, patch.stop.id, patch.stop.stoppedAt) : remaining;
   return patch?.start ? startStudySession(stopped, patch.start.id, patch.start.startedAt) : stopped;
 }

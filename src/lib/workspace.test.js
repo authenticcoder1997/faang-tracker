@@ -14,7 +14,7 @@ import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './
 import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList } from './tasks.js';
-import { startStudySession, stopStudySession } from './studySessions.js';
+import { deleteStudySession, startStudySession, stopStudySession } from './studySessions.js';
 
 const copy = (value) => structuredClone(value);
 const task = (overrides = {}) => ({
@@ -857,6 +857,22 @@ test('a delayed study stop leaves a newer session running and clock skew cannot 
     { id: 'earlier', startedAt: 10000, stoppedAt: 10000 },
     { id: 'next', startedAt: 11000, stoppedAt: null },
   ]);
+});
+
+test('deleting a logged session preserves other devices’ sessions and can be retried', () => {
+  const before = { ...base(), studySessions: [
+    { id: 'logged', startedAt: 1000, stoppedAt: 5000 },
+    { id: 'running', startedAt: 6000, stoppedAt: null },
+  ] };
+  const after = { ...before, studySessions: deleteStudySession(before.studySessions, 'logged') };
+  const patch = makeWorkspacePatch(before, after);
+  const finishedRemotely = stopStudySession(before.studySessions, 'running', 8000);
+  const remote = normalizeWorkspace({ ...before, studySessions: startStudySession(finishedRemotely, 'another', 9000) });
+  const merged = applyWorkspacePatch(remote, patch);
+  assert.deepEqual(merged.studySessions, remote.studySessions.slice(1));
+  assert.deepEqual(applyWorkspacePatch(merged, patch), merged);
+  assert.equal(deleteStudySession(merged.studySessions, 'another'), merged.studySessions);
+  assert.deepEqual(workspaceWriteFields(remote, reuseWorkspace(remote, merged)), { studySessions: merged.studySessions });
 });
 
 test('noop patches preserve all current remote edits', () => {

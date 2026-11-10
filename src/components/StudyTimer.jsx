@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Play, Square, Timer } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown, Play, Square, Timer, Trash2 } from 'lucide-react';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
-import { activeStudySession, startStudySession, stopStudySession } from '../lib/studySessions';
+import { activeStudySession, deleteStudySession, startStudySession, stopStudySession } from '../lib/studySessions';
 
 const sessionDate = new Intl.DateTimeFormat('en', {
   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit',
@@ -17,11 +17,40 @@ function durationLabel(ms) {
   return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
 }
 
+function DeleteSessionDialog({ session, onCancel, onConfirm }) {
+  const dialog = useRef(null);
+  useEffect(() => {
+    const element = dialog.current;
+    element.showModal();
+    return () => element.close();
+  }, []);
+
+  return (
+    <dialog ref={dialog} aria-labelledby="delete-study-title" aria-describedby="delete-study-detail"
+      onCancel={onCancel}
+      className="task-dialog m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line p-5 sm:p-6">
+      <h2 id="delete-study-title" className="text-lg font-semibold">Delete this study session?</h2>
+      <div id="delete-study-detail" className="mt-3 space-y-2 text-sm text-muted">
+        <p>{sessionDate.formatRange(session.startedAt, session.stoppedAt)} · {durationLabel(session.stoppedAt - session.startedAt)}</p>
+        <p>Its duration will be removed from your total.</p>
+      </div>
+      <div className="mt-5 flex flex-wrap justify-end gap-2">
+        <button type="button" className="button-secondary" onClick={onCancel}>Cancel</button>
+        <button type="button" className="button-secondary !border-danger/30 !text-danger hover:!bg-danger/10"
+          onClick={onConfirm}>
+          <Trash2 size={15} aria-hidden="true" /> Delete session
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
 export default function StudyTimer({ isActive }) {
   const { updateData } = useWorkspace();
   const sessions = useWorkspaceValue((state) => state.data.studySessions);
   const [now, setNow] = useState(Date.now);
   const [showHistory, setShowHistory] = useState(false);
+  const [pendingDeletion, setPendingDeletion] = useState(null);
   const { active, history, total } = useMemo(() => {
     const history = sessions.filter((session) => session.stoppedAt !== null)
       .sort((first, second) => second.startedAt - first.startedAt);
@@ -57,6 +86,10 @@ export default function StudyTimer({ isActive }) {
   function stop() {
     const stoppedAt = Date.now();
     if (saveSessions((current) => stopStudySession(current, active.id, stoppedAt))) setShowHistory(true);
+  }
+
+  function remove(session) {
+    if (saveSessions((current) => deleteStudySession(current, session.id))) setPendingDeletion(null);
   }
 
   const elapsed = active ? Math.max(0, now - active.startedAt) : 0;
@@ -98,14 +131,25 @@ export default function StudyTimer({ isActive }) {
                 <span className="text-muted">
                   {sessionDate.formatRange(session.startedAt, session.stoppedAt)}
                 </span>
-                <span className="font-medium tabular-nums text-ink">
-                  {durationLabel(session.stoppedAt - session.startedAt)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium tabular-nums text-ink">
+                    {durationLabel(session.stoppedAt - session.startedAt)}
+                  </span>
+                  <button type="button" className="icon-button hover:text-danger"
+                    aria-label={`Delete study session from ${sessionDate.format(session.startedAt)}`}
+                    title="Delete study session" onClick={() => setPendingDeletion(session)}>
+                    <Trash2 size={15} aria-hidden="true" />
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         ) : <p className="py-3 text-sm text-muted">No study sessions yet.</p>}
       </div>
+      {isActive && pendingDeletion && (
+        <DeleteSessionDialog session={pendingDeletion}
+          onCancel={() => setPendingDeletion(null)} onConfirm={() => remove(pendingDeletion)} />
+      )}
     </section>
   );
 }
