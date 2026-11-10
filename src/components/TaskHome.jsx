@@ -617,7 +617,7 @@ function DeleteListDialog({
 
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
-  const [view, setView] = useState('today');
+  const [view, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [listEditor, setListEditor] = useState(null);
