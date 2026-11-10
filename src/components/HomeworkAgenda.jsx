@@ -1,10 +1,7 @@
-import { useCloudStorage } from '../hooks/useCloudStorage';
-import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
-import { lldTopics } from '../data/lldTopics';
-import { hldTopics } from '../data/hldTopics';
-import { striverDsaTopics } from '../lib/dsaPlan';
-import { buildHomeworkSchedule, extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
-import { useEffect, useMemo, useState } from 'react';
+import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
+import { useWorkspace } from '../hooks/useWorkspace';
+import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
+import { useEffect, useState } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -128,11 +125,7 @@ function AgendaSection({ track, onOpen }) {
 
 export default function HomeworkAgenda({ today, setActiveTab, children }) {
   const { updateData } = useWorkspace();
-  const plan = useWorkspaceValue((state) => state.data.homework);
-  const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
-  const [lld, setLld] = useCloudStorage('lld', lldTopics);
-  const [hld, setHld] = useCloudStorage('hld', hldTopics);
-  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld, today, plan), [dsa, lld, hld, today, plan]);
+  const { schedule, plan, dsa, setDsa, setLld, setHld } = useHomeworkSchedule(today);
   const todayIndex = schedule.findIndex((day) => day.date >= today);
   const todaysAgenda = schedule[todayIndex];
   useEffect(() => {

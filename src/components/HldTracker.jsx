@@ -1,9 +1,36 @@
-import { useCloudStorage } from '../hooks/useCloudStorage';
-import { hldTopics } from '../data/hldTopics';
+import { useEffect, useMemo, useState } from 'react';
+import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
+import { dateKey } from '../lib/tasks';
 import StudyTracker from './StudyTracker';
 
-export default function HldTracker() {
-  const [items, setItems] = useCloudStorage('hld', hldTopics);
+const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
+
+export default function HldTracker({ isActive = true }) {
+  const [today, setToday] = useState(dateKey);
+  useEffect(() => {
+    if (!isActive) return;
+    const refresh = () => setToday(dateKey());
+    refresh();
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener('focus', refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [isActive]);
+
+  const { schedule, hld, setHld } = useHomeworkSchedule(today, isActive);
+  const items = useMemo(() => {
+    if (!schedule) return hld;
+    const dates = new Map(schedule.flatMap(({ date, design }) =>
+      design?.track === 'hld' ? [[design.item.id, date]] : [],
+    ));
+    return hld.map((item) => {
+      const date = item.completed ? item.homeworkDate : dates.get(item.id);
+      return { ...item, date: date ? shortDate.format(new Date(`${date}T12:00:00`)) : undefined };
+    });
+  }, [hld, schedule]);
+
   return (
     <StudyTracker
       id="hld"
@@ -12,7 +39,7 @@ export default function HldTracker() {
       sourceLabel="HelloInterview"
       sourceUrl="https://hellointerview.com/learn/system-design"
       items={items}
-      setItems={setItems}
+      setItems={setHld}
     />
   );
 }
