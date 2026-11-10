@@ -126,7 +126,7 @@ function AgendaSection({ track, onOpen }) {
   );
 }
 
-export default function HomeworkAgenda({ today, setActiveTab }) {
+export default function HomeworkAgenda({ today, setActiveTab, children }) {
   const { updateData } = useWorkspace();
   const plan = useWorkspaceValue((state) => state.data.homework);
   const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
@@ -151,24 +151,22 @@ export default function HomeworkAgenda({ today, setActiveTab }) {
     item.id === id && !item.completed ? { ...item, completed: true, homeworkDate: day.date } : item,
   ));
 
-  const tracks = [
-    day.dsa.length > 0 && {
-      id: 'dsa',
-      label: 'DSA',
-      title: 'DSA questions',
-      icon: BookOpen,
-      subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
-      items: day.dsa,
-      complete: (id) => complete(setDsa, id),
-      source: 'TakeUForward',
-    },
-    day.design && {
-      ...DESIGN_TRACKS[day.design.track],
-      items: [day.design.item],
-      complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
-    },
-  ].filter(Boolean);
-  const extraPlan = day.date === today && plan?.date === today && !tracks.length
+  const dsaTrack = day.dsa.length > 0 && {
+    id: 'dsa',
+    label: 'DSA',
+    title: 'DSA questions',
+    icon: BookOpen,
+    subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
+    items: day.dsa,
+    complete: (id) => complete(setDsa, id),
+    source: 'TakeUForward',
+  };
+  const designTrack = day.design && {
+    ...DESIGN_TRACKS[day.design.track],
+    items: [day.design.item],
+    complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
+  };
+  const extraPlan = day.date === today && plan?.date === today && !dsaTrack && !designTrack
     ? extraHomeworkPlan(plan, dsa)
     : null;
 
@@ -229,14 +227,8 @@ export default function HomeworkAgenda({ today, setActiveTab }) {
         </div>
       </header>
 
-      {tracks.length ? (
-        <div className={`grid items-start gap-4 ${tracks.length > 1 ? 'lg:grid-cols-2' : ''}`}>
-          {tracks.map((track) => (
-            <AgendaSection key={track.id} track={track} onOpen={setActiveTab} />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+      {!dsaTrack && !designTrack && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <p className="flex items-center gap-2 text-sm text-muted">
             <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
             {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
@@ -251,6 +243,13 @@ export default function HomeworkAgenda({ today, setActiveTab }) {
           )}
         </div>
       )}
+      <div className={`grid items-start gap-4 ${dsaTrack && designTrack ? 'lg:grid-cols-2' : ''}`}>
+        {dsaTrack && <AgendaSection track={dsaTrack} onOpen={setActiveTab} />}
+        <div className="grid min-w-0 gap-4">
+          {designTrack && <AgendaSection track={designTrack} onOpen={setActiveTab} />}
+          {children}
+        </div>
+      </div>
     </section>
   );
 }

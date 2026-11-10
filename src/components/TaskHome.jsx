@@ -1017,8 +1017,9 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           {error}
         </p>
       )}
-      <StudyTimer isActive={isActive} />
-      <HomeworkAgenda today={today} setActiveTab={setActiveTab} />
+      <HomeworkAgenda today={today} setActiveTab={setActiveTab}>
+        <StudyTimer isActive={isActive} />
+      </HomeworkAgenda>
       <h2 id="home-tasks-title" className="mb-4 text-lg font-semibold tracking-tight text-ink">Tasks</h2>
       <div className="task-workspace grid grid-cols-1 gap-7" role="region" aria-labelledby="home-tasks-title">
         <aside

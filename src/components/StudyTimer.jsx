@@ -62,12 +62,12 @@ export default function StudyTimer({ isActive }) {
   const elapsed = active ? Math.max(0, now - active.startedAt) : 0;
 
   return (
-    <section aria-labelledby="study-timer-title" className="panel mb-8 px-4 py-4 sm:px-5">
+    <section aria-labelledby="study-timer-title" className="panel px-4 py-4 sm:px-5">
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
         <div className="flex min-w-0 items-center gap-3">
           <Timer size={20} className="shrink-0 text-accent" aria-hidden="true" />
           <div>
-            <h2 id="study-timer-title" className="section-heading">Study timer</h2>
+            <h3 id="study-timer-title" className="section-heading">Study timer</h3>
             <p className="mt-0.5 text-xs text-muted">{active ? 'Session running' : 'Ready to study'}</p>
           </div>
         </div>
