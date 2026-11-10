@@ -8,6 +8,7 @@ import {
   getTaskRows,
   INITIAL_TASK_DATA,
   isValidDate,
+  isTaskFocused,
   mergeTaskEdits,
   MAX_TASK_LINKS,
   MAX_TASK_LINK_LENGTH,
@@ -15,6 +16,8 @@ import {
   normalizeTaskLinks,
   reorderTasks,
   restoreTaskList,
+  TASK_FOCUS_OPTIONS,
+  taskFocusEnd,
   validateTaskData,
 } from './tasks.js';
 
@@ -84,6 +87,26 @@ test('dates follow the local calendar across month and year boundaries', () => {
   assert.equal(addDays('2026-12-31', 1), '2027-01-01');
   assert.equal(addDays('2028-02-28', 1), '2028-02-29');
   assert.equal(isValidDate('2026-02-30'), false);
+});
+
+test('focus presets expire after elapsed hours or at local midnight', () => {
+  const now = new Date(2026, 11, 31, 23, 30).getTime();
+  const [hour, twoHours, today] = TASK_FOCUS_OPTIONS;
+  assert.equal(taskFocusEnd(hour, now), now + 3_600_000);
+  assert.equal(taskFocusEnd(twoHours, now), now + 7_200_000);
+  const focusUntil = taskFocusEnd(today, now);
+  assert.equal(focusUntil, new Date(2027, 0, 1).getTime());
+  assert.equal(isTaskFocused(task({ focusUntil }), focusUntil - 1), true);
+  assert.equal(isTaskFocused(task({ focusUntil }), focusUntil), false);
+  assert.equal(isTaskFocused(task(), now), false);
+});
+
+test('completing a focused task ends the pin, including the next instance of a recurring task', () => {
+  const focusUntil = new Date(2026, 9, 21, 18).getTime();
+  assert.equal(completeTask(task({ focusUntil })).focusUntil, null);
+  const recurring = task({ repeat: 'daily', focusUntil, completedDates: ['2026-10-20'] });
+  assert.equal(completeTask(recurring, '2026-10-20').focusUntil, focusUntil);
+  assert.equal(completeTask(recurring, '2026-10-21').focusUntil, null);
 });
 
 test('weekday tasks roll from Friday to Monday; weekend tasks roll from Sunday to Saturday', () => {

@@ -111,6 +111,21 @@ export function nextOccurrence(task, today = dateKey()) {
   return candidate;
 }
 
+export const TASK_FOCUS_OPTIONS = [
+  { id: 'hour', label: '1 hour', hours: 1 },
+  { id: 'two-hours', label: '2 hours', hours: 2 },
+  { id: 'today', label: 'Today' },
+];
+
+export function taskFocusEnd(option, now = Date.now()) {
+  if (option.hours) return now + option.hours * 60 * 60 * 1000;
+  return new Date(now).setHours(24, 0, 0, 0);
+}
+
+export function isTaskFocused(task, now) {
+  return task.focusUntil > now;
+}
+
 export function completeTask(
   task,
   occurrenceDate,
@@ -121,14 +136,17 @@ export function completeTask(
       ...task,
       completed: !task.completed,
       completedAt: task.completed ? null : now,
+      ...(task.focusUntil ? { focusUntil: null } : {}),
       updatedAt: now,
     };
   const dates = task.completedDates || [];
+  const reopening = dates.includes(occurrenceDate);
   return {
     ...task,
-    completedDates: dates.includes(occurrenceDate)
+    completedDates: reopening
       ? dates.filter((date) => date !== occurrenceDate)
       : [...dates, occurrenceDate].sort(),
+    ...(!reopening && task.focusUntil ? { focusUntil: null } : {}),
     updatedAt: now,
   };
 }
@@ -310,6 +328,8 @@ export function validateTaskData(value) {
         !REPEAT_OPTIONS.some((option) => option.value === task.repeat) ||
         (task.dueDate && !isValidDate(task.dueDate)) ||
         (task.snoozedUntil != null && !isValidDate(task.snoozedUntil)) ||
+        (task.focusUntil != null && (!Number.isSafeInteger(task.focusUntil) || task.focusUntil <= 0 ||
+          !Number.isFinite(new Date(task.focusUntil).getTime()))) ||
         !Array.isArray(task.completedDates) ||
         task.completedDates.some((date) => !isValidDate(date)) ||
         typeof task.createdAt !== 'string',

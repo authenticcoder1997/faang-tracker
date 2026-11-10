@@ -70,6 +70,19 @@ test('task order and snooze survive the Firebase merge alongside another deviceâ
   assert.deepEqual(normalizeWorkspace(copy(merged)), merged);
 });
 
+test('a task focus change syncs independently of another deviceâ€™s edits', () => {
+  const before = base();
+  const pinned = copy(before);
+  pinned.tasks.tasks[0].focusUntil = 1_800_000_000_000;
+  const edited = copy(before);
+  edited.tasks.tasks[0].title = 'Edited on phone';
+  const patch = copy(makeWorkspacePatch(before, pinned));
+  const result = applyWorkspacePatch(edited, patch);
+  assert.equal(result.tasks.tasks[0].focusUntil, 1_800_000_000_000);
+  assert.equal(result.tasks.tasks[0].title, 'Edited on phone');
+  assert.deepEqual(applyWorkspacePatch(pinned, makeWorkspacePatch(before, edited)), result);
+});
+
 test('new workspaces include source progress, all 21 Important links and independent default task lists', () => {
   const first = createWorkspace();
   const second = createWorkspace();

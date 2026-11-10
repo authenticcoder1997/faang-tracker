@@ -15,6 +15,8 @@ import {
   ListTodo,
   Mic,
   Pencil,
+  Pin,
+  PinOff,
   Plus,
   Repeat2,
   Search,
@@ -35,12 +37,15 @@ import {
   dateKey,
   deleteTaskList,
   getTaskRows,
+  isTaskFocused,
   LIST_COLORS,
   mergeTaskEdits,
   normalizeTaskLinks,
   REPEAT_OPTIONS,
   reorderTasks,
   restoreTaskList,
+  TASK_FOCUS_OPTIONS,
+  taskFocusEnd,
 } from '../lib/tasks';
 
 const SMART_VIEWS = [
@@ -72,6 +77,14 @@ function prettyDate(key, today) {
     day: 'numeric',
     ...(key.slice(0, 4) !== today.slice(0, 4) ? { year: 'numeric' } : {}),
   }).format(new Date(year, month - 1, day, 12));
+}
+
+function focusTime(until, today) {
+  const date = new Date(until);
+  const day = dateKey(date);
+  if (day === addDays(today, 1) && new Date(until).setHours(0, 0, 0, 0) === until) return 'midnight';
+  const time = new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(date);
+  return day === today ? time : `${prettyDate(day, today)} at ${time}`;
 }
 
 function Modal({ title, children, onClose, focusSelector = 'input, textarea' }) {
@@ -676,26 +689,63 @@ function SnoozeDialog({ task, today, onSnooze, onClose }) {
   );
 }
 
+function FocusDialog({ task, focused, today, onFocus, onClose }) {
+  return (
+    <Modal title="Focus on task" onClose={onClose} focusSelector="[data-focus-option]">
+      <div className="space-y-4 p-6">
+        <p className="break-words text-sm font-medium text-ink">{task.title}</p>
+        <p className="text-sm text-muted">
+          {focused ? `Pinned until ${focusTime(task.focusUntil, today)}. Set a new duration or end focus.`
+            : 'Pin this task to the top of your list for:'}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {TASK_FOCUS_OPTIONS.map((option) => (
+            <button key={option.id} type="button" data-focus-option className="button-secondary"
+              onClick={() => onFocus(option)}>
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {focused && (
+          <div className="flex justify-end border-t border-line pt-4">
+            <button type="button" className="button-secondary" onClick={() => onFocus(null)}>
+              <PinOff size={15} /> End focus
+            </button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
   const [view, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [snoozeTask, setSnoozeTask] = useState(null);
+  const [focusTaskId, setFocusTaskId] = useState(null);
   const [listEditor, setListEditor] = useState(null);
   const [listDeletion, setListDeletion] = useState(null);
   const [listDeleteError, setListDeleteError] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
   const [notice, setNotice] = useState(null);
   const [today, setToday] = useState(dateKey);
+  const [, setFocusClock] = useState(Date.now);
   const { drag, handleProps } = useTaskReorder(moveTask);
   useEffect(() => {
     const updateDate = () => setToday(dateKey());
     const timer = window.setInterval(updateDate, 30000);
-    window.addEventListener('focus', updateDate);
+    const refresh = () => {
+      updateDate();
+      setFocusClock(Date.now());
+    };
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener('focus', updateDate);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
     };
   }, []);
   useEffect(() => {
@@ -705,6 +755,31 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
   }, [notice]);
 
   const { active, snoozed, completed, deleted } = getTaskRows(data.tasks, today, data.manualOrder);
+  const now = Date.now();
+  const focusedIds = new Set();
+  let nextFocusEnd = Infinity;
+  for (const { task } of active) {
+    if (!isTaskFocused(task, now)) continue;
+    focusedIds.add(task.id);
+    nextFocusEnd = Math.min(nextFocusEnd, task.focusUntil);
+  }
+  useEffect(() => {
+    if (!Number.isFinite(nextFocusEnd)) return;
+    let timer;
+    function expire() {
+      const remaining = nextFocusEnd - Date.now();
+      if (remaining > 0) {
+        timer = window.setTimeout(expire, Math.min(remaining, 2_147_483_647));
+      } else {
+        setToday(dateKey());
+        setFocusClock(Date.now());
+      }
+    }
+    expire();
+    return () => window.clearTimeout(timer);
+  }, [nextFocusEnd]);
+  const focusTask = active.find(({ key }) => key === focusTaskId)?.task;
+  const isToday = (row) => focusedIds.has(row.key) || (!!row.date && row.date <= today);
   const selectedList = view.startsWith('list:')
     ? data.lists.find((list) => list.id === view.slice(5))
     : null;
@@ -714,7 +789,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     selectedSmart?.name ||
     (view === 'flagged' ? 'Flagged' : 'Recently deleted');
   const counts = {
-    today: active.filter((row) => row.date && row.date <= today).length,
+    today: active.filter(isToday).length,
     scheduled: active.filter((row) => row.date).length,
     all: active.length,
     snoozed: snoozed.length,
@@ -728,7 +803,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     selectedList
       ? row.task.listId === selectedList.id
       : view === 'today'
-        ? !!row.date && row.date <= today
+        ? isToday(row)
         : view === 'scheduled'
           ? !!row.date
           : view === 'flagged'
@@ -754,10 +829,12 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
   const [emptyTitle, emptyDescription] = query
     ? ['No matching tasks', 'Try another title, note, or list name.']
     : EMPTY_VIEWS[view] || ['A little room for what’s next', 'Add your first task and take it one step at a time.'];
+  const focusRows = canAdd ? rows.filter(({ key }) => focusedIds.has(key)) : [];
+  const ordinaryRows = canAdd ? rows.filter(({ key }) => !focusedIds.has(key)) : rows;
   const groups =
     view === 'scheduled'
       ? Object.entries(
-          rows.reduce((result, row) => {
+          ordinaryRows.reduce((result, row) => {
             const key = row.date < today ? 'overdue' : row.date;
             (result[key] ||= []).push(row);
             return result;
@@ -765,7 +842,8 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         ).sort(([left], [right]) =>
           Number(right === 'overdue') - Number(left === 'overdue') || left.localeCompare(right),
         )
-      : [['tasks', rows]];
+      : [['tasks', ordinaryRows]];
+  if (focusRows.length) groups.unshift(['focus', focusRows]);
 
   function moveTask(ids, movedId, targetId) {
     let moved = false;
@@ -785,7 +863,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           (item.repeat === 'none' && item.completed) ||
           (item.snoozedUntil ?? null) !== (task.snoozedUntil ?? null)) return item;
         changed = true;
-        return { ...item, snoozedUntil: until };
+        return { ...item, snoozedUntil: until, ...(until && item.focusUntil ? { focusUntil: null } : {}) };
       });
       return changed ? { ...current, tasks } : current;
     });
@@ -793,6 +871,25 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     setSnoozeTask(null);
     setNotice({ message: !changed ? 'This task changed on another device.'
       : until ? `Snoozed until ${prettyDate(until, today)}` : 'Task brought back' });
+  }
+
+  function setTaskFocus(option) {
+    const until = option ? taskFocusEnd(option) : null;
+    const today = dateKey();
+    let changed = false;
+    const saved = updateData((current) => {
+      const tasks = current.tasks.map((task) => {
+        if (task.id !== focusTaskId || task.deletedAt || task.snoozedUntil > today ||
+          (task.repeat === 'none' && task.completed)) return task;
+        changed = true;
+        return { ...task, focusUntil: until };
+      });
+      return changed ? { ...current, tasks } : current;
+    });
+    if (!saved) return;
+    setFocusTaskId(null);
+    setNotice({ message: !changed ? 'This task is no longer active.'
+      : until ? `Pinned until ${focusTime(until, today)}` : 'Focus ended' });
   }
 
   function saveTask(draft) {
@@ -898,7 +995,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         ...current,
         tasks: current.tasks.map((item) =>
           item.id === task.id
-            ? { ...item, deletedAt: new Date().toISOString() }
+            ? { ...item, deletedAt: new Date().toISOString(), ...(item.focusUntil ? { focusUntil: null } : {}) }
             : item,
         ),
       }))
@@ -974,6 +1071,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       (option) => option.value === row.task.repeat,
     );
     const isSnoozed = view === 'snoozed';
+    const isFocused = !isCompleted && !isDeleted && focusedIds.has(row.key);
     const dropTarget = order && drag?.targetId === row.key && drag.movedId !== row.key;
     const dropPosition = dropTarget && (order.ids.indexOf(drag.movedId) < order.index ? 'after' : 'before');
     return (
@@ -1041,6 +1139,11 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
             )}
           </div>
           <div className="task-row-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
+            {isFocused && (
+              <span className="flex items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-accent">
+                <Pin size={11} aria-hidden="true" /> Until {focusTime(row.task.focusUntil, today)}
+              </span>
+            )}
             {!selectedList && (
               <span className="flex min-w-0 items-center gap-1.5">
                 <span
@@ -1094,15 +1197,26 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         ) : (
           <div className="flex shrink-0 items-center">
             {!isCompleted && (
-              <button
-                type="button"
-                onClick={() => setSnoozeTask(row.task)}
-                aria-label={`Snooze ${row.task.title}`}
-                title="Snooze task"
-                className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
-              >
-                <AlarmClock size={16} />
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setFocusTaskId(row.task.id)}
+                  aria-label={`${isFocused ? 'Manage focus for' : 'Focus on'} ${row.task.title}`}
+                  title={isFocused ? 'Manage focus' : 'Focus on task'}
+                  className={`rounded-lg p-2 hover:bg-hover hover:text-accent focus-visible:text-accent ${isFocused ? 'bg-accent-soft text-accent' : 'text-faint'}`}
+                >
+                  <Pin size={16} fill={isFocused ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSnoozeTask(row.task)}
+                  aria-label={`Snooze ${row.task.title}`}
+                  title="Snooze task"
+                  className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
+                >
+                  <AlarmClock size={16} />
+                </button>
+              </>
             )}
             <button
               aria-label={`${row.task.flagged ? 'Unflag' : 'Flag'} ${row.task.title}`}
@@ -1323,14 +1437,15 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           {rows.length > 0 ? (
             <div className="mt-1">
               {groups.map(([group, entries]) => {
+                if (!entries.length) return null;
                 const ids = canAdd ? entries.map(({ key }) => key) : null;
                 return (
                   <div key={group}>
                     {group !== 'tasks' && (
                       <h3
-                        className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-danger' : 'text-muted'}`}
+                        className={`mt-6 mb-1 text-xs font-semibold ${group === 'focus' ? 'text-accent' : group === 'overdue' ? 'text-danger' : 'text-muted'}`}
                       >
-                        {group === 'overdue' ? 'Overdue' : prettyDate(group, today)}
+                        {group === 'focus' ? 'Focus' : group === 'overdue' ? 'Overdue' : prettyDate(group, today)}
                       </h3>
                     )}
                     <ul>
@@ -1417,6 +1532,15 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           today={today}
           onSnooze={setTaskSnooze}
           onClose={() => setSnoozeTask(null)}
+        />
+      )}
+      {focusTask && isActive && (
+        <FocusDialog
+          task={focusTask}
+          focused={focusedIds.has(focusTask.id)}
+          today={today}
+          onFocus={setTaskFocus}
+          onClose={() => setFocusTaskId(null)}
         />
       )}
       {listEditor && isActive && (
