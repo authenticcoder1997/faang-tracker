@@ -13,7 +13,7 @@ import {
 import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './workspaceLegacy.js';
 import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
-import { deleteTaskList, reorderTasks } from './tasks.js';
+import { deleteTaskList, reorderTasks, taskFocus } from './tasks.js';
 import { deleteStudySession, startStudySession, stopStudySession } from './studySessions.js';
 
 const copy = (value) => structuredClone(value);
@@ -73,14 +73,42 @@ test('task order and snooze survive the Firebase merge alongside another deviceâ
 test('a task focus change syncs independently of another deviceâ€™s edits', () => {
   const before = base();
   const pinned = copy(before);
-  pinned.tasks.tasks[0].focusUntil = 1_800_000_000_000;
+  pinned.tasks.focus = { taskId: 'task-1', until: 1_800_000_000_000 };
   const edited = copy(before);
   edited.tasks.tasks[0].title = 'Edited on phone';
   const patch = copy(makeWorkspacePatch(before, pinned));
   const result = applyWorkspacePatch(edited, patch);
-  assert.equal(result.tasks.tasks[0].focusUntil, 1_800_000_000_000);
+  assert.deepEqual(result.tasks.focus, pinned.tasks.focus);
   assert.equal(result.tasks.tasks[0].title, 'Edited on phone');
   assert.deepEqual(applyWorkspacePatch(pinned, makeWorkspacePatch(before, edited)), result);
+});
+
+test('a new focus replaces the old task and a stale end cannot cancel the replacement', () => {
+  const before = base();
+  before.tasks.tasks.push(task({ id: 'second' }));
+  const mac = copy(before);
+  const phone = copy(before);
+  mac.tasks.focus = { taskId: 'task-1', until: 1_800_000_000_000 };
+  phone.tasks.focus = { taskId: 'second', until: 1_800_000_001_000 };
+  const switched = applyWorkspacePatch(mac, makeWorkspacePatch(before, phone));
+  assert.deepEqual(switched.tasks.focus, phone.tasks.focus);
+  const ended = copy(mac);
+  ended.tasks.focus = null;
+  assert.deepEqual(applyWorkspacePatch(switched, makeWorkspacePatch(mac, ended)).tasks.focus, phone.tasks.focus);
+  assert.equal(applyWorkspacePatch(mac, makeWorkspacePatch(mac, ended)).tasks.focus, null);
+});
+
+test('legacy focus keeps one task and a remote completion ends focus', () => {
+  const legacy = base();
+  legacy.tasks.tasks[0].focusUntil = 1_800_000_000_000;
+  legacy.tasks.tasks.push(task({ id: 'second', focusUntil: 1_800_000_001_000 }));
+  const current = normalizeWorkspace(legacy);
+  assert.deepEqual(taskFocus(current.tasks), { taskId: 'second', until: 1_800_000_001_000 });
+  const finished = copy(legacy);
+  finished.tasks.tasks[1].completed = true;
+  const merged = applyWorkspacePatch(current, makeWorkspacePatch(legacy, finished));
+  assert.equal(merged.tasks.focus, null);
+  assert.equal(normalizeWorkspace(copy(merged)).tasks.focus, null);
 });
 
 test('new workspaces include source progress, all 21 Important links and independent default task lists', () => {

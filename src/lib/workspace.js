@@ -2,7 +2,7 @@ import { normalizeDsaRevision } from './dsaRevision.js';
 import { normalizeHomeworkPlan } from './homeworkSchedule.js';
 import { applyStudySessionPatch, diffStudySessions, normalizeStudySession } from './studySessions.js';
 import { normalizeBookmark } from './bookmarks.js';
-import { isValidDate, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
+import { canFocusTask, dateKey, isValidDate, LIST_COLORS, normalizeTaskLinks, taskFocus, validateTaskData } from './tasks.js';
 import { isValidTheme } from './theme.js';
 
 export const PROGRESS_TRACKS = Object.freeze(['dsa', 'lld', 'hld', 'concurrency']);
@@ -310,6 +310,8 @@ export function makeWorkspacePatch(before, after) {
 
 // Both inputs here have already been validated.
 export function diffWorkspace(previous, next) {
+  const previousFocus = taskFocus(previous.tasks);
+  const nextFocus = next.tasks.focus;
   const listMoves = {};
   const removedLists = previous.tasks.lists === next.tasks.lists ? [] : previous.tasks.lists.filter(
     (list) => !next.tasks.lists.some((item) => item.id === list.id),
@@ -336,6 +338,7 @@ export function diffWorkspace(previous, next) {
     lists: entityPatch(previous.tasks.lists, next.tasks.lists),
     tasks: entityPatch(previous.tasks.tasks, next.tasks.tasks, true),
     manualTaskOrder: !!next.tasks.manualOrder && !previous.tasks.manualOrder,
+    taskFocus: nextFocus === undefined || equal(previousFocus, nextFocus) ? null : { from: previousFocus, to: nextFocus },
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
     revisions: entityPatch(previous.revisions, next.revisions),
     homework: equal(previous.homework, next.homework) ? null : next.homework,
@@ -510,6 +513,18 @@ export function applyValidatedWorkspacePatch(current, patch) {
   const lists = applyEntities(current.tasks.lists, patch.lists);
   const tasks = applyEntities(current.tasks.tasks, patch.tasks);
   const manualOrder = patch.manualTaskOrder ? true : current.tasks.manualOrder;
+  const previousFocus = taskFocus(current.tasks);
+  let focus = current.tasks.focus;
+  if (patch.taskFocus?.to) {
+    const { to } = patch.taskFocus;
+    if (canFocusTask(tasks.find(({ id }) => id === to.taskId), dateKey())) focus = to;
+  } else if (patch.taskFocus && equal(previousFocus, patch.taskFocus.from)) {
+    focus = null;
+  }
+  const focusedTaskId = (focus === undefined ? previousFocus : focus)?.taskId;
+  if (focusedTaskId && (patch.tasks.remove.includes(focusedTaskId) ||
+    patch.tasks.update.some(({ id, set, completedDates }) => id === focusedTaskId &&
+      (set.snoozedUntil || set.deletedAt || set.completed || completedDates?.add.length)))) focus = null;
   const savedPlan = current.homework;
   const incomingPlan = patch.homework;
   // A duplicate click or a stale device must never replace today's active batch.
@@ -518,9 +533,16 @@ export function applyValidatedWorkspacePatch(current, patch) {
     ? incomingPlan : savedPlan;
   return normalizeWorkspace({
     schemaVersion: 1,
-    tasks: lists === current.tasks.lists && tasks === current.tasks.tasks && manualOrder === current.tasks.manualOrder
+    tasks: lists === current.tasks.lists && tasks === current.tasks.tasks &&
+      manualOrder === current.tasks.manualOrder && focus === current.tasks.focus
       ? current.tasks
-      : repairTaskLists({ ...current.tasks, ...(manualOrder ? { manualOrder } : {}), lists, tasks }, patch.listMoves || {}),
+      : repairTaskLists({
+          ...current.tasks,
+          ...(manualOrder ? { manualOrder } : {}),
+          ...(focus !== undefined ? { focus } : {}),
+          lists,
+          tasks,
+        }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
     homework,
     studySessions: applyStudySessionPatch(current.studySessions, patch.studySessions),

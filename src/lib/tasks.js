@@ -126,6 +126,29 @@ export function isTaskFocused(task, now) {
   return task.focusUntil > now;
 }
 
+export function canFocusTask(task, today) {
+  return !!task && !task.deletedAt && !(task.repeat === 'none' && task.completed) && !(task.snoozedUntil > today);
+}
+
+export function taskFocus(data) {
+  if (data.focus !== undefined) return data.focus;
+  // Older workspaces could pin several tasks. Keep the one with the latest end time.
+  let focus = null;
+  for (const task of data.tasks) {
+    if (isTaskFocused(task, focus?.until || 0) && !task.deletedAt && !(task.repeat === 'none' && task.completed))
+      focus = { taskId: task.id, until: task.focusUntil };
+  }
+  return focus;
+}
+
+export function clearTaskFocus(data, taskId) {
+  return taskFocus(data)?.taskId === taskId ? { ...data, focus: null } : data;
+}
+
+function validFocusEnd(value) {
+  return Number.isSafeInteger(value) && value > 0 && value <= 8_640_000_000_000_000;
+}
+
 export function completeTask(
   task,
   occurrenceDate,
@@ -309,6 +332,9 @@ export function validateTaskData(value) {
     (value.manualOrder !== undefined && typeof value.manualOrder !== 'boolean')
   )
     throw new Error('Unrecognized task data');
+  if (value.focus != null && (typeof value.focus.taskId !== 'string' || !value.focus.taskId ||
+    !validFocusEnd(value.focus.until)))
+    throw new Error('Invalid task focus');
   if (
     value.lists.some(
       (list) =>
@@ -328,8 +354,7 @@ export function validateTaskData(value) {
         !REPEAT_OPTIONS.some((option) => option.value === task.repeat) ||
         (task.dueDate && !isValidDate(task.dueDate)) ||
         (task.snoozedUntil != null && !isValidDate(task.snoozedUntil)) ||
-        (task.focusUntil != null && (!Number.isSafeInteger(task.focusUntil) || task.focusUntil <= 0 ||
-          !Number.isFinite(new Date(task.focusUntil).getTime()))) ||
+        (task.focusUntil != null && !validFocusEnd(task.focusUntil)) ||
         !Array.isArray(task.completedDates) ||
         task.completedDates.some((date) => !isValidDate(date)) ||
         typeof task.createdAt !== 'string',

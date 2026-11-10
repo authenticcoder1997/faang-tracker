@@ -15,12 +15,11 @@ import {
   ListTodo,
   Mic,
   Pencil,
-  Pin,
-  PinOff,
   Plus,
   Repeat2,
   Search,
   Square,
+  Timer,
   Trash2,
   Undo2,
   X,
@@ -33,11 +32,12 @@ import StudyTimer from './StudyTimer';
 import { createTaskDictation } from '../lib/taskDictation';
 import {
   addDays,
+  canFocusTask,
+  clearTaskFocus,
   completeTask,
   dateKey,
   deleteTaskList,
   getTaskRows,
-  isTaskFocused,
   LIST_COLORS,
   mergeTaskEdits,
   normalizeTaskLinks,
@@ -45,6 +45,7 @@ import {
   reorderTasks,
   restoreTaskList,
   TASK_FOCUS_OPTIONS,
+  taskFocus,
   taskFocusEnd,
 } from '../lib/tasks';
 
@@ -79,12 +80,23 @@ function prettyDate(key, today) {
   }).format(new Date(year, month - 1, day, 12));
 }
 
-function focusTime(until, today) {
-  const date = new Date(until);
-  const day = dateKey(date);
-  if (day === addDays(today, 1) && new Date(until).setHours(0, 0, 0, 0) === until) return 'midnight';
-  const time = new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' }).format(date);
-  return day === today ? time : `${prettyDate(day, today)} at ${time}`;
+function FocusCountdown({ until }) {
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const tick = () => setNow(Date.now());
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [until]);
+  const seconds = Math.max(0, Math.ceil((until - now) / 1000));
+  const time = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
+    .map((part) => String(part).padStart(2, '0')).join(':');
+  return (
+    <span role="timer" aria-label="Focus time remaining"
+      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-accent-soft px-2 py-1 font-semibold tabular-nums text-accent">
+      <Timer size={13} aria-hidden="true" /> {time} left
+    </span>
+  );
 }
 
 function Modal({ title, children, onClose, focusSelector = 'input, textarea' }) {
@@ -130,6 +142,9 @@ function TaskForm({
   defaultDate,
   today,
   onSave,
+  onFocus,
+  focusUntil,
+  hasOtherFocus,
   onDelete,
   onClose,
   voiceMode = false,
@@ -295,6 +310,27 @@ function TaskForm({
             className={fieldClass}
           />
         </div>
+        {onFocus && (
+          <fieldset className="rounded-xl border border-line px-3.5 pb-3 pt-1.5">
+            <legend className="px-1.5 text-xs font-semibold text-ink">Focus</legend>
+            <p className="mb-2.5 text-xs leading-5 text-muted">
+              {hasOtherFocus ? 'Starting focus will switch from your current task.' : 'Choose a duration to start focus immediately.'}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {TASK_FOCUS_OPTIONS.map((option) => (
+                <button key={option.id} type="button" className="button-secondary" onClick={() => onFocus(option)}>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {focusUntil && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <FocusCountdown until={focusUntil} />
+                <button type="button" className="button-secondary" onClick={() => onFocus(null)}>End focus</button>
+              </div>
+            )}
+          </fieldset>
+        )}
         <div>
           <div className="mb-2 flex h-5 items-center justify-between">
             <label
@@ -689,42 +725,12 @@ function SnoozeDialog({ task, today, onSnooze, onClose }) {
   );
 }
 
-function FocusDialog({ task, focused, today, onFocus, onClose }) {
-  return (
-    <Modal title="Focus on task" onClose={onClose} focusSelector="[data-focus-option]">
-      <div className="space-y-4 p-6">
-        <p className="break-words text-sm font-medium text-ink">{task.title}</p>
-        <p className="text-sm text-muted">
-          {focused ? `Pinned until ${focusTime(task.focusUntil, today)}. Set a new duration or end focus.`
-            : 'Pin this task to the top of your list for:'}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {TASK_FOCUS_OPTIONS.map((option) => (
-            <button key={option.id} type="button" data-focus-option className="button-secondary"
-              onClick={() => onFocus(option)}>
-              {option.label}
-            </button>
-          ))}
-        </div>
-        {focused && (
-          <div className="flex justify-end border-t border-line pt-4">
-            <button type="button" className="button-secondary" onClick={() => onFocus(null)}>
-              <PinOff size={15} /> End focus
-            </button>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
-}
-
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
   const [view, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [snoozeTask, setSnoozeTask] = useState(null);
-  const [focusTaskId, setFocusTaskId] = useState(null);
   const [listEditor, setListEditor] = useState(null);
   const [listDeletion, setListDeletion] = useState(null);
   const [listDeleteError, setListDeleteError] = useState('');
@@ -755,14 +761,10 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
   }, [notice]);
 
   const { active, snoozed, completed, deleted } = getTaskRows(data.tasks, today, data.manualOrder);
-  const now = Date.now();
-  const focusedIds = new Set();
-  let nextFocusEnd = Infinity;
-  for (const { task } of active) {
-    if (!isTaskFocused(task, now)) continue;
-    focusedIds.add(task.id);
-    nextFocusEnd = Math.min(nextFocusEnd, task.focusUntil);
-  }
+  const savedFocus = taskFocus(data);
+  const focus = savedFocus?.until > Date.now() && active.some(({ key }) => key === savedFocus.taskId)
+    ? savedFocus : null;
+  const nextFocusEnd = focus?.until;
   useEffect(() => {
     if (!Number.isFinite(nextFocusEnd)) return;
     let timer;
@@ -778,8 +780,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     expire();
     return () => window.clearTimeout(timer);
   }, [nextFocusEnd]);
-  const focusTask = active.find(({ key }) => key === focusTaskId)?.task;
-  const isToday = (row) => focusedIds.has(row.key) || (!!row.date && row.date <= today);
+  const isToday = (row) => focus?.taskId === row.key || (!!row.date && row.date <= today);
   const selectedList = view.startsWith('list:')
     ? data.lists.find((list) => list.id === view.slice(5))
     : null;
@@ -829,8 +830,8 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
   const [emptyTitle, emptyDescription] = query
     ? ['No matching tasks', 'Try another title, note, or list name.']
     : EMPTY_VIEWS[view] || ['A little room for what’s next', 'Add your first task and take it one step at a time.'];
-  const focusRows = canAdd ? rows.filter(({ key }) => focusedIds.has(key)) : [];
-  const ordinaryRows = canAdd ? rows.filter(({ key }) => !focusedIds.has(key)) : rows;
+  const focusedRow = canAdd && rows.find(({ key }) => key === focus?.taskId);
+  const ordinaryRows = focusedRow ? rows.filter((row) => row !== focusedRow) : rows;
   const groups =
     view === 'scheduled'
       ? Object.entries(
@@ -843,7 +844,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           Number(right === 'overdue') - Number(left === 'overdue') || left.localeCompare(right),
         )
       : [['tasks', ordinaryRows]];
-  if (focusRows.length) groups.unshift(['focus', focusRows]);
+  if (focusedRow) groups.unshift(['focus', [focusedRow]]);
 
   function moveTask(ids, movedId, targetId) {
     let moved = false;
@@ -865,7 +866,8 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         changed = true;
         return { ...item, snoozedUntil: until, ...(until && item.focusUntil ? { focusUntil: null } : {}) };
       });
-      return changed ? { ...current, tasks } : current;
+      if (!changed) return current;
+      return { ...(until ? clearTaskFocus(current, task.id) : current), tasks };
     });
     if (!saved) return;
     setSnoozeTask(null);
@@ -873,23 +875,20 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       : until ? `Snoozed until ${prettyDate(until, today)}` : 'Task brought back' });
   }
 
-  function setTaskFocus(option) {
+  function setTaskFocus(taskId, option) {
     const until = option ? taskFocusEnd(option) : null;
     const today = dateKey();
     let changed = false;
     const saved = updateData((current) => {
-      const tasks = current.tasks.map((task) => {
-        if (task.id !== focusTaskId || task.deletedAt || task.snoozedUntil > today ||
-          (task.repeat === 'none' && task.completed)) return task;
-        changed = true;
-        return { ...task, focusUntil: until };
-      });
-      return changed ? { ...current, tasks } : current;
+      const task = current.tasks.find(({ id }) => id === taskId);
+      if (!canFocusTask(task, today)) return current;
+      const next = until ? { ...current, focus: { taskId, until } } : clearTaskFocus(current, taskId);
+      changed = next !== current;
+      return next;
     });
     if (!saved) return;
-    setFocusTaskId(null);
     setNotice({ message: !changed ? 'This task is no longer active.'
-      : until ? `Pinned until ${focusTime(until, today)}` : 'Focus ended' });
+      : until ? 'Focus started' : 'Focus ended' });
   }
 
   function saveTask(draft) {
@@ -962,14 +961,16 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       setListEditor(null);
     }
   }
-  function toggle(row) {
+  function toggle(row, isCompleted) {
     if (
-      updateData((current) => ({
-        ...current,
-        tasks: current.tasks.map((task) =>
-          task.id === row.task.id ? completeTask(task, row.date) : task,
-        ),
-      }))
+      updateData((current) => {
+        return {
+          ...(isCompleted ? current : clearTaskFocus(current, row.task.id)),
+          tasks: current.tasks.map((task) =>
+            task.id === row.task.id ? completeTask(task, row.date) : task,
+          ),
+        };
+      })
     ) {
       setNotice({
         message:
@@ -992,7 +993,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
   function deleteTask(task) {
     if (
       updateData((current) => ({
-        ...current,
+        ...clearTaskFocus(current, task.id),
         tasks: current.tasks.map((item) =>
           item.id === task.id
             ? { ...item, deletedAt: new Date().toISOString(), ...(item.focusUntil ? { focusUntil: null } : {}) }
@@ -1071,7 +1072,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       (option) => option.value === row.task.repeat,
     );
     const isSnoozed = view === 'snoozed';
-    const isFocused = !isCompleted && !isDeleted && focusedIds.has(row.key);
+    const isFocused = !isCompleted && !isDeleted && focus?.taskId === row.key;
     const dropTarget = order && drag?.targetId === row.key && drag.movedId !== row.key;
     const dropPosition = dropTarget && (order.ids.indexOf(drag.movedId) < order.index ? 'after' : 'before');
     return (
@@ -1079,7 +1080,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         key={row.key}
         data-task-row={order ? row.key : undefined}
         data-task-drop={dropPosition || undefined}
-        className={`group relative flex items-start gap-2 border-b border-line px-1 py-4 last:border-0 sm:gap-3.5 lg:py-3.5 ${drag?.movedId === row.key && order ? 'opacity-50' : ''}`}
+        className={`group relative flex items-start gap-2 border-b border-line px-1 py-4 last:border-0 sm:gap-3.5 lg:py-3.5 ${isFocused ? 'task-focused-row mb-2 rounded-xl px-3' : ''} ${drag?.movedId === row.key && order ? 'opacity-50' : ''}`}
       >
         {order?.ids.length > 1 && (
           <button
@@ -1097,7 +1098,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           <input
             type="checkbox"
             checked={isCompleted}
-            onChange={() => toggle(row)}
+            onChange={() => toggle(row, isCompleted)}
             aria-label={`${isCompleted ? 'Reopen' : 'Complete'} ${row.task.title}${isCompleted && row.task.repeat !== 'none' ? ` on ${row.date}` : ''}`}
             className="task-check mt-1 h-[20px] w-[20px] shrink-0 cursor-pointer appearance-none rounded-full border transition hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
           />
@@ -1139,11 +1140,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
             )}
           </div>
           <div className="task-row-meta mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted">
-            {isFocused && (
-              <span className="flex items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-accent">
-                <Pin size={11} aria-hidden="true" /> Until {focusTime(row.task.focusUntil, today)}
-              </span>
-            )}
+            {isFocused && <FocusCountdown until={focus.until} />}
             {!selectedList && (
               <span className="flex min-w-0 items-center gap-1.5">
                 <span
@@ -1197,26 +1194,15 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         ) : (
           <div className="flex shrink-0 items-center">
             {!isCompleted && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setFocusTaskId(row.task.id)}
-                  aria-label={`${isFocused ? 'Manage focus for' : 'Focus on'} ${row.task.title}`}
-                  title={isFocused ? 'Manage focus' : 'Focus on task'}
-                  className={`rounded-lg p-2 hover:bg-hover hover:text-accent focus-visible:text-accent ${isFocused ? 'bg-accent-soft text-accent' : 'text-faint'}`}
-                >
-                  <Pin size={16} fill={isFocused ? 'currentColor' : 'none'} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSnoozeTask(row.task)}
-                  aria-label={`Snooze ${row.task.title}`}
-                  title="Snooze task"
-                  className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
-                >
-                  <AlarmClock size={16} />
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => setSnoozeTask(row.task)}
+                aria-label={`Snooze ${row.task.title}`}
+                title="Snooze task"
+                className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
+              >
+                <AlarmClock size={16} />
+              </button>
             )}
             <button
               aria-label={`${row.task.flagged ? 'Unflag' : 'Flag'} ${row.task.title}`}
@@ -1521,6 +1507,10 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           defaultDate={today}
           today={today}
           onSave={saveTask}
+          onFocus={active.some(({ key }) => key === taskEditor.task?.id)
+            ? (option) => setTaskFocus(taskEditor.task.id, option) : undefined}
+          focusUntil={focus?.taskId === taskEditor.task?.id ? focus?.until : undefined}
+          hasOtherFocus={!!focus && focus.taskId !== taskEditor.task?.id}
           onDelete={() => deleteTask(taskEditor.task)}
           onClose={() => setTaskEditor(null)}
           voiceMode={!!taskEditor.voiceMode}
@@ -1532,15 +1522,6 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           today={today}
           onSnooze={setTaskSnooze}
           onClose={() => setSnoozeTask(null)}
-        />
-      )}
-      {focusTask && isActive && (
-        <FocusDialog
-          task={focusTask}
-          focused={focusedIds.has(focusTask.id)}
-          today={today}
-          onFocus={setTaskFocus}
-          onClose={() => setFocusTaskId(null)}
         />
       )}
       {listEditor && isActive && (
