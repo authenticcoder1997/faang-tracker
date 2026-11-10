@@ -99,6 +99,47 @@ function FocusCountdown({ until }) {
   );
 }
 
+function FocusControls({ until, hasOtherFocus, onFocus }) {
+  const [choice, setChoice] = useState(TASK_FOCUS_OPTIONS[0].id);
+  const [customHours, setCustomHours] = useState('');
+  const hours = Number(customHours);
+  const validHours = Number.isInteger(hours) && hours >= 1 && hours <= 24;
+  const option = choice === 'custom'
+    ? validHours ? { hours } : null
+    : TASK_FOCUS_OPTIONS.find(({ id }) => id === choice);
+
+  return (
+    <fieldset className="rounded-xl border border-line px-3.5 pb-3 pt-1.5">
+      <legend className="px-1.5 text-xs font-semibold text-ink">Focus</legend>
+      <p id="task-focus-hint" className="mb-2.5 text-xs leading-5 text-muted">
+        {hasOtherFocus && 'Starting focus switches from your current task. '}
+        Focus ends by midnight.
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <select aria-label="Focus duration" aria-describedby="task-focus-hint"
+          className={`${fieldClass} min-w-36 flex-1`} value={choice} onChange={(event) => setChoice(event.target.value)}>
+          {TASK_FOCUS_OPTIONS.map(({ id, label }) => <option key={id} value={id}>{label}</option>)}
+          <option value="custom">Custom hours</option>
+        </select>
+        {choice === 'custom' && (
+          <input aria-label="Custom focus hours, 1 to 24" inputMode="numeric" maxLength={2}
+            value={customHours} onChange={(event) => setCustomHours(event.target.value)}
+            placeholder="1–24 hours" className={`${fieldClass} !w-28`} />
+        )}
+        <button type="button" className="button-secondary" disabled={!option} onClick={() => onFocus(option)}>
+          {until ? 'Update focus' : 'Start focus'}
+        </button>
+      </div>
+      {until && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <FocusCountdown until={until} />
+          <button type="button" className="button-secondary" onClick={() => onFocus(null)}>End focus</button>
+        </div>
+      )}
+    </fieldset>
+  );
+}
+
 function Modal({ title, children, onClose, focusSelector = 'input, textarea' }) {
   const dialog = useRef(null);
   useEffect(() => {
@@ -311,25 +352,7 @@ function TaskForm({
           />
         </div>
         {onFocus && (
-          <fieldset className="rounded-xl border border-line px-3.5 pb-3 pt-1.5">
-            <legend className="px-1.5 text-xs font-semibold text-ink">Focus</legend>
-            <p className="mb-2.5 text-xs leading-5 text-muted">
-              {hasOtherFocus ? 'Starting focus will switch from your current task.' : 'Choose a duration to start focus immediately.'}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              {TASK_FOCUS_OPTIONS.map((option) => (
-                <button key={option.id} type="button" className="button-secondary" onClick={() => onFocus(option)}>
-                  {option.label}
-                </button>
-              ))}
-            </div>
-            {focusUntil && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <FocusCountdown until={focusUntil} />
-                <button type="button" className="button-secondary" onClick={() => onFocus(null)}>End focus</button>
-              </div>
-            )}
-          </fieldset>
+          <FocusControls until={focusUntil} hasOtherFocus={hasOtherFocus} onFocus={onFocus} />
         )}
         <div>
           <div className="mb-2 flex h-5 items-center justify-between">

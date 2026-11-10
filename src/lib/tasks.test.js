@@ -89,13 +89,14 @@ test('dates follow the local calendar across month and year boundaries', () => {
   assert.equal(isValidDate('2026-02-30'), false);
 });
 
-test('focus presets expire after elapsed hours or at local midnight', () => {
+test('focus presets and custom hours end at the requested time or local midnight', () => {
+  const morning = new Date(2026, 11, 31, 8).getTime();
   const now = new Date(2026, 11, 31, 23, 30).getTime();
-  const [hour, twoHours, today] = TASK_FOCUS_OPTIONS;
-  assert.equal(taskFocusEnd(hour, now), now + 3_600_000);
-  assert.equal(taskFocusEnd(twoHours, now), now + 7_200_000);
-  const focusUntil = taskFocusEnd(today, now);
-  assert.equal(focusUntil, new Date(2027, 0, 1).getTime());
+  const focusUntil = new Date(2027, 0, 1).getTime();
+  for (const option of [...TASK_FOCUS_OPTIONS, { hours: 5 }]) {
+    assert.equal(taskFocusEnd(option, morning), option.hours ? morning + option.hours * 3_600_000 : focusUntil);
+    assert.equal(taskFocusEnd(option, now), focusUntil);
+  }
   assert.equal(isTaskFocused(task({ focusUntil }), focusUntil - 1), true);
   assert.equal(isTaskFocused(task({ focusUntil }), focusUntil), false);
   assert.equal(isTaskFocused(task(), now), false);

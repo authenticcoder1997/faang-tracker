@@ -114,12 +114,14 @@ export function nextOccurrence(task, today = dateKey()) {
 export const TASK_FOCUS_OPTIONS = [
   { id: 'hour', label: '1 hour', hours: 1 },
   { id: 'two-hours', label: '2 hours', hours: 2 },
+  { id: 'six-hours', label: '6 hours', hours: 6 },
+  { id: 'twelve-hours', label: '12 hours', hours: 12 },
   { id: 'today', label: 'Today' },
 ];
 
 export function taskFocusEnd(option, now = Date.now()) {
-  if (option.hours) return now + option.hours * 60 * 60 * 1000;
-  return new Date(now).setHours(24, 0, 0, 0);
+  const midnight = new Date(now).setHours(24, 0, 0, 0);
+  return option.hours ? Math.min(now + option.hours * 60 * 60 * 1000, midnight) : midnight;
 }
 
 export function isTaskFocused(task, now) {
