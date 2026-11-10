@@ -245,7 +245,7 @@ function fieldPatch(before, after, excluded = []) {
   return { set, remove };
 }
 
-function entityPatch(before, after, recurring = false) {
+function entityPatch(before, after, isTask = false) {
   if (before === after) return { add: [], update: [], remove: [], order: [] };
   const previous = new Map(before.map((entry) => [entityKey(entry.id), entry]));
   const next = new Map(after.map((entry) => [entityKey(entry.id), entry]));
@@ -262,8 +262,9 @@ function entityPatch(before, after, recurring = false) {
         : [
             {
               value: clone(entry),
-              beforeId: after[index + 1]?.id ?? null,
-              afterId: after[index - 1]?.id ?? null,
+              // New tasks join the end of the latest manual order.
+              beforeId: isTask ? null : after[index + 1]?.id ?? null,
+              afterId: isTask ? null : after[index - 1]?.id ?? null,
             },
           ],
     ),
@@ -273,9 +274,9 @@ function entityPatch(before, after, recurring = false) {
       const fields = fieldPatch(
         old,
         entry,
-        recurring ? ['id', 'completedDates'] : ['id'],
+        isTask ? ['id', 'completedDates'] : ['id'],
       );
-      const dates = recurring
+      const dates = isTask
         ? {
             add: entry.completedDates.filter(
               (date) => !old.completedDates.includes(date),
@@ -296,7 +297,7 @@ function entityPatch(before, after, recurring = false) {
     remove: before
       .filter((entry) => !next.has(entityKey(entry.id)))
       .map((entry) => entry.id),
-    order: equal(observedBefore, observedAfter) && after.every((entry) => previous.has(entityKey(entry.id)))
+    order: equal(observedBefore, observedAfter) && (isTask || after.every((entry) => previous.has(entityKey(entry.id))))
       ? []
       : after.map((entry) => entry.id),
   };
@@ -334,6 +335,7 @@ export function diffWorkspace(previous, next) {
     schemaVersion: 1,
     lists: entityPatch(previous.tasks.lists, next.tasks.lists),
     tasks: entityPatch(previous.tasks.tasks, next.tasks.tasks, true),
+    manualTaskOrder: !!next.tasks.manualOrder && !previous.tasks.manualOrder,
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
     revisions: entityPatch(previous.revisions, next.revisions),
     homework: equal(previous.homework, next.homework) ? null : next.homework,
@@ -507,6 +509,7 @@ export function applyValidatedWorkspacePatch(current, patch) {
   }
   const lists = applyEntities(current.tasks.lists, patch.lists);
   const tasks = applyEntities(current.tasks.tasks, patch.tasks);
+  const manualOrder = patch.manualTaskOrder ? true : current.tasks.manualOrder;
   const savedPlan = current.homework;
   const incomingPlan = patch.homework;
   // A duplicate click or a stale device must never replace today's active batch.
@@ -515,9 +518,9 @@ export function applyValidatedWorkspacePatch(current, patch) {
     ? incomingPlan : savedPlan;
   return normalizeWorkspace({
     schemaVersion: 1,
-    tasks: lists === current.tasks.lists && tasks === current.tasks.tasks
+    tasks: lists === current.tasks.lists && tasks === current.tasks.tasks && manualOrder === current.tasks.manualOrder
       ? current.tasks
-      : repairTaskLists({ version: 1, lists, tasks }, patch.listMoves || {}),
+      : repairTaskLists({ ...current.tasks, ...(manualOrder ? { manualOrder } : {}), lists, tasks }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
     homework,
     studySessions: applyStudySessionPatch(current.studySessions, patch.studySessions),

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  AlarmClock,
+  AlarmClockOff,
   CalendarDays,
   CalendarClock,
   Check,
@@ -9,6 +11,7 @@ import {
   ClipboardList,
   ExternalLink,
   Flag,
+  GripVertical,
   ListTodo,
   Mic,
   Pencil,
@@ -21,11 +24,13 @@ import {
   X,
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
+import { useTaskReorder } from '../hooks/useTaskReorder';
 import { PageHeader } from './ui/Workspace';
 import HomeworkAgenda from './HomeworkAgenda';
 import StudyTimer from './StudyTimer';
 import { createTaskDictation } from '../lib/taskDictation';
 import {
+  addDays,
   completeTask,
   dateKey,
   deleteTaskList,
@@ -34,6 +39,7 @@ import {
   mergeTaskEdits,
   normalizeTaskLinks,
   REPEAT_OPTIONS,
+  reorderTasks,
   restoreTaskList,
 } from '../lib/tasks';
 
@@ -41,8 +47,15 @@ const SMART_VIEWS = [
   { id: 'today', name: 'Today', icon: CalendarDays },
   { id: 'scheduled', name: 'Scheduled', icon: CalendarClock },
   { id: 'all', name: 'All', icon: ClipboardList },
+  { id: 'snoozed', name: 'Snoozed', icon: AlarmClock },
   { id: 'completed', name: 'Completed', icon: CheckCheck },
 ];
+const EMPTY_VIEWS = {
+  today: ['A fresh start for today', 'Add something you’d like to get done. Keep it simple, or make it a routine.'],
+  completed: ['Small wins belong here', 'Completed tasks and recurring check-ins will appear here.'],
+  snoozed: ['No snoozed tasks', 'Snoozed tasks appear here until their return date.'],
+  deleted: ['Nothing in Recently deleted', 'Deleted tasks can be restored from here.'],
+};
 const fieldClass = 'input-control';
 
 function themedAccent(color) {
@@ -61,14 +74,14 @@ function prettyDate(key, today) {
   }).format(new Date(year, month - 1, day, 12));
 }
 
-function Modal({ title, children, onClose }) {
+function Modal({ title, children, onClose, focusSelector = 'input, textarea' }) {
   const dialog = useRef(null);
   useEffect(() => {
     dialog.current.showModal();
     const element = dialog.current;
-    element.querySelector('input, textarea')?.focus();
+    element.querySelector(focusSelector)?.focus();
     return () => element.close();
-  }, []);
+  }, [focusSelector]);
   return (
     <dialog
       ref={dialog}
@@ -615,17 +628,67 @@ function DeleteListDialog({
   );
 }
 
+function SnoozeDialog({ task, today, onSnooze, onClose }) {
+  const [days, setDays] = useState('1');
+  const count = Number(days);
+  const until = Number.isInteger(count) && count >= 1 && count <= 365
+    ? addDays(today, count) : null;
+
+  return (
+    <Modal title="Snooze task" onClose={onClose} focusSelector='[aria-pressed="true"]'>
+      <form className="space-y-4 p-6" onSubmit={(event) => {
+        event.preventDefault();
+        if (until) onSnooze(task, until);
+      }}>
+        <p className="break-words text-sm font-medium text-ink">{task.title}</p>
+        <div className="flex flex-wrap gap-2" aria-label="Snooze presets" role="group">
+          {[1, 3, 7].map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              aria-pressed={count === preset}
+              onClick={() => setDays(String(preset))}
+              className={`button-secondary ${count === preset ? '!border-accent/40 !bg-accent-soft !text-accent' : ''}`}
+            >
+              {preset === 1 ? 'Tomorrow' : `${preset} days`}
+            </button>
+          ))}
+        </div>
+        <label className="block text-sm text-muted">
+          Number of days
+          <input
+            className={`${fieldClass} mt-2`}
+            type="number"
+            min="1"
+            max="365"
+            required
+            value={days}
+            onChange={(event) => setDays(event.target.value)}
+          />
+        </label>
+        {until && <p className="text-sm text-muted" aria-live="polite">Snoozed until {prettyDate(until, today)}</p>}
+        <div className="flex justify-end gap-2 border-t border-line pt-4">
+          <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
+          <button type="submit" className="button-primary" disabled={!until}>Snooze</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
   const [view, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
+  const [snoozeTask, setSnoozeTask] = useState(null);
   const [listEditor, setListEditor] = useState(null);
   const [listDeletion, setListDeletion] = useState(null);
   const [listDeleteError, setListDeleteError] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
   const [notice, setNotice] = useState(null);
   const [today, setToday] = useState(dateKey);
+  const { drag, handleProps } = useTaskReorder(moveTask);
   useEffect(() => {
     const updateDate = () => setToday(dateKey());
     const timer = window.setInterval(updateDate, 30000);
@@ -641,7 +704,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     return () => window.clearTimeout(timer);
   }, [notice]);
 
-  const { active, completed, deleted } = getTaskRows(data.tasks, today);
+  const { active, snoozed, completed, deleted } = getTaskRows(data.tasks, today, data.manualOrder);
   const selectedList = view.startsWith('list:')
     ? data.lists.find((list) => list.id === view.slice(5))
     : null;
@@ -654,6 +717,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     today: active.filter((row) => row.date && row.date <= today).length,
     scheduled: active.filter((row) => row.date).length,
     all: active.length,
+    snoozed: snoozed.length,
     completed: completed.length,
   };
   const matches = (row) =>
@@ -670,9 +734,8 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           : view === 'flagged'
             ? row.task.flagged
             : true;
-  const rows = (
-    view === 'completed' ? completed : view === 'deleted' ? deleted : active
-  )
+  const rowsByView = { completed, deleted, snoozed };
+  const rows = (rowsByView[view] || active)
     .filter(inView)
     .filter(matches);
   const doneRows = completed
@@ -687,7 +750,10 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           : inView(row),
     )
     .filter(matches);
-  const canAdd = !['completed', 'deleted'].includes(view);
+  const canAdd = !rowsByView[view];
+  const [emptyTitle, emptyDescription] = query
+    ? ['No matching tasks', 'Try another title, note, or list name.']
+    : EMPTY_VIEWS[view] || ['A little room for what’s next', 'Add your first task and take it one step at a time.'];
   const groups =
     view === 'scheduled'
       ? Object.entries(
@@ -696,8 +762,38 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
             (result[key] ||= []).push(row);
             return result;
           }, {}),
+        ).sort(([left], [right]) =>
+          Number(right === 'overdue') - Number(left === 'overdue') || left.localeCompare(right),
         )
       : [['tasks', rows]];
+
+  function moveTask(ids, movedId, targetId) {
+    let moved = false;
+    const saved = updateData((current) => {
+      const next = reorderTasks(current, ids, movedId, targetId, dateKey());
+      moved = next !== current;
+      return next;
+    });
+    if (saved && moved) setNotice({ message: 'Task moved' });
+  }
+
+  function setTaskSnooze(task, until) {
+    let changed = false;
+    const saved = updateData((current) => {
+      const tasks = current.tasks.map((item) => {
+        if (item.id !== task.id || item.deletedAt ||
+          (item.repeat === 'none' && item.completed) ||
+          (item.snoozedUntil ?? null) !== (task.snoozedUntil ?? null)) return item;
+        changed = true;
+        return { ...item, snoozedUntil: until };
+      });
+      return changed ? { ...current, tasks } : current;
+    });
+    if (!saved) return;
+    setSnoozeTask(null);
+    setNotice({ message: !changed ? 'This task changed on another device.'
+      : until ? `Snoozed until ${prettyDate(until, today)}` : 'Task brought back' });
+  }
 
   function saveTask(draft) {
     const previous = taskEditor?.task;
@@ -872,17 +968,34 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       return;
     setTaskEditor({ task: null, voiceMode: voiceMode === true });
   }
-  function renderRow(row, isCompleted = false, isDeleted = false) {
+  function renderRow(row, isCompleted = false, isDeleted = false, order = null) {
     const list = data.lists.find((item) => item.id === row.task.listId);
     const repeat = REPEAT_OPTIONS.find(
       (option) => option.value === row.task.repeat,
     );
+    const isSnoozed = view === 'snoozed';
+    const dropTarget = order && drag?.targetId === row.key && drag.movedId !== row.key;
+    const dropPosition = dropTarget && (order.ids.indexOf(drag.movedId) < order.index ? 'after' : 'before');
     return (
       <li
         key={row.key}
-        className="group flex items-start gap-3.5 border-b border-line px-1 py-4 last:border-0 sm:gap-4 lg:py-3.5"
+        data-task-row={order ? row.key : undefined}
+        data-task-drop={dropPosition || undefined}
+        className={`group relative flex items-start gap-2 border-b border-line px-1 py-4 last:border-0 sm:gap-3.5 lg:py-3.5 ${drag?.movedId === row.key && order ? 'opacity-50' : ''}`}
       >
-        {!isDeleted && (
+        {order?.ids.length > 1 && (
+          <button
+            type="button"
+            aria-label={`Reorder ${row.task.title}`}
+            aria-describedby="task-reorder-help"
+            title="Drag to reorder"
+            className="task-drag-handle -ml-1 -my-2 flex h-11 w-8 shrink-0 touch-none select-none items-center justify-center rounded-lg text-muted hover:bg-hover hover:text-ink"
+            {...handleProps(row.key, order.ids, order.index)}
+          >
+            <GripVertical size={17} />
+          </button>
+        )}
+        {!isDeleted && !isSnoozed && (
           <input
             type="checkbox"
             checked={isCompleted}
@@ -937,7 +1050,12 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
                 <span className="break-anywhere">{list?.name}</span>
               </span>
             )}
-            {row.date && (
+            {isSnoozed ? (
+              <span className="flex items-center gap-1 text-accent">
+                <AlarmClock size={12} />
+                Until {prettyDate(row.task.snoozedUntil, today)}
+              </span>
+            ) : row.date && (
               <span
                 className={`flex items-center gap-1 ${!isCompleted && row.date < today ? 'text-danger' : !isCompleted && row.date === today ? 'text-accent' : ''}`}
               >
@@ -962,24 +1080,48 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
             <Undo2 size={14} />
             Restore
           </button>
-        ) : (
+        ) : isSnoozed ? (
           <button
-            aria-label={`${row.task.flagged ? 'Unflag' : 'Flag'} ${row.task.title}`}
-            aria-pressed={!!row.task.flagged}
-            onClick={() =>
-              updateData((current) => ({
-                ...current,
-                tasks: current.tasks.map((task) =>
-                  task.id === row.task.id
-                    ? { ...task, flagged: !task.flagged }
-                    : task,
-                ),
-              }))
-            }
-            className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-warning' : 'text-faint hover:text-warning sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
+            type="button"
+            onClick={() => setTaskSnooze(row.task, null)}
+            aria-label={`Wake ${row.task.title}`}
+            title="Bring back now"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg p-2 text-xs text-accent hover:bg-accent-soft"
           >
-            <Flag size={16} fill={row.task.flagged ? 'currentColor' : 'none'} />
+            <AlarmClockOff size={16} />
+            <span className="hidden sm:inline">Bring back</span>
           </button>
+        ) : (
+          <div className="flex shrink-0 items-center">
+            {!isCompleted && (
+              <button
+                type="button"
+                onClick={() => setSnoozeTask(row.task)}
+                aria-label={`Snooze ${row.task.title}`}
+                title="Snooze task"
+                className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
+              >
+                <AlarmClock size={16} />
+              </button>
+            )}
+            <button
+              aria-label={`${row.task.flagged ? 'Unflag' : 'Flag'} ${row.task.title}`}
+              aria-pressed={!!row.task.flagged}
+              onClick={() =>
+                updateData((current) => ({
+                  ...current,
+                  tasks: current.tasks.map((task) =>
+                    task.id === row.task.id
+                      ? { ...task, flagged: !task.flagged }
+                      : task,
+                  ),
+                }))
+              }
+              className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-warning' : 'text-faint hover:text-warning sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
+            >
+              <Flag size={16} fill={row.task.flagged ? 'currentColor' : 'none'} />
+            </button>
+          </div>
         )}
       </li>
     );
@@ -1026,7 +1168,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           aria-label="Task lists"
           className="task-sidebar min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-5 lg:pb-0"
         >
-          <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
+          <div className="flex flex-wrap gap-1 lg:flex-col">
             {SMART_VIEWS.map((item) => {
               const Icon = item.icon;
               return (
@@ -1144,6 +1286,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           </button>
         </aside>
         <section aria-label={title} className="flex min-w-0 flex-col">
+          <p id="task-reorder-help" className="sr-only">Drag this handle or use the Up and Down arrow keys to move the task.</p>
           <div className="task-agenda-toolbar flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold tracking-tight text-ink">
@@ -1179,24 +1322,25 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           </div>
           {rows.length > 0 ? (
             <div className="mt-1">
-              {groups.map(([group, entries]) => (
-                <div key={group}>
-                  {group !== 'tasks' && (
-                    <h3
-                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-danger' : 'text-muted'}`}
-                    >
-                      {group === 'overdue'
-                        ? 'Overdue'
-                        : prettyDate(group, today)}
-                    </h3>
-                  )}
-                  <ul>
-                    {entries.map((row) =>
-                      renderRow(row, view === 'completed', view === 'deleted'),
+              {groups.map(([group, entries]) => {
+                const ids = canAdd ? entries.map(({ key }) => key) : null;
+                return (
+                  <div key={group}>
+                    {group !== 'tasks' && (
+                      <h3
+                        className={`mt-6 mb-1 text-xs font-semibold ${group === 'overdue' ? 'text-danger' : 'text-muted'}`}
+                      >
+                        {group === 'overdue' ? 'Overdue' : prettyDate(group, today)}
+                      </h3>
                     )}
-                  </ul>
-                </div>
-              ))}
+                    <ul>
+                      {entries.map((row, index) =>
+                        renderRow(row, view === 'completed', view === 'deleted', ids && { ids, index }),
+                      )}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="flex min-h-80 flex-1 flex-col items-center justify-center px-4 py-12 text-center">
@@ -1204,26 +1348,10 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
                 <CircleCheck size={25} strokeWidth={1.25} />
               </div>
               <h3 className="text-base font-semibold text-ink">
-                {query
-                  ? 'No matching tasks'
-                  : view === 'today'
-                    ? 'A fresh start for today'
-                    : view === 'completed'
-                      ? 'Small wins belong here'
-                      : view === 'deleted'
-                        ? 'Nothing in Recently deleted'
-                        : 'A little room for what’s next'}
+                {emptyTitle}
               </h3>
               <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
-                {query
-                  ? 'Try another title, note, or list name.'
-                  : view === 'today'
-                    ? 'Add something you’d like to get done. Keep it simple, or make it a routine.'
-                    : view === 'completed'
-                      ? 'Completed tasks and recurring check-ins will appear here.'
-                      : view === 'deleted'
-                        ? 'Deleted tasks can be restored from here.'
-                        : 'Add your first task and take it one step at a time.'}
+                {emptyDescription}
               </p>
               {canAdd && !query && (
                 <button onClick={openNewTask} className="button-secondary mt-5">
@@ -1242,7 +1370,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
               Add a task
             </button>
           )}
-          {!['completed', 'deleted'].includes(view) && doneRows.length > 0 && (
+          {canAdd && doneRows.length > 0 && (
             <div className="mt-7 border-t border-line pt-4">
               <button
                 onClick={() => setShowCompleted(!showCompleted)}
@@ -1281,6 +1409,14 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           onDelete={() => deleteTask(taskEditor.task)}
           onClose={() => setTaskEditor(null)}
           voiceMode={!!taskEditor.voiceMode}
+        />
+      )}
+      {snoozeTask && isActive && (
+        <SnoozeDialog
+          task={snoozeTask}
+          today={today}
+          onSnooze={setTaskSnooze}
+          onClose={() => setSnoozeTask(null)}
         />
       )}
       {listEditor && isActive && (

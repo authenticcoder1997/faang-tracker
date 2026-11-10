@@ -13,7 +13,7 @@ import {
 import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './workspaceLegacy.js';
 import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
-import { deleteTaskList } from './tasks.js';
+import { deleteTaskList, reorderTasks } from './tasks.js';
 import { deleteStudySession, startStudySession, stopStudySession } from './studySessions.js';
 
 const copy = (value) => structuredClone(value);
@@ -48,6 +48,26 @@ const base = () => ({
   bookmarks: [bookmark()],
   notes: [note()],
   tasks: { ...createWorkspace().tasks, tasks: [task()] },
+});
+
+test('task order and snooze survive the Firebase merge alongside another device’s edits', () => {
+  const today = '2026-10-21';
+  const before = base();
+  before.tasks.tasks.push(task({ id: 'second' }));
+  const ordered = reorderTasks(before.tasks, ['task-1', 'second'], 'second', 'task-1', today);
+  const phone = { ...before, tasks: { ...ordered, tasks: ordered.tasks.map((item) =>
+    item.id === 'second' ? { ...item, snoozedUntil: '2026-10-24' } : item,
+  ) } };
+  const mac = copy(before);
+  mac.tasks.tasks[1].notes = 'Added from Mac';
+  mac.tasks.tasks.push(task({ id: 'third' }));
+  const merged = applyWorkspacePatch(mac, makeWorkspacePatch(before, phone));
+  assert.equal(merged.tasks.manualOrder, true);
+  assert.deepEqual(merged.tasks.tasks.map(({ id }) => id), ['second', 'task-1', 'third']);
+  assert.equal(merged.tasks.tasks[0].notes, 'Added from Mac');
+  assert.equal(merged.tasks.tasks[0].snoozedUntil, '2026-10-24');
+  assert.deepEqual(applyWorkspacePatch(phone, makeWorkspacePatch(before, mac)), merged);
+  assert.deepEqual(normalizeWorkspace(copy(merged)), merged);
 });
 
 test('new workspaces include source progress, all 21 Important links and independent default task lists', () => {

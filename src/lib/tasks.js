@@ -102,8 +102,9 @@ function eligibleDay(key, repeat) {
 }
 
 export function nextOccurrence(task, today = dateKey()) {
-  if (task.repeat === 'none') return task.dueDate || null;
-  let candidate = (task.dueDate || today) > today ? task.dueDate : today;
+  const start = task.snoozedUntil > (task.dueDate || '') ? task.snoozedUntil : task.dueDate;
+  if (task.repeat === 'none') return start || null;
+  let candidate = start > today ? start : today;
   const completed = new Set(task.completedDates || []);
   while (!eligibleDay(candidate, task.repeat) || completed.has(candidate))
     candidate = addDays(candidate, 1);
@@ -159,13 +160,23 @@ export function mergeTaskEdits(current, opened, draft, now, today = dateKey()) {
   );
   if (!Object.keys(changed).length) return current;
   const next = { ...current, ...changed, updatedAt: now };
+  if (current.snoozedUntil && current.snoozedUntil <= today &&
+    (Object.hasOwn(changed, 'dueDate') || Object.hasOwn(changed, 'repeat')))
+    next.snoozedUntil = null;
   return next.repeat === current.repeat
     ? next
     : { ...next, completed: false, completedAt: null, completedDates: [] };
 }
 
-export function getTaskRows(tasks, today = dateKey()) {
+function compareTaskRows(a, b) {
+  return (a.date || '9999').localeCompare(b.date || '9999') ||
+    Number(!!b.task.flagged) - Number(!!a.task.flagged) ||
+    a.task.createdAt.localeCompare(b.task.createdAt);
+}
+
+export function getTaskRows(tasks, today = dateKey(), manualOrder = false) {
   const active = [];
+  const snoozed = [];
   const completed = [];
   const deleted = [];
   for (const task of tasks) {
@@ -173,27 +184,46 @@ export function getTaskRows(tasks, today = dateKey()) {
       deleted.push({ task, date: null, key: task.id });
       continue;
     }
-    if (task.repeat === 'none') {
-      const row = { task, date: task.dueDate || null, key: task.id };
-      (task.completed ? completed : active).push(row);
-    } else {
-      active.push({ task, date: nextOccurrence(task, today), key: task.id });
+    const row = { task, date: nextOccurrence(task, today), key: task.id };
+    if (task.repeat === 'none' && task.completed) {
+      completed.push({ ...row, date: task.dueDate || null });
+      continue;
+    }
+    (task.snoozedUntil > today ? snoozed : active).push(row);
+    if (task.repeat !== 'none') {
       for (const date of task.completedDates || [])
         completed.push({ task, date, key: `${task.id}:${date}` });
     }
   }
-  active.sort(
-    (a, b) =>
-      (a.date || '9999').localeCompare(b.date || '9999') ||
-      Number(b.task.flagged) - Number(a.task.flagged) ||
-      a.task.createdAt.localeCompare(b.task.createdAt),
-  );
+  if (!manualOrder) active.sort(compareTaskRows);
+  snoozed.sort((a, b) => a.task.snoozedUntil.localeCompare(b.task.snoozedUntil));
   completed.sort((a, b) =>
     (b.task.completedAt || b.date || '').localeCompare(
       a.task.completedAt || a.date || '',
     ),
   );
-  return { active, completed, deleted };
+  return { active, snoozed, completed, deleted };
+}
+
+export function reorderTasks(data, visibleIds, movedId, targetId, today = dateKey()) {
+  const visible = new Set(visibleIds);
+  const { active, snoozed } = getTaskRows(data.tasks, today, data.manualOrder);
+  const ordered = data.manualOrder ? data.tasks : [
+    ...[...active, ...snoozed].sort(compareTaskRows).map(({ task }) => task),
+    ...data.tasks.filter((task) => task.deletedAt || (task.repeat === 'none' && task.completed)),
+  ];
+  const moveable = new Set(active.filter(({ key }) => visible.has(key)).map(({ key }) => key));
+  const entries = ordered.filter((task) => moveable.has(task.id));
+  const from = entries.findIndex((task) => task.id === movedId);
+  const to = entries.findIndex((task) => task.id === targetId);
+  if (from < 0 || to < 0 || from === to) return data;
+  entries.splice(to, 0, ...entries.splice(from, 1));
+  let index = 0;
+  return {
+    ...data,
+    manualOrder: true,
+    tasks: ordered.map((task) => moveable.has(task.id) ? entries[index++] : task),
+  };
 }
 
 export function deleteTaskList(data, listId, destinationId, inboxId) {
@@ -257,7 +287,8 @@ export function validateTaskData(value) {
   if (
     value?.version !== 1 ||
     !Array.isArray(value.lists) ||
-    !Array.isArray(value.tasks)
+    !Array.isArray(value.tasks) ||
+    (value.manualOrder !== undefined && typeof value.manualOrder !== 'boolean')
   )
     throw new Error('Unrecognized task data');
   if (
@@ -278,6 +309,7 @@ export function validateTaskData(value) {
         !listIds.has(task.listId) ||
         !REPEAT_OPTIONS.some((option) => option.value === task.repeat) ||
         (task.dueDate && !isValidDate(task.dueDate)) ||
+        (task.snoozedUntil != null && !isValidDate(task.snoozedUntil)) ||
         !Array.isArray(task.completedDates) ||
         task.completedDates.some((date) => !isValidDate(date)) ||
         typeof task.createdAt !== 'string',

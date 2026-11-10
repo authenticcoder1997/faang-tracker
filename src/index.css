@@ -740,6 +740,28 @@ textarea::placeholder {
 .task-check {
   border-color: var(--control-border);
 }
+.task-drag-handle {
+  cursor: grab;
+}
+.task-drag-handle:active {
+  cursor: grabbing;
+}
+[data-task-drop]::after {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  content: '';
+}
+[data-task-drop='before']::after {
+  top: -1px;
+}
+[data-task-drop='after']::after {
+  bottom: -1px;
+}
 .task-search {
   padding-left: 35px;
   font-size: 12px;

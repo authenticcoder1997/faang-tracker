@@ -13,6 +13,7 @@ import {
   MAX_TASK_LINK_LENGTH,
   nextOccurrence,
   normalizeTaskLinks,
+  reorderTasks,
   restoreTaskList,
   validateTaskData,
 } from './tasks.js';
@@ -155,6 +156,45 @@ test('recurring completion history is separate from the next active occurrence',
     rows.completed.map((row) => row.date),
     ['2026-10-21', '2026-10-20'],
   );
+});
+
+test('snoozed tasks return on the local wake date while recurring tasks keep their schedule', () => {
+  const until = '2026-10-24';
+  const tasks = [
+    task({ id: 'undated', dueDate: null, snoozedUntil: until }),
+    task({ id: 'future', dueDate: '2026-10-30', snoozedUntil: until }),
+    task({ id: 'weekday', repeat: 'weekdays', snoozedUntil: until, completedDates: ['2026-10-21'] }),
+    task({ id: 'deleted', deletedAt: '2026-10-21', snoozedUntil: until }),
+  ];
+  const waiting = getTaskRows(tasks, '2026-10-23');
+  assert.equal(waiting.active.length, 0);
+  assert.deepEqual(waiting.snoozed.map(({ key }) => key), ['undated', 'future', 'weekday']);
+  assert.equal(waiting.completed[0].date, '2026-10-21');
+  assert.equal(waiting.deleted[0].key, 'deleted');
+  const awake = getTaskRows(tasks, until);
+  assert.equal(awake.snoozed.length, 0);
+  assert.deepEqual(awake.active.map(({ key, date }) => [key, date]), [
+    ['undated', until], ['weekday', '2026-10-26'], ['future', '2026-10-30'],
+  ]);
+  assert.equal(getTaskRows([{ ...tasks[0], snoozedUntil: null }], '2026-10-23').active[0].date, null);
+  assert.throws(() => validateTaskData({ ...INITIAL_TASK_DATA, tasks: [task({ snoozedUntil: '2026-02-30' })] }), /Invalid tasks/);
+});
+
+test('manual ordering uses the displayed order and keeps filtered and snoozed rows in their slots', () => {
+  const today = '2026-10-21';
+  const data = { ...INITIAL_TASK_DATA, tasks: [
+    task({ id: 'last', dueDate: '2026-10-28' }),
+    task({ id: 'hidden', dueDate: '2026-10-22' }),
+    task({ id: 'asleep', snoozedUntil: '2026-10-24' }),
+    task({ id: 'first' }),
+  ] };
+  const visible = ['first', 'last'];
+  const moved = reorderTasks(data, visible, 'last', 'first', today);
+  assert.equal(moved.manualOrder, true);
+  assert.deepEqual(moved.tasks.map(({ id }) => id), ['last', 'hidden', 'asleep', 'first']);
+  assert.deepEqual(getTaskRows(moved.tasks, today, moved.manualOrder).active.map(({ key }) => key), ['last', 'hidden', 'first']);
+  assert.equal(reorderTasks(moved, [...visible, 'asleep'], 'last', 'asleep', today), moved);
+  assert.deepEqual(reorderTasks(moved, visible, 'first', 'last', today).tasks.map(({ id }) => id), ['first', 'hidden', 'asleep', 'last']);
 });
 
 const editorDraft = (value, today = '2026-10-21') => ({
