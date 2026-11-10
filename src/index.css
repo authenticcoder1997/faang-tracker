@@ -976,6 +976,17 @@ textarea::placeholder {
     padding: 13px 14px;
   }
 }
+/* Keep mobile form text large enough to avoid focus zoom. */
+@media (max-width: 767px), (pointer: coarse) {
+  .input-control,
+  .search-field input,
+  .notebook-editor textarea,
+  .theme-modal textarea,
+  #date-selector {
+    font-size: max(16px, 1rem);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .app-shell,
   .app-header,
