@@ -1,4 +1,5 @@
 import { normalizeDsaRevision } from './dsaRevision.js';
+import { normalizeHomeworkPlan } from './homeworkSchedule.js';
 import { normalizeBookmark } from './bookmarks.js';
 import { isValidDate, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 import { isValidTheme } from './theme.js';
@@ -153,6 +154,8 @@ export function normalizeWorkspace(value, previous) {
     schemaVersion: 1,
     tasks: previous && value.tasks === previous.tasks ? previous.tasks : tasks(value.tasks),
     bookmarks: previous && value.bookmarks === previous.bookmarks ? previous.bookmarks : bookmarks(value.bookmarks),
+    homework: previous && value.homework === previous.homework
+      ? previous.homework : normalizeHomeworkPlan(value.homework),
     revisions: previous && value.revisions === previous.revisions ? previous.revisions
       : uniqueEntities(value.revisions === undefined ? [] : value.revisions, 'DSA revisions', normalizeDsaRevision),
     notes: previous && value.notes === previous.notes ? previous.notes : notes(value.notes),
@@ -187,7 +190,7 @@ function equal(left, right) {
   return false;
 }
 
-const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions'];
+const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions', 'homework'];
 
 // Keep unchanged sections referentially stable across cloud snapshots and acks.
 export function reuseWorkspace(previous, next) {
@@ -324,6 +327,7 @@ export function diffWorkspace(previous, next) {
     tasks: entityPatch(previous.tasks.tasks, next.tasks.tasks, true),
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
     revisions: entityPatch(previous.revisions, next.revisions),
+    homework: equal(previous.homework, next.homework) ? null : next.homework,
     notes: entityPatch(previous.notes, next.notes),
     appearance: fieldPatch(previous.appearance, next.appearance),
     progress: Object.fromEntries(
@@ -493,12 +497,19 @@ export function applyValidatedWorkspacePatch(current, patch) {
   }
   const lists = applyEntities(current.tasks.lists, patch.lists);
   const tasks = applyEntities(current.tasks.tasks, patch.tasks);
+  const savedPlan = current.homework;
+  const incomingPlan = patch.homework;
+  // A duplicate click or a stale device must never replace today's active batch.
+  const homework = incomingPlan && (!savedPlan || incomingPlan.date > savedPlan.date ||
+    (incomingPlan.date === savedPlan.date && incomingPlan.round > savedPlan.round))
+    ? incomingPlan : savedPlan;
   return normalizeWorkspace({
     schemaVersion: 1,
     tasks: lists === current.tasks.lists && tasks === current.tasks.tasks
       ? current.tasks
       : repairTaskLists({ version: 1, lists, tasks }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
+    homework,
     revisions: patch.revisions ? applyEntities(current.revisions, patch.revisions) : current.revisions,
     notes: applyEntities(current.notes, patch.notes),
     appearance: applyFields(current.appearance, patch.appearance),

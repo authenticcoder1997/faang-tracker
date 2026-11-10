@@ -1,9 +1,10 @@
 import { useCloudStorage } from '../hooks/useCloudStorage';
+import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { striverDsaTopics } from '../lib/dsaPlan';
-import { buildHomeworkSchedule } from '../lib/homeworkSchedule';
-import { useMemo, useState } from 'react';
+import { buildHomeworkSchedule, extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   BookOpen,
@@ -68,7 +69,7 @@ function AgendaSection({ track, onOpen }) {
       </header>
 
       <ul className="divide-y divide-line">
-        {track.items.map((item, index) => (
+        {track.items.map((item) => (
           <li
             key={item.id}
             className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
@@ -92,13 +93,11 @@ function AgendaSection({ track, onOpen }) {
                 {item.title}
               </a>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
-                {track.id === 'dsa' ? (
-                  <span className="tabular-nums">Question {index + 1}</span>
-                ) : (
-                  <span>{item.topic || item.section || 'Breakdown'}</span>
-                )}
                 {item.difficulty && (
                   <span className="status-pill">{item.difficulty}</span>
+                )}
+                {(item.topic || item.section) && (
+                  <span className="status-pill">{item.topic || item.section}</span>
                 )}
                 {item.premium && (
                   <span className="status-pill text-warning">Premium</span>
@@ -128,15 +127,24 @@ function AgendaSection({ track, onOpen }) {
 }
 
 export default function HomeworkAgenda({ today, setActiveTab }) {
+  const { updateData } = useWorkspace();
+  const plan = useWorkspaceValue((state) => state.data.homework);
   const [dsa, setDsa] = useCloudStorage('dsa', striverDsaTopics);
   const [lld, setLld] = useCloudStorage('lld', lldTopics);
   const [hld, setHld] = useCloudStorage('hld', hldTopics);
-  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld, today), [dsa, lld, hld, today]);
+  const schedule = useMemo(() => buildHomeworkSchedule(dsa, lld, hld, today, plan), [dsa, lld, hld, today, plan]);
+  const todayIndex = schedule.findIndex((day) => day.date >= today);
+  const todaysAgenda = schedule[todayIndex];
+  useEffect(() => {
+    if (todaysAgenda.date !== today || plan?.date >= today) return;
+    updateData((current) => current.homework === plan
+      ? { ...current, homework: homeworkPlanFor(todaysAgenda) }
+      : current);
+  }, [plan, today, todaysAgenda, updateData]);
+
   const [chosenDate, setChosenDate] = useState(null);
   const chosenIndex = schedule.findIndex((day) => day.date === chosenDate);
-  const selectedDayIndex = chosenIndex === -1
-    ? schedule.findIndex((day) => day.date >= today)
-    : chosenIndex;
+  const selectedDayIndex = chosenIndex === -1 ? todayIndex : chosenIndex;
   const day = schedule[selectedDayIndex];
 
   const complete = (setItems, id) => setItems((items) => items.map((item) =>
@@ -160,6 +168,9 @@ export default function HomeworkAgenda({ today, setActiveTab }) {
       complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
     },
   ].filter(Boolean);
+  const extraPlan = day.date === today && plan?.date === today && !tracks.length
+    ? extraHomeworkPlan(plan, dsa)
+    : null;
 
   return (
     <section aria-labelledby="homework-title" className="mb-8">
@@ -225,10 +236,20 @@ export default function HomeworkAgenda({ today, setActiveTab }) {
           ))}
         </div>
       ) : (
-        <p className="flex items-center gap-2 border-b border-line pb-4 text-sm text-muted">
-          <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
-          No unfinished work for this day.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+          <p className="flex items-center gap-2 text-sm text-muted">
+            <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
+            {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
+          </p>
+          {extraPlan && (
+            <button type="button" className="button-secondary"
+              onClick={() => updateData((current) => current.homework === plan
+                ? { ...current, homework: extraPlan }
+                : current)}>
+              Get more work
+            </button>
+          )}
+        </div>
       )}
     </section>
   );

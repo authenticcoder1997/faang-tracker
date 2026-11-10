@@ -3,11 +3,13 @@ import test from 'node:test';
 import { lldTopics } from '../data/lldTopics.js';
 import { hldTopics } from '../data/hldTopics.js';
 import { striverDsaTopics } from './dsaPlan.js';
-import { buildHomeworkSchedule, homeworkPoints, HOMEWORK_TARGET } from './homeworkSchedule.js';
+import {
+  buildHomeworkSchedule, DESIGN_POINTS, extraHomeworkPlan, homeworkPlanFor, homeworkPoints, HOMEWORK_TARGET,
+} from './homeworkSchedule.js';
 
 const today = '2026-11-09';
 const planned = ({ dsa, design }) => dsa.reduce(
-  (points, item) => points + homeworkPoints('dsa', item), design ? 5 : 0,
+  (points, item) => points + homeworkPoints('dsa', item), design ? DESIGN_POINTS : 0,
 );
 const ids = (items) => items.map((item) => item.id);
 
@@ -33,7 +35,7 @@ test('completed Homework earns points for its date and leaves only the rest of t
     ? { ...item, completed: true, homeworkDate: today }
     : item);
   const [partial] = buildHomeworkSchedule(withDsa, withLld, hldTopics, today);
-  assert.equal(partial.earned, 5 + homeworkPoints('dsa', completedDsa));
+  assert.equal(partial.earned, DESIGN_POINTS + homeworkPoints('dsa', completedDsa));
   assert.equal(partial.design, null);
   assert.deepEqual(ids(partial.dsa), ids(first.dsa.slice(1)));
   assert.equal(partial.earned + planned(partial), HOMEWORK_TARGET);
@@ -52,6 +54,38 @@ test('when an exact fit is unavailable, the agenda uses the largest score below 
   const medium = Array.from({ length: 4 }, (_, i) => ({ id: `medium-${i}`, difficulty: 'Medium' }));
   const schedule = buildHomeworkSchedule(medium, lldTopics.slice(0, 1), [], today);
   assert.deepEqual(ids(schedule[0].dsa), ids(medium.slice(0, 3)));
-  assert.equal(planned(schedule[0]), 14);
+  assert.equal(planned(schedule[0]), 19);
   assert.equal(planned(schedule[1]), 3);
+});
+
+test('a saved day stays fixed and unfinished assignments carry forward before new work', () => {
+  const [first] = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, today);
+  const plan = homeworkPlanFor(first);
+  const doneId = first.dsa[0].id;
+  const remaining = striverDsaTopics.map((item) => item.id === doneId
+    ? { ...item, completed: true, homeworkDate: today }
+    : item);
+  const [sameDay] = buildHomeworkSchedule(remaining, lldTopics, hldTopics, today, plan);
+  assert.deepEqual(ids(sameDay.dsa), plan.dsa.filter((id) => id !== doneId));
+  const tomorrow = buildHomeworkSchedule(remaining, lldTopics, hldTopics, '2026-11-10', plan)[1];
+  assert.equal(tomorrow.date, '2026-11-10');
+  assert.equal(tomorrow.design.item.id, plan.design.id);
+  assert.deepEqual(ids(tomorrow.dsa).slice(0, sameDay.dsa.length), ids(sameDay.dsa));
+  assert.equal(planned(tomorrow), HOMEWORK_TARGET);
+});
+
+test('extra work adds a bounded DSA batch without changing the normal schedule', () => {
+  const [first] = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, today);
+  const plan = homeworkPlanFor(first);
+  const done = new Set(plan.dsa);
+  const dsa = striverDsaTopics.map((item) => done.has(item.id) ? { ...item, completed: true, homeworkDate: today } : item);
+  const lld = lldTopics.map((item) => item.id === plan.design.id ? { ...item, completed: true, homeworkDate: today } : item);
+  const extra = extraHomeworkPlan(plan, dsa);
+  assert.equal(extra.round, 1);
+  assert.ok(extra.dsa.every((id) => !done.has(id)));
+  const [withExtra, next] = buildHomeworkSchedule(dsa, lld, hldTopics, today, extra);
+  assert.equal(withExtra.earned, HOMEWORK_TARGET);
+  assert.equal(planned(withExtra), 10);
+  assert.equal(withExtra.design, null);
+  assert.equal(planned(next), HOMEWORK_TARGET);
 });

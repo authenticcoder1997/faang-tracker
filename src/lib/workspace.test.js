@@ -814,6 +814,20 @@ test('a first Homework completion and a first note on the same problem merge in 
   assert.deepEqual(applyWorkspacePatch(checked, makeWorkspacePatch(before, annotated)).progress.dsa[id], expected);
 });
 
+test('Homework batches sync independently and ignore duplicate or older requests', () => {
+  const before = base();
+  const initial = { ...before, homework: { date: '2026-11-10', round: 0, dsa: ['dsa-1'], design: null } };
+  const extra = { ...initial, homework: { ...initial.homework, round: 1, dsa: ['dsa-2'] } };
+  const sameRound = { ...extra, homework: { ...extra.homework, dsa: ['dsa-3'] } };
+  const nextDay = { ...extra, homework: { ...initial.homework, date: '2026-11-11' } };
+  const saved = applyWorkspacePatch(initial, makeWorkspacePatch(initial, extra));
+  assert.deepEqual(saved.homework, extra.homework);
+  assert.deepEqual(applyWorkspacePatch(saved, makeWorkspacePatch(initial, sameRound)).homework, extra.homework);
+  assert.deepEqual(applyWorkspacePatch(nextDay, makeWorkspacePatch(initial, extra)).homework, nextDay.homework);
+  const remote = normalizeWorkspace(initial);
+  assert.deepEqual(workspaceWriteFields(remote, reuseWorkspace(remote, saved)), { homework: extra.homework });
+});
+
 test('noop patches preserve all current remote edits', () => {
   const before = base();
   const remote = copy(before);
