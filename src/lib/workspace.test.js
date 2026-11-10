@@ -14,6 +14,7 @@ import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './
 import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList } from './tasks.js';
+import { startStudySession, stopStudySession } from './studySessions.js';
 
 const copy = (value) => structuredClone(value);
 const task = (overrides = {}) => ({
@@ -826,6 +827,36 @@ test('Homework batches sync independently and ignore duplicate or older requests
   assert.deepEqual(applyWorkspacePatch(nextDay, makeWorkspacePatch(initial, extra)).homework, nextDay.homework);
   const remote = normalizeWorkspace(initial);
   assert.deepEqual(workspaceWriteFields(remote, reuseWorkspace(remote, saved)), { homework: extra.homework });
+});
+
+test('study sessions persist across devices, deduplicate starts and stops, and write only their own field', () => {
+  const before = base();
+  delete before.studySessions;
+  const ready = normalizeWorkspace(before);
+  assert.deepEqual(ready.studySessions, []);
+  const laptop = { ...ready, studySessions: startStudySession(ready.studySessions, 'laptop', 10000) };
+  const phone = { ...ready, studySessions: startStudySession(ready.studySessions, 'phone', 12000) };
+  const saved = applyWorkspacePatch(laptop, makeWorkspacePatch(ready, phone));
+  assert.deepEqual(saved.studySessions, laptop.studySessions);
+  const reloaded = normalizeWorkspace(JSON.parse(JSON.stringify(saved)));
+  const done = { ...reloaded, studySessions: stopStudySession(reloaded.studySessions, 'laptop', 75000) };
+  const laterStop = { ...laptop, studySessions: stopStudySession(laptop.studySessions, 'laptop', 76000) };
+  const confirmed = applyWorkspacePatch(saved, makeWorkspacePatch(reloaded, done));
+  assert.deepEqual(confirmed.studySessions, [{ id: 'laptop', startedAt: 10000, stoppedAt: 75000 }]);
+  assert.deepEqual(applyWorkspacePatch(confirmed, makeWorkspacePatch(laptop, laterStop)).studySessions, confirmed.studySessions);
+  assert.deepEqual(workspaceWriteFields(saved, reuseWorkspace(saved, confirmed)), { studySessions: done.studySessions });
+});
+
+test('a delayed study stop leaves a newer session running and clock skew cannot create a negative duration', () => {
+  const before = base();
+  const running = { ...before, studySessions: startStudySession(before.studySessions, 'earlier', 10000) };
+  const done = { ...running, studySessions: stopStudySession(running.studySessions, 'earlier', 9000) };
+  const next = { ...done, studySessions: startStudySession(done.studySessions, 'next', 11000) };
+  const result = applyWorkspacePatch(next, makeWorkspacePatch(running, done));
+  assert.deepEqual(result.studySessions, [
+    { id: 'earlier', startedAt: 10000, stoppedAt: 10000 },
+    { id: 'next', startedAt: 11000, stoppedAt: null },
+  ]);
 });
 
 test('noop patches preserve all current remote edits', () => {

@@ -1,5 +1,6 @@
 import { normalizeDsaRevision } from './dsaRevision.js';
 import { normalizeHomeworkPlan } from './homeworkSchedule.js';
+import { applyStudySessionPatch, diffStudySessions, normalizeStudySession } from './studySessions.js';
 import { normalizeBookmark } from './bookmarks.js';
 import { isValidDate, LIST_COLORS, normalizeTaskLinks, validateTaskData } from './tasks.js';
 import { isValidTheme } from './theme.js';
@@ -143,6 +144,12 @@ function progressState(value) {
   );
 }
 
+function studySessions(value = []) {
+  const sessions = uniqueEntities(value, 'study session', normalizeStudySession);
+  assert(sessions.filter((session) => session.stoppedAt === null).length <= 1, 'Multiple active study sessions');
+  return sessions;
+}
+
 /** Validate a complete cloud document without replacing unreadable data. */
 export function normalizeWorkspace(value, previous) {
   assert(
@@ -156,6 +163,8 @@ export function normalizeWorkspace(value, previous) {
     bookmarks: previous && value.bookmarks === previous.bookmarks ? previous.bookmarks : bookmarks(value.bookmarks),
     homework: previous && value.homework === previous.homework
       ? previous.homework : normalizeHomeworkPlan(value.homework),
+    studySessions: previous && value.studySessions === previous.studySessions
+      ? previous.studySessions : studySessions(value.studySessions),
     revisions: previous && value.revisions === previous.revisions ? previous.revisions
       : uniqueEntities(value.revisions === undefined ? [] : value.revisions, 'DSA revisions', normalizeDsaRevision),
     notes: previous && value.notes === previous.notes ? previous.notes : notes(value.notes),
@@ -190,7 +199,7 @@ function equal(left, right) {
   return false;
 }
 
-const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions', 'homework'];
+const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions', 'homework', 'studySessions'];
 
 // Keep unchanged sections referentially stable across cloud snapshots and acks.
 export function reuseWorkspace(previous, next) {
@@ -328,6 +337,7 @@ export function diffWorkspace(previous, next) {
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
     revisions: entityPatch(previous.revisions, next.revisions),
     homework: equal(previous.homework, next.homework) ? null : next.homework,
+    studySessions: diffStudySessions(previous.studySessions, next.studySessions),
     notes: entityPatch(previous.notes, next.notes),
     appearance: fieldPatch(previous.appearance, next.appearance),
     progress: Object.fromEntries(
@@ -510,6 +520,7 @@ export function applyValidatedWorkspacePatch(current, patch) {
       : repairTaskLists({ version: 1, lists, tasks }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
     homework,
+    studySessions: applyStudySessionPatch(current.studySessions, patch.studySessions),
     revisions: patch.revisions ? applyEntities(current.revisions, patch.revisions) : current.revisions,
     notes: applyEntities(current.notes, patch.notes),
     appearance: applyFields(current.appearance, patch.appearance),

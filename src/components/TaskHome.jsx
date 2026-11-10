@@ -23,6 +23,7 @@ import {
 import { useTasks } from '../hooks/useTasks';
 import { PageHeader } from './ui/Workspace';
 import HomeworkAgenda from './HomeworkAgenda';
+import StudyTimer from './StudyTimer';
 import { createTaskDictation } from '../lib/taskDictation';
 import {
   completeTask,
@@ -1016,6 +1017,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
           {error}
         </p>
       )}
+      <StudyTimer isActive={isActive} />
       <HomeworkAgenda today={today} setActiveTab={setActiveTab} />
       <h2 id="home-tasks-title" className="mb-4 text-lg font-semibold tracking-tight text-ink">Tasks</h2>
       <div className="task-workspace grid grid-cols-1 gap-7" role="region" aria-labelledby="home-tasks-title">
