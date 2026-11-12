@@ -119,8 +119,13 @@ export function notes(value) {
 
 export function appearance(value) {
   assert(object(value) && isValidTheme(value), 'Invalid appearance');
-  const { mode, palette, material } = value;
-  return { mode, palette, ...(material === undefined ? {} : { material }) };
+  const { mode, palette, material, selectedTheme } = value;
+  return {
+    mode,
+    palette,
+    ...(material === undefined ? {} : { material }),
+    ...(selectedTheme === undefined ? {} : { selectedTheme }),
+  };
 }
 
 function progressState(value) {

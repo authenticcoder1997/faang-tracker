@@ -1,31 +1,28 @@
 export const THEME_MODES = Object.freeze(['light', 'dark']);
-export const THEME_MATERIALS = Object.freeze(['glass', 'solid']);
 export const THEME_PALETTES = Object.freeze([
+  'glass',
   'neutral',
   'ocean',
   'violet',
   'rose',
   'amber',
 ]);
-export const DEFAULT_THEME = Object.freeze({ mode: 'light', palette: 'neutral', material: 'glass' });
+export const DEFAULT_THEME = Object.freeze({ mode: 'light', palette: 'neutral' });
 
-/** Existing preferences use glass until a material is selected. */
 export function normalizeTheme(value) {
   if (typeof value === 'string') {
     return {
       ...DEFAULT_THEME,
       mode: value === 'dark' ? 'dark' : 'light',
+      palette: value === 'glass' ? 'glass' : DEFAULT_THEME.palette,
     };
   }
 
+  // New selections have one dedicated field. Older clients can still read their saved palette.
   return {
     mode: THEME_MODES.includes(value?.mode) ? value.mode : DEFAULT_THEME.mode,
-    palette: THEME_PALETTES.includes(value?.palette)
-      ? value.palette
-      : DEFAULT_THEME.palette,
-    material: THEME_MATERIALS.includes(value?.material)
-      ? value.material
-      : DEFAULT_THEME.material,
+    palette: THEME_PALETTES.includes(value?.selectedTheme) ? value.selectedTheme
+      : THEME_PALETTES.includes(value?.palette) ? value.palette : DEFAULT_THEME.palette,
   };
 }
 
@@ -35,7 +32,8 @@ export function isValidTheme(value) {
     typeof value === 'object' &&
     THEME_MODES.includes(value.mode) &&
     THEME_PALETTES.includes(value.palette) &&
-    (value.material === undefined || THEME_MATERIALS.includes(value.material))
+    (value.selectedTheme === undefined || THEME_PALETTES.includes(value.selectedTheme)) &&
+    (value.material === undefined || ['glass', 'solid'].includes(value.material))
   );
 }
 
@@ -47,7 +45,6 @@ export function applyTheme(
   if (root) {
     root.dataset.theme = theme.mode;
     root.dataset.palette = theme.palette;
-    root.dataset.material = theme.material;
     root.classList.toggle('dark', theme.mode === 'dark');
     root.style.colorScheme = theme.mode;
   }

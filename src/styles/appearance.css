@@ -1,4 +1,4 @@
-/* Each palette supplies its own glass, ink and light for both appearances. */
+/* Palette tokens also color the theme swatches. */
 :root,
 [data-swatch='neutral'] {
   --light-base: #edf3f7;
@@ -15,9 +15,6 @@
   --dark-shift: #90dfcc;
   --dark-glow: #315570;
   --dark-flare: #2d5b60;
-  --glow-origin: 6% -10rem;
-  --flare-origin: 99% 21rem;
-  --sheen-angle: 150deg;
 }
 
 /* Voltage */
@@ -37,9 +34,6 @@
   --dark-shift: #5be6e4;
   --dark-glow: #3b40ab;
   --dark-flare: #076b7c;
-  --glow-origin: 72% -12rem;
-  --flare-origin: 0% 20rem;
-  --sheen-angle: 112deg;
 }
 
 /* After Hours */
@@ -59,9 +53,6 @@
   --dark-shift: #ffa0d4;
   --dark-glow: #783ca5;
   --dark-flare: #8b2c66;
-  --glow-origin: 10% -7rem;
-  --flare-origin: 100% 12rem;
-  --sheen-angle: 136deg;
 }
 
 /* Velvet */
@@ -81,9 +72,6 @@
   --dark-shift: #dec2fa;
   --dark-glow: #87364e;
   --dark-flare: #6e458e;
-  --glow-origin: 88% -9rem;
-  --flare-origin: 2% 19rem;
-  --sheen-angle: 212deg;
 }
 
 /* Ember */
@@ -103,9 +91,25 @@
   --dark-shift: #ead282;
   --dark-glow: #9b4c29;
   --dark-flare: #806326;
-  --glow-origin: 34% -10rem;
-  --flare-origin: 100% 24rem;
-  --sheen-angle: 123deg;
+}
+
+/* Liquid Glass */
+[data-palette='glass'],
+[data-swatch='glass'] {
+  --light-base: #e0e8f7;
+  --light-pane: #f6faff;
+  --light-ink: #17243e;
+  --light-accent: #304b95;
+  --light-shift: #554689;
+  --light-glow: #98c9f6;
+  --light-flare: #ceb7ef;
+  --dark-base: #0a1124;
+  --dark-pane: #192745;
+  --dark-ink: #f0f5ff;
+  --dark-accent: #bed1ff;
+  --dark-shift: #a9e9fa;
+  --dark-glow: #284e96;
+  --dark-flare: #573877;
 }
 
 :root {
@@ -115,16 +119,6 @@
   --text: var(--light-ink);
   --accent: var(--light-accent);
   --accent-shift: var(--light-shift);
-  --glow: var(--light-glow);
-  --flare: var(--light-flare);
-  --glow-strength: 53%;
-  --flare-strength: 47%;
-  --glass-rim: rgb(255 255 255 / 0.96);
-  --glass-highlight: rgb(255 255 255 / 0.52);
-  --glass-sheen: rgb(255 255 255 / 0.68);
-  --glass-shadow: rgb(20 32 57 / 0.13);
-  --glass-band: rgb(255 255 255 / 0.56);
-  --glass-edge: color-mix(in srgb, var(--accent) 28%, transparent);
   --accent-ink: #fff;
   --accent-hover: color-mix(in srgb, var(--accent) 84%, var(--text));
   --accent-mix-strength: 56%;
@@ -142,16 +136,6 @@
   --text: var(--dark-ink);
   --accent: var(--dark-accent);
   --accent-shift: var(--dark-shift);
-  --glow: var(--dark-glow);
-  --flare: var(--dark-flare);
-  --glow-strength: 66%;
-  --flare-strength: 50%;
-  --glass-rim: color-mix(in srgb, var(--accent) 49%, transparent);
-  --glass-highlight: color-mix(in srgb, var(--accent-shift) 22%, transparent);
-  --glass-sheen: color-mix(in srgb, var(--accent) 18%, transparent);
-  --glass-shadow: rgb(0 0 0 / 0.34);
-  --glass-band: color-mix(in srgb, var(--accent) 15%, transparent);
-  --glass-edge: color-mix(in srgb, var(--accent) 36%, transparent);
   --accent-ink: var(--page-base);
   --accent-hover: color-mix(in srgb, var(--accent) 82%, white);
   --accent-mix-strength: 27%;
@@ -163,22 +147,16 @@
 }
 
 :root {
-  --page-background:
-    radial-gradient(ellipse 100rem 48rem at var(--glow-origin), transparent 45%, var(--glass-band) 57%, transparent 71%),
-    radial-gradient(ellipse 65rem 36rem at var(--flare-origin), transparent 50%, var(--glass-highlight) 62%, transparent 73%),
-    radial-gradient(ellipse 72rem 40rem at var(--glow-origin), color-mix(in srgb, var(--glow) var(--glow-strength), transparent), transparent),
-    radial-gradient(ellipse 63rem 44rem at var(--flare-origin), color-mix(in srgb, var(--flare) var(--flare-strength), transparent), transparent),
-    var(--page-base);
+  --page-background: var(--page-base);
   --canvas: transparent;
-  --surface: color-mix(in srgb, var(--pane) 63%, transparent);
-  --elevated: color-mix(in srgb, var(--pane) 95%, transparent);
-  --field: color-mix(in srgb, var(--pane) 70%, transparent);
+  --surface: var(--pane);
+  --elevated: var(--pane);
+  --field: color-mix(in srgb, var(--pane) 72%, var(--page-base));
   --well: color-mix(in srgb, var(--page-base) 56%, var(--pane));
   --selected: color-mix(in srgb, var(--accent) 15%, var(--pane));
   --hover: color-mix(in srgb, var(--accent) 8%, transparent);
-  --header: color-mix(in srgb, var(--pane) 66%, transparent);
-  --header-backdrop: blur(18px) saturate(150%);
-  --modal: color-mix(in srgb, var(--pane) 98%, transparent);
+  --header: var(--pane);
+  --modal: var(--pane);
   --text-secondary: color-mix(in srgb, var(--text) 92%, var(--page-base));
   --text-muted: color-mix(in srgb, var(--text) 86%, var(--page-base));
   --text-faint: color-mix(in srgb, var(--text) 82%, var(--page-base));
@@ -188,28 +166,51 @@
   --option: var(--pane);
   --scroll-thumb: color-mix(in srgb, var(--accent) 32%, var(--pane));
   --control-border: color-mix(in srgb, var(--text) 60%, var(--pane));
-  --material-shadow: 0 8px 28px var(--glass-shadow);
-  --glass-spark: color-mix(in srgb, var(--accent-shift) 19%, transparent);
-  --glass-reflection:
-    radial-gradient(ellipse 85% 10rem at 8% 0%, var(--glass-sheen), transparent 72%),
-    linear-gradient(var(--sheen-angle), transparent 46%, var(--glass-spark));
-  --glass-layer-shadow:
-    inset 0 1px var(--glass-rim),
-    inset 0 -1px var(--glass-highlight),
-    var(--material-shadow);
 }
 
-:root[data-material='solid'] {
-  --page-background: var(--page-base);
-  --surface: var(--pane);
-  --elevated: var(--pane);
-  --field: color-mix(in srgb, var(--pane) 72%, var(--page-base));
-  --header: var(--pane);
-  --header-backdrop: none;
-  --modal: var(--pane);
-  --glass-rim: transparent;
-  --glass-highlight: transparent;
-  --glass-sheen: transparent;
-  --glass-spark: transparent;
-  --material-shadow: none;
+:root[data-palette='glass'] {
+  --glass-blue: #a9d9fa;
+  --glass-violet: #c8b8ef;
+  --glass-pearl: #f5deed;
+  --glass-ray: rgb(255 255 255 / 0.62);
+  --glass-arc: rgb(250 254 255 / 0.44);
+  --glass-rim: rgb(255 255 255 / 0.96);
+  --glass-refracted-edge: rgb(96 128 198 / 0.24);
+  --glass-sheen: rgb(255 255 255 / 0.65);
+  --glass-tint: rgb(167 187 255 / 0.16);
+  --glass-shadow: rgb(34 52 101 / 0.15);
+  --glass-edge: rgb(82 110 177 / 0.29);
+  --page-background:
+    radial-gradient(ellipse 70% 94% at 70% -22%, transparent 68%, var(--glass-arc) 73%, transparent 83%),
+    linear-gradient(118deg, transparent 24%, var(--glass-ray) 47%, transparent 65%),
+    radial-gradient(ellipse 78% 80% at 1% 6%, var(--glass-blue), transparent 74%),
+    radial-gradient(ellipse 70% 79% at 102% 18%, var(--glass-violet), transparent 74%),
+    radial-gradient(ellipse 70% 68% at 73% 103%, var(--glass-pearl), transparent 79%),
+    var(--page-base);
+  --surface: color-mix(in srgb, var(--pane) 55%, transparent);
+  --field: color-mix(in srgb, var(--pane) 70%, transparent);
+  --header: color-mix(in srgb, var(--pane) 56%, transparent);
+  --modal: color-mix(in srgb, var(--pane) 86%, transparent);
+  --glass-reflection:
+    linear-gradient(155deg, var(--glass-sheen), transparent 43%, var(--glass-tint)),
+    radial-gradient(ellipse 64% 120% at 100% 110%, var(--glass-tint), transparent 74%);
+  --glass-layer-shadow:
+    inset 0 1px 1px var(--glass-rim),
+    inset 0 -1px 1px var(--glass-refracted-edge),
+    0 9px 28px var(--glass-shadow);
+  --glass-backdrop: blur(22px) saturate(145%);
+}
+
+:root[data-palette='glass'][data-theme='dark'] {
+  --glass-blue: #213f7b;
+  --glass-violet: #422765;
+  --glass-pearl: #143654;
+  --glass-ray: rgb(149 185 255 / 0.09);
+  --glass-arc: rgb(128 161 246 / 0.13);
+  --glass-rim: rgb(187 215 255 / 0.4);
+  --glass-refracted-edge: rgb(119 152 244 / 0.26);
+  --glass-sheen: rgb(163 198 255 / 0.13);
+  --glass-tint: rgb(126 114 226 / 0.17);
+  --glass-shadow: rgb(3 8 24 / 0.44);
+  --glass-edge: rgb(166 196 255 / 0.25);
 }

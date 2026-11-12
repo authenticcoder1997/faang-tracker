@@ -125,6 +125,7 @@ export function createWorkspace(legacy = {}) {
             'Invalid saved theme',
           );
           workspace.appearance.mode = value === 'dark' ? 'dark' : 'light';
+          if (value === 'glass') workspace.appearance.selectedTheme = 'glass';
         } else workspace.appearance = appearance(value);
       } else {
         const [name, keys] = Object.entries(PROGRESS_KEYS).find(([, keys]) =>

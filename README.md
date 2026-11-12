@@ -7,7 +7,7 @@ A personal workspace for everyday tasks, study plans, notes, and links, backed b
 - **Important links:** 21 supplied bookmarks, organized into folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** DSA starts with TUF and adds source filters for AlgoMaster 600, 300, 150, 75, and Whoami's four bookmarked LeetCode lists. AlgoMaster and Whoami problems open on LeetCode. Overlapping lists share progress where they refer to the same problem. Use **Planly only** under TUF for the original Planly list. The DSA revision queue syncs due dates and review counts in Firebase. Other libraries keep their own filters, progress, and problem notes.
 - **Notes:** an open notebook editor with automatic Firebase saving.
-- **Appearance:** Light and Dark Liquid Glass, with Silver, Ocean, Iris, Rose, and Amber palettes throughout every page and dialog.
+- **Appearance:** Liquid Glass, Frost, Voltage, After Hours, Velvet, and Ember, each with light and dark modes.
 
 ## Run locally
 

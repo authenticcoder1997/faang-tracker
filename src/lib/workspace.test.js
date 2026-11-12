@@ -239,7 +239,7 @@ test('migration preserves intentionally empty collections and recognizes plain o
   assert.deepEqual(empty.bookmarks, []);
   assert.deepEqual(empty.notes, []);
   assert.deepEqual(empty.tasks.lists, []);
-  assert.deepEqual(empty.appearance, { mode: 'light', palette: 'neutral' });
+  assert.deepEqual(empty.appearance, { mode: 'light', palette: 'neutral', selectedTheme: 'glass' });
   assert.equal(
     createWorkspace({
       'faang-tracker-notes': JSON.stringify({ notes: [note()] }),
@@ -757,7 +757,7 @@ test('note fields and appearance fields merge independently across devices', () 
   const before = base();
   const after = copy(before);
   after.notes[0].title = 'Renamed on laptop';
-  after.appearance.palette = 'ocean';
+  after.appearance.selectedTheme = 'glass';
   const remote = copy(before);
   remote.notes[0].content = 'Edited on phone';
   remote.appearance.mode = 'dark';
@@ -765,11 +765,11 @@ test('note fields and appearance fields merge independently across devices', () 
   const result = applyWorkspacePatch(remote, makeWorkspacePatch(before, after));
   assert.equal(result.notes[0].title, 'Renamed on laptop');
   assert.equal(result.notes[0].content, 'Edited on phone');
-  assert.deepEqual(result.appearance, { mode: 'dark', palette: 'ocean', material: 'solid' });
+  assert.deepEqual(result.appearance, { mode: 'dark', palette: 'neutral', material: 'solid', selectedTheme: 'glass' });
   const afterToggle = copy(result);
-  afterToggle.appearance.material = 'glass';
+  afterToggle.appearance.selectedTheme = 'ocean';
   const patch = makeWorkspacePatch(result, afterToggle);
-  assert.deepEqual(patch.appearance, { set: { material: 'glass' }, remove: [] });
+  assert.deepEqual(patch.appearance, { set: { selectedTheme: 'ocean' }, remove: [] });
   assert.deepEqual(applyWorkspacePatch(result, patch).appearance, afterToggle.appearance);
 });
 
