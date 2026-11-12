@@ -7,6 +7,10 @@ const sessionDate = new Intl.DateTimeFormat('en', {
   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit',
 });
 
+function nextLocalMidnight(timestamp) {
+  return new Date(timestamp).setHours(24, 0, 0, 0);
+}
+
 function durationParts(ms) {
   const seconds = Math.floor(ms / 1000);
   return [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
@@ -32,7 +36,7 @@ function DeleteSessionDialog({ session, onCancel, onConfirm }) {
       <h2 id="delete-study-title" className="text-lg font-semibold">Delete this study session?</h2>
       <div id="delete-study-detail" className="mt-3 space-y-2 text-sm text-muted">
         <p>{sessionDate.formatRange(session.startedAt, session.stoppedAt)} · {durationLabel(session.stoppedAt - session.startedAt)}</p>
-        <p>Its duration will be removed from your total.</p>
+        <p>This removes the entire session from your study history.</p>
       </div>
       <div className="mt-5 flex flex-wrap justify-end gap-2">
         <button type="button" className="button-secondary" onClick={onCancel}>Cancel</button>
@@ -51,22 +55,30 @@ export default function StudyTimer({ isActive }) {
   const [now, setNow] = useState(Date.now);
   const [showHistory, setShowHistory] = useState(false);
   const [pendingDeletion, setPendingDeletion] = useState(null);
-  const { active, history, total } = useMemo(() => {
-    const history = sessions.filter((session) => session.stoppedAt !== null)
-      .sort((first, second) => second.startedAt - first.startedAt);
-    return {
-      active: activeStudySession(sessions),
-      history,
-      total: history.reduce((sum, session) => sum + (session.stoppedAt - session.startedAt), 0),
-    };
-  }, [sessions]);
+  const active = useMemo(() => activeStudySession(sessions), [sessions]);
+  const todayStart = new Date(now).setHours(0, 0, 0, 0);
+  const { history, studiedToday } = useMemo(() => {
+    const todayEnd = nextLocalMidnight(todayStart);
+    const history = sessions.flatMap((session) => {
+      const { startedAt, stoppedAt } = session;
+      if (stoppedAt === null || startedAt >= todayEnd ||
+          (startedAt < todayStart && stoppedAt <= todayStart)) return [];
+      return [{ session, start: Math.max(startedAt, todayStart), end: Math.min(stoppedAt, todayEnd) }];
+    }).sort((first, second) => second.session.startedAt - first.session.startedAt);
+    const studiedToday = history.reduce((sum, { start, end }) => sum + end - start, 0);
+    return { history, studiedToday };
+  }, [sessions, todayStart]);
 
   useEffect(() => {
-    if (!active || !isActive) return;
-    const tick = () => setNow(Date.now());
+    if (!isActive) return;
+    let timer;
+    function tick() {
+      const timestamp = Date.now();
+      setNow(timestamp);
+      timer = window.setTimeout(tick, active ? 1000 : nextLocalMidnight(timestamp) - timestamp);
+    }
     tick();
-    const timer = window.setInterval(tick, 1000);
-    return () => window.clearInterval(timer);
+    return () => window.clearTimeout(timer);
   }, [active, isActive]);
 
   function saveSessions(change) {
@@ -85,6 +97,7 @@ export default function StudyTimer({ isActive }) {
 
   function stop() {
     const stoppedAt = Date.now();
+    setNow(stoppedAt);
     if (saveSessions((current) => stopStudySession(current, active.id, stoppedAt))) setShowHistory(true);
   }
 
@@ -114,26 +127,26 @@ export default function StudyTimer({ isActive }) {
           </button>
         </div>
         <div>
-          <p className="text-xs text-muted">Total studied</p>
-          <p className="mt-0.5 font-semibold tabular-nums text-ink">{durationLabel(total)}</p>
+          <p className="text-xs text-muted">Studied today</p>
+          <p className="mt-0.5 font-semibold tabular-nums text-ink">{durationLabel(studiedToday)}</p>
         </div>
         <button type="button" className="button-secondary" aria-expanded={showHistory}
           aria-controls="study-session-history" onClick={() => setShowHistory(!showHistory)}>
-          History <span className="tabular-nums text-muted">{history.length}</span>
+          Today’s history <span className="tabular-nums text-muted">{history.length}</span>
           <ChevronDown size={14} aria-hidden="true" className={showHistory ? 'rotate-180' : ''} />
         </button>
       </div>
       <div id="study-session-history" hidden={!showHistory} className="mt-4 border-t border-line pt-2">
         {history.length ? (
-          <ul aria-label="Study sessions" className="max-h-60 divide-y divide-line overflow-y-auto">
-            {history.map((session) => (
+          <ul aria-label="Today’s study sessions" className="max-h-60 divide-y divide-line overflow-y-auto">
+            {history.map(({ session, start, end }) => (
               <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
                 <span className="text-muted">
-                  {sessionDate.formatRange(session.startedAt, session.stoppedAt)}
+                  {sessionDate.formatRange(start, end)}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-medium tabular-nums text-ink">
-                    {durationLabel(session.stoppedAt - session.startedAt)}
+                    {durationLabel(end - start)}
                   </span>
                   <button type="button" className="icon-button hover:text-danger"
                     aria-label={`Delete study session from ${sessionDate.format(session.startedAt)}`}
@@ -144,7 +157,7 @@ export default function StudyTimer({ isActive }) {
               </li>
             ))}
           </ul>
-        ) : <p className="py-3 text-sm text-muted">No study sessions yet.</p>}
+        ) : <p className="py-3 text-sm text-muted">No study sessions today.</p>}
       </div>
       {isActive && pendingDeletion && (
         <DeleteSessionDialog session={pendingDeletion}

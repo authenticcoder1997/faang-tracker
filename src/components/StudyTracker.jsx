@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import NoteModal from './NoteModal';
+import CompletionDate from './CompletionDate';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
 import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 
@@ -211,6 +212,7 @@ export default function StudyTracker({
           {item.title}
         </a>
         {item.completed && <span className="sr-only">Completed</span>}
+        {(id === 'lld' || id === 'hld') && item.completed && <CompletionDate date={item.completedOn} />}
         {item.description && (
           <p className="mt-1 max-w-3xl line-clamp-1 text-xs leading-5 text-muted">
             {item.description}

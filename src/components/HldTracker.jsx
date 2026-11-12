@@ -27,7 +27,9 @@ export default function HldTracker({ isActive = true }) {
     ));
     return hld.map((item) => {
       const date = item.completed ? item.homeworkDate : dates.get(item.id);
-      return { ...item, date: date ? shortDate.format(new Date(`${date}T12:00:00`)) : undefined };
+      const label = date && date !== item.completedOn
+        ? shortDate.format(new Date(`${date}T12:00:00`)) : undefined;
+      return { ...item, date: item.completed && label ? `Homework ${label}` : label };
     });
   }, [hld, schedule]);
 

@@ -1,7 +1,13 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
-import { useEffect, useState } from 'react';
+import { completedQuestionsByDate } from '../lib/studyProgress';
+import { dsaCatalog } from '../lib/dsaCatalog';
+import { allDsaTopics } from '../lib/dsaPlan';
+import { lldTopics } from '../data/lldTopics';
+import { hldTopics } from '../data/hldTopics';
+import { useEffect, useMemo, useState } from 'react';
+import CompletedQuestions from './CompletedQuestions';
 import {
   ArrowRight,
   BookOpen,
@@ -18,6 +24,11 @@ import {
 const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
 const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
 const atNoon = (date) => new Date(date + 'T12:00:00');
+const completionCatalogs = {
+  dsa: [...new Map([...allDsaTopics, ...dsaCatalog].map((item) => [item.id, item])).values()],
+  lld: lldTopics,
+  hld: hldTopics,
+};
 
 const DESIGN_TRACKS = {
   lld: {
@@ -126,8 +137,12 @@ function AgendaSection({ track, onOpen }) {
 export default function HomeworkAgenda({ today, setActiveTab, children }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa, setDsa, setLld, setHld } = useHomeworkSchedule(today);
-  const todayIndex = schedule.findIndex((day) => day.date >= today);
-  const todaysAgenda = schedule[todayIndex];
+  const progress = useWorkspaceValue((state) => state.data.progress);
+  const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
+  const studyDates = useMemo(() => [...new Set([
+    ...schedule.map(({ date }) => date), ...completions.keys(),
+  ])].sort(), [schedule, completions]);
+  const todaysAgenda = schedule.find((day) => day.date >= today);
   useEffect(() => {
     if (todaysAgenda.date !== today || plan?.date >= today) return;
     updateData((current) => current.homework === plan
@@ -136,15 +151,17 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
   }, [plan, today, todaysAgenda, updateData]);
 
   const [chosenDate, setChosenDate] = useState(null);
-  const chosenIndex = schedule.findIndex((day) => day.date === chosenDate);
-  const selectedDayIndex = chosenIndex === -1 ? todayIndex : chosenIndex;
-  const day = schedule[selectedDayIndex];
+  const date = studyDates.includes(chosenDate) ? chosenDate : todaysAgenda.date;
+  const selectedDayIndex = studyDates.indexOf(date);
+  const day = schedule.find((day) => day.date === date);
+  const isPast = date < today;
+  const completedQuestions = <CompletedQuestions date={date} today={today} questions={completions.get(date)} />;
 
   const complete = (setItems, id) => setItems((items) => items.map((item) =>
-    item.id === id && !item.completed ? { ...item, completed: true, homeworkDate: day.date } : item,
+    item.id === id && !item.completed ? { ...item, completed: true, homeworkDate: date } : item,
   ));
 
-  const dsaTrack = day.dsa.length > 0 && {
+  const dsaTrack = day?.dsa.length > 0 && {
     id: 'dsa',
     label: 'DSA',
     title: 'DSA questions',
@@ -154,12 +171,12 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
     complete: (id) => complete(setDsa, id),
     source: 'TakeUForward',
   };
-  const designTrack = day.design && {
+  const designTrack = day?.design && {
     ...DESIGN_TRACKS[day.design.track],
     items: [day.design.item],
     complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
   };
-  const extraPlan = day.date === today && plan?.date === today && !dsaTrack && !designTrack
+  const extraPlan = date === today && plan?.date === today && !dsaTrack && !designTrack
     ? extraHomeworkPlan(plan, dsa)
     : null;
 
@@ -170,7 +187,7 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
           <h2 id="homework-title" className="text-lg font-semibold tracking-tight text-ink">Homework</h2>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
             <CalendarDays size={14} className="text-accent" aria-hidden="true" />
-            {agendaDate.format(atNoon(day.date))}
+            {agendaDate.format(atNoon(date))}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -184,7 +201,7 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
           <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
             <button
               type="button"
-              onClick={() => setChosenDate(schedule[selectedDayIndex - 1].date)}
+              onClick={() => setChosenDate(studyDates[selectedDayIndex - 1])}
               disabled={selectedDayIndex <= 0}
               aria-label="Previous study day"
               className="icon-button disabled:cursor-default disabled:opacity-30"
@@ -196,21 +213,21 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
             </label>
             <select
               id="date-selector"
-              value={day.date}
+              value={date}
               onChange={(event) => setChosenDate(event.target.value)}
               className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
               style={{ textAlignLast: 'center' }}
             >
-              {schedule.map(({ date }) => (
-                <option key={date} value={date}>
-                  {shortDate.format(atNoon(date))}
+              {studyDates.map((studyDate) => (
+                <option key={studyDate} value={studyDate}>
+                  {shortDate.format(atNoon(studyDate))}
                 </option>
               ))}
             </select>
             <button
               type="button"
-              onClick={() => setChosenDate(schedule[selectedDayIndex + 1].date)}
-              disabled={selectedDayIndex >= schedule.length - 1}
+              onClick={() => setChosenDate(studyDates[selectedDayIndex + 1])}
+              disabled={selectedDayIndex >= studyDates.length - 1}
               aria-label="Next study day"
               className="icon-button disabled:cursor-default disabled:opacity-30"
             >
@@ -220,7 +237,8 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
         </div>
       </header>
 
-      {!dsaTrack && !designTrack && (
+      {isPast && <div className="mb-4">{completedQuestions}</div>}
+      {!isPast && !dsaTrack && !designTrack && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <p className="flex items-center gap-2 text-sm text-muted">
             <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
@@ -243,6 +261,7 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
           {children}
         </div>
       </div>
+      {date === today && completedQuestions}
     </section>
   );
 }

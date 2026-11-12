@@ -132,13 +132,15 @@ function progressState(value) {
           object(state) &&
           typeof state.completed === 'boolean' &&
           (state.note === undefined || typeof state.note === 'string') &&
-          (state.homeworkDate === undefined || isValidDate(state.homeworkDate)),
+          (state.homeworkDate === undefined || isValidDate(state.homeworkDate)) &&
+          (state.completedOn === undefined || isValidDate(state.completedOn)),
         'Invalid problem progress',
       );
       return [id, {
         completed: state.completed,
         note: state.note ?? '',
         ...(state.completed && state.homeworkDate ? { homeworkDate: state.homeworkDate } : {}),
+        ...(state.completed && state.completedOn ? { completedOn: state.completedOn } : {}),
       }];
     }),
   );
@@ -488,10 +490,12 @@ export function applyValidatedWorkspacePatch(current, patch) {
         if (changedExisting.has(id)) return [];
         if (!Object.hasOwn(current.progress[name], id)) return [[id, state]];
         const existing = current.progress[name][id];
-        // A first-time note and Homework completion can arrive in either order.
-        if (state.homeworkDate && !existing.completed)
-          return [[id, { ...existing, completed: true, homeworkDate: state.homeworkDate }]];
-        if (existing.homeworkDate && !existing.note && state.note)
+        // A first note and a first completion can arrive in either order.
+        if ((state.homeworkDate || state.completedOn) && !existing.completed)
+          return [[id, { ...state, note: existing.note || state.note }]];
+        if (existing.completed && state.completedOn > (existing.completedOn ?? ''))
+          return [[id, { ...existing, note: existing.note || state.note, completedOn: state.completedOn }]];
+        if ((existing.homeworkDate || existing.completedOn) && !existing.note && state.note)
           return [[id, { ...existing, note: state.note }]];
         return [];
       }),
@@ -501,13 +505,16 @@ export function applyValidatedWorkspacePatch(current, patch) {
       remove: fields.remove,
     }) };
     for (const [id, delta] of Object.entries(patch.progressFields[name])) {
-      if (Object.hasOwn(progress[name], id))
-        Object.defineProperty(progress[name], id, {
-          value: applyFields(progress[name][id], delta),
-          enumerable: true,
-          configurable: true,
-          writable: true,
-        });
+      if (!Object.hasOwn(progress[name], id)) continue;
+      const existing = progress[name][id];
+      const updated = applyFields(existing, delta);
+      const keepLatestDate = delta.set.completedOn && existing.completedOn > delta.set.completedOn;
+      Object.defineProperty(progress[name], id, {
+        value: keepLatestDate ? { ...updated, completedOn: existing.completedOn } : updated,
+        enumerable: true,
+        configurable: true,
+        writable: true,
+      });
     }
   }
   const lists = applyEntities(current.tasks.lists, patch.lists);

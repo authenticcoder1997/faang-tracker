@@ -3,6 +3,7 @@ import { BookOpen, BookmarkCheck, BookmarkPlus, Check, CheckCircle2, Circle, Fil
 import { EMPTY_DSA_FILTERS, filterDsaProblems } from '../lib/dsaFilters';
 import { DSA_SOURCES, DSA_SOURCE_LABELS, dsaPatternsFor, dsaSourceFor } from '../lib/dsaCatalog';
 import NoteModal from './NoteModal';
+import CompletionDate from './CompletionDate';
 import { EmptyState } from './ui/Workspace';
 
 const PAGE_SIZE = 60;
@@ -63,6 +64,7 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
         >
           {link.title}
         </a>
+        {solved && <CompletionDate date={item.completedOn} />}
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 md:hidden">
           <span className="status-pill">{pattern}</span>
           <DifficultyTag level={item.difficulty} />

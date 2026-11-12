@@ -15,6 +15,7 @@ import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList, reorderTasks, taskFocus } from './tasks.js';
 import { deleteStudySession, startStudySession, stopStudySession } from './studySessions.js';
+import { completedQuestionsByDate, mergeChangedStudyProgress } from './studyProgress.js';
 
 const copy = (value) => structuredClone(value);
 const task = (overrides = {}) => ({
@@ -874,6 +875,65 @@ test('a first Homework completion and a first note on the same problem merge in 
   const expected = { ...checked.progress.dsa[id], note: 'Practice note' };
   assert.deepEqual(applyWorkspacePatch(annotated, makeWorkspacePatch(before, checked)).progress.dsa[id], expected);
   assert.deepEqual(applyWorkspacePatch(checked, makeWorkspacePatch(before, annotated)).progress.dsa[id], expected);
+});
+
+test('question completions sync with their actual date, separate from the assigned homework day', () => {
+  const before = base();
+  const checked = copy(before);
+  const annotated = copy(before);
+  const id = 'planly-next-permutation';
+  const today = '2026-11-12';
+  const assigned = '2026-11-11';
+  const old = { id, completed: false };
+  const done = { ...old, completed: true, homeworkDate: assigned };
+  checked.progress.dsa = mergeChangedStudyProgress(before.progress.dsa, [old], [done], today);
+  annotated.progress.dsa[id] = { completed: false, note: 'Review this approach' };
+  const saved = applyWorkspacePatch(annotated, makeWorkspacePatch(before, checked));
+  assert.deepEqual(saved.progress.dsa[id], {
+    completed: true, note: 'Review this approach', homeworkDate: assigned, completedOn: today,
+  });
+  assert.deepEqual(applyWorkspacePatch(checked, makeWorkspacePatch(before, annotated)).progress.dsa[id], saved.progress.dsa[id]);
+  const catalogs = { dsa: [{ id, title: 'Next Permutation', url: 'https://example.com/next' }] };
+  const history = completedQuestionsByDate(saved.progress, catalogs);
+  assert.equal(history.get(today)[0].id, id);
+  assert.equal(history.has(assigned), false);
+  const savedItem = { id, ...saved.progress.dsa[id] };
+  const edited = mergeChangedStudyProgress(saved.progress.dsa, [savedItem], [{ ...savedItem, note: 'New note' }], '2026-11-13');
+  assert.equal(edited[id].completedOn, today);
+  const unchecked = mergeChangedStudyProgress(edited, [savedItem], [{ ...savedItem, completed: false }], today);
+  assert.equal(unchecked[id].completedOn, undefined);
+  assert.equal(completedQuestionsByDate({ dsa: unchecked }, catalogs).size, 0);
+});
+
+test('question history includes past dates from all tracks and labels older Homework dates', () => {
+  const catalogs = {
+    dsa: [{ id: 'dsa-1', title: 'DSA' }],
+    lld: [{ id: 'lld-1', title: 'LLD' }],
+    hld: [{ id: 'hld-1', title: 'HLD' }],
+  };
+  const progress = {
+    dsa: { 'dsa-1': { completed: true, completedOn: '2026-11-10' } },
+    lld: { 'lld-1': { completed: true, completedOn: '2026-11-10' } },
+    hld: { 'hld-1': { completed: true, homeworkDate: '2026-11-09' } },
+  };
+  const history = completedQuestionsByDate(progress, catalogs);
+  assert.deepEqual(history.get('2026-11-10').map(({ track }) => track), ['dsa', 'lld']);
+  assert.equal(history.get('2026-11-09')[0].onlyHomeworkDate, true);
+});
+
+test('concurrent completions preserve the later completion date in either sync order', () => {
+  const id = 'hld-1';
+  for (const hasProgress of [false, true]) {
+    const before = base();
+    if (!hasProgress) delete before.progress.hld[id];
+    const older = copy(before);
+    older.progress.hld[id] = { completed: true, note: '', completedOn: '2026-11-11' };
+    const later = copy(before);
+    later.progress.hld[id] = { completed: true, note: '', completedOn: '2026-11-12' };
+    const expected = later.progress.hld[id];
+    assert.deepEqual(applyWorkspacePatch(older, makeWorkspacePatch(before, later)).progress.hld[id], expected);
+    assert.deepEqual(applyWorkspacePatch(later, makeWorkspacePatch(before, older)).progress.hld[id], expected);
+  }
 });
 
 test('Homework batches sync independently and ignore duplicate or older requests', () => {
