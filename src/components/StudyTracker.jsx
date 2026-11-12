@@ -80,6 +80,7 @@ export default function StudyTracker({
   const [collapsed, setCollapsed] = useState({});
   const [noteId, setNoteId] = useState(null);
   const activeNote = items.find((item) => item.id === noteId);
+  const showCompletionDay = id === 'lld' || id === 'hld';
 
   const sectionNames = [
     ...new Set(items.map((item) => item.section).filter(Boolean)),
@@ -212,7 +213,9 @@ export default function StudyTracker({
           {item.title}
         </a>
         {item.completed && <span className="sr-only">Completed</span>}
-        {(id === 'lld' || id === 'hld') && item.completed && <CompletionDate date={item.completedOn} />}
+        {showCompletionDay && item.completed && item.completedOn && (
+          <p className="mt-0.5 text-xs text-muted sm:hidden">Last completed day · <CompletionDate date={item.completedOn} /></p>
+        )}
         {item.description && (
           <p className="mt-1 max-w-3xl line-clamp-1 text-xs leading-5 text-muted">
             {item.description}
@@ -263,7 +266,14 @@ export default function StudyTracker({
           </span>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-2 sm:gap-5">
+      {showCompletionDay && (
+        <div className="hidden w-28 shrink-0 pt-1 text-xs text-muted sm:block">
+          {item.completed && item.completedOn && (
+            <><span className="sr-only">Last completed day </span><CompletionDate date={item.completedOn} /></>
+          )}
+        </div>
+      )}
+      <div className={`flex shrink-0 items-center gap-2 sm:gap-5 ${showCompletionDay ? 'sm:w-28 sm:justify-end' : ''}`}>
         <span className="hidden sm:block">
           <Difficulty value={item.difficulty} />
         </span>
@@ -513,13 +523,24 @@ export default function StudyTracker({
                       aria-hidden="true"
                     />
                   </button>
-                ) : (
+                ) : !showCompletionDay && (
                   <div className="flex items-center justify-between gap-4 px-5 py-3 text-[11px] text-muted">
                     <span>Interview questions</span>
                     <span>Difficulty & notes</span>
                   </div>
                 )}
-                {!closed && <div id={sectionId}>{rows.map(renderRow)}</div>}
+                {!closed && (
+                  <div id={sectionId}>
+                    {showCompletionDay && (
+                      <div className="hidden items-center gap-4 px-5 py-3 text-[11px] text-muted sm:flex">
+                        <span className="min-w-0 flex-1">Question</span>
+                        <span className="w-28 shrink-0">Last completed day</span>
+                        <span className="w-28 shrink-0 text-right">Difficulty &amp; notes</span>
+                      </div>
+                    )}
+                    {rows.map(renderRow)}
+                  </div>
+                )}
               </section>
             );
           })}

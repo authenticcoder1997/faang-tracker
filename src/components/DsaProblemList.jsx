@@ -34,6 +34,7 @@ function StatusTag({ solved }) {
 
 const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, onToggle, onNote, onRevision }) {
   const solved = !!item.completed;
+  const completedOn = solved ? item.completedOn : undefined;
   const source = dsaSourceFor(item, sources);
   const link = item.sources[source];
   const available = dsaPatternsFor(item, sources);
@@ -64,7 +65,9 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
         >
           {link.title}
         </a>
-        {solved && <CompletionDate date={item.completedOn} />}
+        {completedOn && (
+          <p className="mt-0.5 text-xs text-muted md:hidden">Last completed day · <CompletionDate date={completedOn} /></p>
+        )}
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 md:hidden">
           <span className="status-pill">{pattern}</span>
           <DifficultyTag level={item.difficulty} />
@@ -83,6 +86,9 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
       </td>
       <td className="hidden px-3 py-3 md:table-cell">
         <span className="status-pill" title={sourceNames.join(', ')}>{sourceLabel}</span>
+      </td>
+      <td className="hidden whitespace-nowrap px-3 py-3 text-xs text-muted md:table-cell">
+        <CompletionDate date={completedOn} />
       </td>
       <td className="w-16 pr-2 text-right sm:w-22">
         <button
@@ -284,6 +290,7 @@ export default function DsaProblemList({
                   <th scope="col" className="hidden px-3 md:table-cell">Difficulty</th>
                   <th scope="col" className="hidden px-3 md:table-cell">Status</th>
                   <th scope="col" className="hidden px-3 md:table-cell">Source</th>
+                  <th scope="col" className="hidden whitespace-nowrap px-3 md:table-cell">Last completed day</th>
                   <th scope="col" className="w-16 sm:w-22"><span className="sr-only">Revision and notes</span></th>
                 </tr>
               </thead>
