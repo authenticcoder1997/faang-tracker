@@ -4,7 +4,7 @@ const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short
 
 export default function CompletedQuestions({ date, today, questions = [] }) {
   return (
-    <section aria-labelledby="completed-questions-title" className="px-4 py-4 sm:px-6">
+    <section aria-labelledby="completed-questions-title" className="panel min-w-0 px-4 py-4 sm:px-6">
       <h3 id="completed-questions-title" className="section-heading flex flex-wrap items-center gap-x-2 gap-y-1">
         <CheckCircle2 size={17} className="shrink-0 text-accent" aria-hidden="true" />
         {date === today ? 'Questions completed today' : 'Questions completed on ' + dateFormat.format(new Date(date + 'T12:00:00'))}

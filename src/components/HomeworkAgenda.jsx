@@ -16,7 +16,6 @@ import {
   ArrowRight,
   BookOpen,
   CalendarDays,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Circle,
@@ -46,14 +45,14 @@ const TRACKS = {
   },
 };
 
-function AgendaSection({ track, today, onOpen, onComplete }) {
+function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAction }) {
   const Icon = track.icon;
   const { assignmentCount, revisionCount } = track;
   const unit = track.id === 'dsa' ? 'question' : 'exercise';
 
   return (
     <section
-      className="min-w-0 border-b border-line"
+      className="min-w-0"
       aria-labelledby={`agenda-${track.id}`}
     >
       <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pt-4 pb-1 sm:px-6">
@@ -85,6 +84,12 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
         </button>
       </header>
 
+      {track.items.length === 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-2 pb-4 sm:px-6">
+          <p className="text-sm text-muted">{emptyMessage}</p>
+          {emptyAction}
+        </div>
+      )}
       <ul className="divide-y divide-line">
         {track.items.map(({ question, assignment, revision }) => {
           const item = assignment || question;
@@ -187,7 +192,6 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
 
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
-  const isPast = date < today;
 
   function complete(track, assignment, revision) {
     const completedOn = dateKey();
@@ -235,10 +239,14 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
   const extraPlan = date === today && plan?.date === today && !tracks.length
     ? extraHomeworkPlan(plan, dsa)
     : null;
+  const dsaTrack = tracks.find(({ id }) => id === 'dsa') ?? {
+    ...TRACKS.dsa, items: [], assignmentCount: 0, revisionCount: 0,
+  };
+  const designTracks = tracks.filter(({ id }) => id !== 'dsa');
 
   return (
-    <section aria-labelledby="homework-title" className="panel min-w-0">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-line px-4 py-4 sm:px-6">
+    <section aria-labelledby="homework-title" className="grid min-w-0 gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 id="homework-title" className="text-lg font-semibold tracking-tight">Homework</h2>
           <time dateTime={date} className="inline-flex items-center gap-1.5 text-sm text-muted">
@@ -293,30 +301,33 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
         </div>
       </header>
 
-      {(!isPast || tracks.length > 0) && (
-        <>
-          {!tracks.length && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-6">
-              <p className="flex items-center gap-2 text-sm text-muted">
-                <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
-                {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
-              </p>
-              {extraPlan && (
-                <button type="button" className="button-secondary"
-                  onClick={() => updateData((current) => current.homework === plan &&
-                    !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
-                    ? { ...current, homework: extraPlan }
-                    : current)}>
-                  Get more work
-                </button>
-              )}
-            </div>
-          )}
-          {tracks.map((track) => (
+      <div className="panel min-w-0 overflow-hidden">
+        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete}
+          emptyMessage={extraPlan ? 'Today’s homework is complete.' : 'No DSA questions for this day.'}
+          emptyAction={extraPlan && (
+            <button type="button" className="button-secondary"
+              onClick={() => updateData((current) => current.homework === plan &&
+                !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
+                ? { ...current, homework: extraPlan }
+                : current)}>
+              Get more work
+            </button>
+          )} />
+      </div>
+      <div className="panel min-w-0 divide-y divide-line overflow-hidden">
+        {designTracks.length > 0 ? (
+          designTracks.map((track) => (
             <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
-          ))}
-        </>
-      )}
+          ))
+        ) : (
+          <section aria-labelledby="agenda-design" className="px-4 py-4 sm:px-6">
+            <h3 id="agenda-design" className="section-heading flex items-center gap-2.5">
+              <Layers size={17} className="shrink-0 text-accent" aria-hidden="true" /> LLD / HLD
+            </h3>
+            <p className="mt-2 text-sm text-muted">No design exercises for this day.</p>
+          </section>
+        )}
+      </div>
       <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
     </section>
   );
