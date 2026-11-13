@@ -321,6 +321,12 @@ button.study-activity-cell {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
+.study-activity-star {
+  flex: none;
+  fill: #ffd45a;
+  stroke: #5d3600;
+  stroke-width: 1.5px;
+}
 .study-activity-tooltip {
   position: absolute;
   bottom: calc(100% + 5px);

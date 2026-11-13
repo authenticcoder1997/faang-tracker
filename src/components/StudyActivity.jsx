@@ -1,8 +1,10 @@
 import { useMemo, useRef } from 'react';
+import { Star } from 'lucide-react';
 import { studySessionsByDate } from '../lib/studySessions';
 import { addDays } from '../lib/tasks';
 
 const HOUR_MS = 3_600_000;
+const STUDY_GOAL_HOURS = 6;
 const FIRST_HIGHLIGHTED_DAY = '2026-11-11';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
@@ -61,8 +63,10 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
           const column = position % 7 + 1;
           const duration = totals.get(day) ?? 0;
           const muted = day < FIRST_HIGHLIGHTED_DAY;
-          const level = !muted && duration ? Math.max(1, Math.min(6, Math.floor(duration / HOUR_MS))) : 0;
+          const level = !muted && duration
+            ? Math.max(1, Math.min(STUDY_GOAL_HOURS, Math.floor(duration / HOUR_MS))) : 0;
           const future = day > today;
+          const goalReached = level === STUDY_GOAL_HOURS;
           const studied = timeLabel(duration);
           const label = `${fullDate.format(calendarDate)}${future ? '' : ` · ${studied}`}`;
           return (
@@ -73,9 +77,13 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
                 else cells.current.delete(day);
               }}
               style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: column }}
-              aria-label={label} aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
+              aria-label={goalReached ? `${label} · Study goal reached` : label}
+              aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
               onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
-              {index + 1}
+              <span className="flex items-center justify-center gap-px">
+                {index + 1}
+                {goalReached && <Star size={11} className="study-activity-star" aria-hidden="true" />}
+              </span>
               {!future && (
                 <span className="study-activity-tooltip" aria-hidden="true">
                   {shortDate.format(calendarDate)} · {studied}
@@ -90,14 +98,17 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
           {fullDate.format(dayTime(date))} · {timeLabel(totals.get(date) ?? 0)}
         </p>
       )}
-      <div className="mt-2 flex items-center justify-end gap-2 text-xs tabular-nums text-muted" aria-label="Study time scale from 0 to 6 or more hours">
+      <div className="mt-2 flex items-center justify-end gap-2 text-xs tabular-nums text-muted"
+        aria-label={`Study time scale from 0 hours to a gold star at ${STUDY_GOAL_HOURS} hours`}>
         <span>0 h</span>
         <div className="flex gap-1" aria-hidden="true">
-          {[0, 1, 2, 3, 4, 5, 6].map((level) => (
+          {Array.from({ length: STUDY_GOAL_HOURS + 1 }, (_, level) => (
             <span key={level} className="study-activity-cell" data-level={level} />
           ))}
         </div>
-        <span>6+ h</span>
+        <span className="inline-flex items-center gap-1">
+          <Star size={12} className="study-activity-star" aria-hidden="true" /> {STUDY_GOAL_HOURS}+ h
+        </span>
       </div>
     </section>
   );
