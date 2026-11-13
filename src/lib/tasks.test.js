@@ -98,6 +98,14 @@ test('due labels count calendar days across months and years', () => {
   assert.equal(dueDateLabel('2027-02-02', '2027-01-31'), 'Due in 2 days');
 });
 
+test('legacy flags do not change the order of tasks with the same date', () => {
+  const tasks = [
+    task({ id: 'first' }),
+    task({ id: 'second', createdAt: '2026-10-21T05:00:00Z', flagged: true }),
+  ];
+  assert.deepEqual(getTaskRows(tasks, '2026-10-21').active.map(({ key }) => key), ['first', 'second']);
+});
+
 test('focus presets and custom hours end at the requested time or local midnight', () => {
   const morning = new Date(2026, 11, 31, 8).getTime();
   const now = new Date(2026, 11, 31, 23, 30).getTime();

@@ -3,16 +3,11 @@ import {
   AlarmClock,
   AlarmClockOff,
   CalendarDays,
-  CalendarClock,
   Check,
-  CheckCheck,
   ChevronDown,
   CircleCheck,
-  ClipboardList,
   ExternalLink,
-  Flag,
   GripVertical,
-  ListTodo,
   Mic,
   Pencil,
   Plus,
@@ -49,12 +44,13 @@ import {
   taskFocusEnd,
 } from '../lib/tasks';
 
-const SMART_VIEWS = [
-  { id: 'today', name: 'Today', icon: CalendarDays },
-  { id: 'scheduled', name: 'Scheduled', icon: CalendarClock },
-  { id: 'all', name: 'All', icon: ClipboardList },
-  { id: 'snoozed', name: 'Snoozed', icon: AlarmClock },
-  { id: 'completed', name: 'Completed', icon: CheckCheck },
+const TASK_VIEWS = [
+  { id: 'all', name: 'All' },
+  { id: 'today', name: 'Today' },
+  { id: 'scheduled', name: 'Scheduled' },
+  { id: 'snoozed', name: 'Snoozed' },
+  { id: 'completed', name: 'Completed' },
+  { id: 'deleted', name: 'Recently deleted' },
 ];
 const EMPTY_VIEWS = {
   today: ['A fresh start for today', 'Add something you’d like to get done. Keep it simple, or make it a routine.'],
@@ -63,10 +59,6 @@ const EMPTY_VIEWS = {
   deleted: ['Nothing in Recently deleted', 'Deleted tasks can be restored from here.'],
 };
 const fieldClass = 'input-control';
-
-function themedAccent(color) {
-  return `color-mix(in srgb, ${color}, var(--accent-mix) var(--accent-mix-strength))`;
-}
 
 function prettyDate(key, today) {
   if (!key) return '';
@@ -197,7 +189,6 @@ function TaskForm({
     listId: task?.listId || defaultListId || lists[0]?.id || '',
     dueDate: task ? task.dueDate || '' : defaultDate || '',
     repeat: task?.repeat || 'none',
-    flagged: task?.flagged || false,
   });
   const recognition = useRef(null);
   const [voice, setVoice] = useState({ status: 'idle', field: null });
@@ -500,15 +491,6 @@ function TaskForm({
             </p>
           )}
         </div>
-        <label className="flex cursor-pointer items-center gap-3 text-sm text-secondary">
-          <input
-            type="checkbox"
-            checked={draft.flagged}
-            onChange={(event) => field('flagged', event.target.checked)}
-            className="h-4 w-4 accent-accent"
-          />
-          <Flag size={15} className="text-warning" /> Flag as important
-        </label>
         <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
           {task ? (
             <button
@@ -750,7 +732,7 @@ function SnoozeDialog({ task, today, onSnooze, onClose }) {
 
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
-  const [view, setView] = useState('all');
+  const [chosenView, setView] = useState('all');
   const [query, setQuery] = useState('');
   const [taskEditor, setTaskEditor] = useState(null);
   const [snoozeTask, setSnoozeTask] = useState(null);
@@ -804,21 +786,9 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     return () => window.clearTimeout(timer);
   }, [nextFocusEnd]);
   const isToday = (row) => focus?.taskId === row.key || (!!row.date && row.date <= today);
-  const selectedList = view.startsWith('list:')
-    ? data.lists.find((list) => list.id === view.slice(5))
-    : null;
-  const selectedSmart = SMART_VIEWS.find((item) => item.id === view);
-  const title =
-    selectedList?.name ||
-    selectedSmart?.name ||
-    (view === 'flagged' ? 'Flagged' : 'Recently deleted');
-  const counts = {
-    today: active.filter(isToday).length,
-    scheduled: active.filter((row) => row.date).length,
-    all: active.length,
-    snoozed: snoozed.length,
-    completed: completed.length,
-  };
+  const selectedList = data.lists.find((list) => `list:${list.id}` === chosenView);
+  const selectedFilter = TASK_VIEWS.find(({ id }) => id === chosenView) ?? TASK_VIEWS[0];
+  const view = selectedList ? chosenView : selectedFilter.id;
   const matches = (row) =>
     `${row.task.title} ${row.task.notes || ''} ${(row.task.links || []).join(' ')} ${data.lists.find((list) => list.id === row.task.listId)?.name || ''}`
       .toLowerCase()
@@ -830,9 +800,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         ? isToday(row)
         : view === 'scheduled'
           ? !!row.date
-          : view === 'flagged'
-            ? row.task.flagged
-            : true;
+          : true;
   const rowsByView = { completed, deleted, snoozed };
   const rows = (rowsByView[view] || active)
     .filter(inView)
@@ -1103,7 +1071,7 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         key={row.key}
         data-task-row={order ? row.key : undefined}
         data-task-drop={dropPosition || undefined}
-        className={`group relative flex items-start gap-2 border-b border-line px-1 py-4 last:border-0 sm:gap-3.5 lg:py-3.5 ${isFocused ? 'task-focused-row mb-2 rounded-xl px-3' : ''} ${drag?.movedId === row.key && order ? 'opacity-50' : ''}`}
+        className={`relative flex items-start gap-2 border-b border-line px-1 py-4 last:border-0 sm:gap-3.5 lg:py-3.5 ${isFocused ? 'task-focused-row mb-2 rounded-xl px-3' : ''} ${drag?.movedId === row.key && order ? 'opacity-50' : ''}`}
       >
         {order?.ids.length > 1 && (
           <button
@@ -1219,37 +1187,16 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
             <AlarmClockOff size={16} />
             <span className="hidden sm:inline">Bring back</span>
           </button>
-        ) : (
-          <div className="flex shrink-0 items-center">
-            {!isCompleted && (
-              <button
-                type="button"
-                onClick={() => setSnoozeTask(row.task)}
-                aria-label={`Snooze ${row.task.title}`}
-                title="Snooze task"
-                className="rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
-              >
-                <AlarmClock size={16} />
-              </button>
-            )}
-            <button
-              aria-label={`${row.task.flagged ? 'Unflag' : 'Flag'} ${row.task.title}`}
-              aria-pressed={!!row.task.flagged}
-              onClick={() =>
-                updateData((current) => ({
-                  ...current,
-                  tasks: current.tasks.map((task) =>
-                    task.id === row.task.id
-                      ? { ...task, flagged: !task.flagged }
-                      : task,
-                  ),
-                }))
-              }
-              className={`rounded-lg p-2 transition ${row.task.flagged ? 'text-warning' : 'text-faint hover:text-warning sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100'}`}
-            >
-              <Flag size={16} fill={row.task.flagged ? 'currentColor' : 'none'} />
-            </button>
-          </div>
+        ) : !isCompleted && (
+          <button
+            type="button"
+            onClick={() => setSnoozeTask(row.task)}
+            aria-label={`Snooze ${row.task.title}`}
+            title="Snooze task"
+            className="shrink-0 rounded-lg p-2 text-faint hover:bg-hover hover:text-accent focus-visible:text-accent"
+          >
+            <AlarmClock size={16} />
+          </button>
         )}
       </li>
     );
@@ -1289,161 +1236,62 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       )}
       <HomeworkAgenda today={today} setActiveTab={setActiveTab} isActive={isActive} />
       <h2 id="home-tasks-title" className="mb-4 text-lg font-semibold tracking-tight text-ink">Tasks</h2>
-      <div className="task-workspace grid grid-cols-1 gap-7" role="region" aria-labelledby="home-tasks-title">
-        <aside
-          aria-label="Task lists"
-          className="task-sidebar min-w-0 border-b border-line pb-5 lg:border-r lg:border-b-0 lg:pr-5 lg:pb-0"
-        >
-          <div className="flex flex-wrap gap-1 lg:flex-col">
-            {SMART_VIEWS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setView(item.id);
-                    setQuery('');
-                  }}
-                  aria-pressed={view === item.id}
-                  aria-label={`${item.name} tasks`}
-                  className={`flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-xs transition-colors lg:w-full lg:text-sm ${view === item.id ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-hover hover:text-secondary'}`}
-                >
-                  <Icon size={17} className="shrink-0 text-accent" />
-                  <span>{item.name}</span>
-                  <span className="ml-auto pl-2 text-xs tabular-nums text-muted">
-                    {counts[item.id]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex items-center justify-between px-2 lg:mt-7">
-            <h2 className="text-[10px] font-semibold uppercase tracking-[0.13em] text-muted">
-              My lists
-            </h2>
-            <button
-              onClick={() => setListEditor({ list: null })}
-              aria-label="Create a new list"
-              className="rounded-md p-1 text-muted hover:bg-hover hover:text-ink"
-            >
-              <Plus size={15} />
-            </button>
-          </div>
-          <div className="mt-2 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col">
-            {data.lists.map((list) => (
-              <div
-                key={list.id}
-                className="group flex shrink-0 items-center lg:w-full"
-              >
-                <button
-                  aria-label={`${list.name} list`}
-                  aria-pressed={selectedList?.id === list.id}
-                  onClick={() => {
-                    setView(`list:${list.id}`);
-                    setQuery('');
-                  }}
-                  className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition lg:gap-3 lg:py-3 ${selectedList?.id === list.id ? 'bg-selected text-ink' : 'text-muted hover:bg-hover hover:text-ink'}`}
-                >
-                  <span
-                    className="flex h-6 w-6 shrink-0 items-center justify-center"
-                    style={{
-                      color: themedAccent(list.color),
-                    }}
-                  >
-                    <ListTodo size={16} />
-                  </span>
-                  <span className="min-w-0 max-w-36 truncate lg:max-w-none">
-                    {list.name}
-                  </span>
-                  <span className="ml-auto text-xs tabular-nums text-muted">
-                    {active.filter((row) => row.task.listId === list.id).length}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  aria-label={`Delete ${list.name} list`}
-                  title={`Delete ${list.name} list`}
-                  onClick={() => {
-                    setListDeletion(list);
-                    setListDeleteError('');
-                  }}
-                  className="shrink-0 rounded-lg p-2 text-faint hover:bg-danger/10 hover:text-danger focus-visible:text-danger"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 flex gap-1 border-t border-line pt-2 lg:mt-5 lg:block lg:space-y-1 lg:pt-4">
-            <button
-              onClick={() => {
-                setView('flagged');
-                setQuery('');
-              }}
-              aria-pressed={view === 'flagged'}
-              className={`flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs ${view === 'flagged' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
-            >
-              <Flag size={15} className="text-warning" />
-              Flagged
-              <span className="ml-auto">
-                {active.filter((row) => row.task.flagged).length}
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                setView('deleted');
-                setQuery('');
-              }}
-              aria-pressed={view === 'deleted'}
-              className={`flex w-full items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-xs ${view === 'deleted' ? 'bg-selected text-ink' : 'text-muted hover:text-ink'}`}
-            >
-              <Trash2 size={15} />
-              Recently deleted
-              {deleted.length > 0 && (
-                <span className="ml-auto">{deleted.length}</span>
-              )}
-            </button>
-          </div>
-          <button
-            onClick={() => setListEditor({ list: null })}
-            className="mt-6 hidden items-center gap-2 px-2 py-2 text-xs font-medium text-accent lg:flex hover:text-accent"
-          >
-            <Plus size={15} /> Add list
-          </button>
-        </aside>
-        <section aria-label={title} className="flex min-w-0 flex-col">
+      <div className="task-workspace">
+        <section aria-labelledby="home-tasks-title" className="flex min-w-0 flex-col">
           <p id="task-reorder-help" className="sr-only">Drag this handle or use the Up and Down arrow keys to move the task.</p>
           <div className="task-agenda-toolbar flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold tracking-tight text-ink">
-                {title}
-              </h2>
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <div className="relative min-w-0 max-w-[min(100%,20rem)]">
+                <select aria-label="Filter tasks" value={view}
+                  onChange={(event) => {
+                    setView(event.target.value);
+                    setQuery('');
+                  }}
+                  className="task-view-select block min-h-10 max-w-full appearance-none rounded-lg py-1 pr-8 pl-2 text-xl font-semibold tracking-tight text-ink hover:bg-hover focus-visible:outline-offset-0"
+                >
+                  {TASK_VIEWS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+                  {data.lists.length > 0 && (
+                    <optgroup label="My lists">
+                      {data.lists.map(({ id, name }) => <option key={id} value={`list:${id}`}>{name}</option>)}
+                    </optgroup>
+                  )}
+                </select>
+                <ChevronDown size={15} className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-muted" aria-hidden="true" />
+              </div>
               <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] tabular-nums text-accent">
                 {rows.length}
               </span>
               {selectedList && (
-                <button
-                  onClick={() => setListEditor({ list: selectedList })}
-                  aria-label={`Edit ${selectedList.name} list`}
-                  className="rounded-lg p-1.5 text-muted hover:text-ink"
-                >
-                  <Pencil size={14} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => setListEditor({ list: selectedList })}
+                    aria-label={`Edit ${selectedList.name} list`} title="Edit list" className="icon-button">
+                    <Pencil size={14} aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => {
+                    setListDeletion(selectedList);
+                    setListDeleteError('');
+                  }} aria-label={`Delete ${selectedList.name} list`} title="Delete list"
+                    className="icon-button hover:!text-danger">
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </div>
               )}
             </div>
-            <div className="relative w-full sm:w-48 lg:w-64">
-              <Search
-                size={14}
-                className="pointer-events-none absolute top-3 left-3 text-faint"
-              />
-              <input
-                aria-label="Search tasks"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search this view"
-                className="input-control task-search pl-9"
-              />
+            <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+              <div className="relative min-w-0 flex-1 sm:w-48 lg:w-64">
+                <Search size={14} className="pointer-events-none absolute top-3 left-3 text-faint" aria-hidden="true" />
+                <input
+                  aria-label="Search tasks"
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search this view"
+                  className="input-control task-search pl-9"
+                />
+              </div>
+              <button type="button" onClick={() => setListEditor({ list: null })} className="button-secondary shrink-0">
+                <Plus size={15} aria-hidden="true" /> New list
+              </button>
             </div>
           </div>
           {rows.length > 0 ? (

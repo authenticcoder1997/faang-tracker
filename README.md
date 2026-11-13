@@ -2,7 +2,7 @@
 
 A personal workspace for everyday tasks, study plans, notes, and links, backed by Firebase Firestore.
 
-- **Home:** tasks grouped into lists, with clickable website links, voice dictation for titles and notes, daily, weekday, weekend, or one-time schedules; flags, completion history, and recoverable deleted tasks. Home opens on Today; new tasks default to today's date, which can be changed or cleared.
+- **Home:** the task toolbar dropdown switches between All, Today, Scheduled, Snoozed, Completed, Recently deleted, and individual lists. The task view defaults to All. Tasks support website links, voice dictation, and daily, weekday, weekend, or one-time schedules. New tasks default to today's date, which can be changed or cleared.
 - **Homework:** a daily agenda for DSA, low-level design, system design, and concurrency.
 - **Important links:** 21 supplied bookmarks, organized into folders with website screenshot cards, search, and bookmark import.
 - **Study libraries:** DSA starts with TUF and adds source filters for AlgoMaster 600, 300, 150, 75, and Whoami's four bookmarked LeetCode lists. AlgoMaster and Whoami problems open on LeetCode. Overlapping lists share progress where they refer to the same problem. Use **Planly only** under TUF for the original Planly list. The DSA revision queue syncs due dates and review counts in Firebase. Other libraries keep their own filters, progress, and problem notes.
@@ -26,7 +26,7 @@ node --test src/lib/*.test.js src/hooks/*.test.js
 
 `src/index.css` defines the shared theme tokens, page frame, typography, surfaces, and controls. `src/components/ui/Workspace.jsx` contains reusable page headers, statistics, and empty states. All four study libraries use `StudyTracker.jsx`.
 
-Appearance is saved with the Firebase workspace and is shared across devices. The header separates the light/dark toggle from the palette rail. Header and page frames use the available width, with 24px desktop and 14px phone gutters. Wide desktop windows fit the navigation and theme controls in one row, and the Home task sidebar stays visible while scrolling.
+Appearance is saved with the Firebase workspace and is shared across devices. The header separates the light/dark toggle from the palette rail. Header and page frames use the available width, with 24px desktop and 14px phone gutters. Wide desktop windows fit the navigation and theme controls in one row.
 
 Voice task entry uses the browser’s speech recognition. Click a microphone to start, stop to review the text, then save the task. Microphone access is requested only after starting dictation; browsers without speech support keep the typed form available.
 
@@ -34,7 +34,7 @@ Voice task entry uses the browser’s speech recognition. Click a microphone to 
 
 Tasks, lists, notes, bookmarks, study progress, and appearance are stored in one shared Firestore document at `workspaces/main`. The owner chose a public workspace with no login: anyone who opens the website can read and change this same workspace. Firestore uses memory-only caching. The app does not write workspace data or appearance to browser storage.
 
-Use the trash button beside a list to delete it. Tasks move to a list you choose, preserving schedules and completion history; deleting the last populated list creates an Inbox for its tasks. Empty lists can all be removed, and adding a task then creates an Inbox. The deletion notification offers Undo.
+Select a list in the task dropdown and use the trash button to delete it. Tasks move to a list you choose, preserving schedules and completion history. Deleting the last populated list creates an Inbox for its tasks. Empty lists can all be removed, and adding a task then creates an Inbox. The deletion notification offers Undo.
 
 My Space shows its layout while connecting, fills Home from the first confirmed Firebase snapshot, and loads other tabs when opened. Tabs keep their drafts and filters while you switch between them.
 

@@ -363,9 +363,13 @@ span.study-activity-cell { width: 11px; height: 11px; }
   border-radius: 16px;
   background-color: var(--surface);
 }
-[data-palette='glass'] .task-sidebar button[aria-pressed='true'] {
-  background-image: var(--glass-reflection);
-  box-shadow: inset 0 1px var(--glass-rim), inset 0 -1px var(--glass-refracted-edge);
+.task-view-select {
+  field-sizing: content;
+}
+.task-view-select :is(option, optgroup) {
+  color: var(--text);
+  background-color: var(--field);
+  font-size: 15px;
 }
 .section-heading {
   font-size: 15px;
@@ -875,19 +879,6 @@ textarea::placeholder {
   }
   .page-frame {
     padding-top: 24px;
-  }
-  .task-workspace {
-    min-height: calc(100dvh - var(--workspace-header-height) - 184px);
-    grid-template-columns: clamp(218px, 17vw, 268px) minmax(0, 1fr);
-    gap: clamp(26px, 2.4vw, 40px);
-  }
-  .task-sidebar {
-    position: sticky;
-    top: calc(var(--workspace-header-height) + var(--header-inset, 0px) + 16px);
-    align-self: start;
-    max-height: calc(100dvh - var(--workspace-header-height) - var(--header-inset, 0px) - 32px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
   }
   .dsa-workspace {
     grid-template-columns: clamp(220px, 17vw, 268px) minmax(0, 1fr);

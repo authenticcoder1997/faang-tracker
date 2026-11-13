@@ -222,7 +222,6 @@ export function mergeTaskEdits(current, opened, draft, now, today = dateKey()) {
 
 function compareTaskRows(a, b) {
   return (a.date || '9999').localeCompare(b.date || '9999') ||
-    Number(!!b.task.flagged) - Number(!!a.task.flagged) ||
     a.task.createdAt.localeCompare(b.task.createdAt);
 }
 
