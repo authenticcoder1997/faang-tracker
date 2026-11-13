@@ -84,17 +84,44 @@ export function deleteStudySession(sessions, id) {
   return entry ? sessions.filter((session) => session !== entry) : sessions;
 }
 
+function sameStudyTime(first, second) {
+  return first.startedAt === second.startedAt && first.stoppedAt === second.stoppedAt &&
+    first.durationMs === second.durationMs && first.studyDate === second.studyDate;
+}
+
+function replaceStudySession(sessions, edited) {
+  const entry = sessions.find(({ id, stoppedAt }) => id === edited.id && stoppedAt !== null);
+  if (!entry || edited.stoppedAt === null || sameStudyTime(entry, edited)) return sessions;
+  const updated = normalizeStudySession(edited);
+  return sessions.map((session) => session === entry ? updated : session);
+}
+
+export function editStudySession(sessions, id, durationMs, studyDate) {
+  const entry = sessions.find((session) => session.id === id && session.stoppedAt !== null);
+  if (!entry) return sessions;
+  const duration = entry.durationMs ?? (entry.stoppedAt - entry.startedAt);
+  if (duration === durationMs && studySessionDate(entry) === studyDate) return sessions;
+  return replaceStudySession(sessions, {
+    id, startedAt: entry.startedAt, stoppedAt: entry.startedAt, durationMs, studyDate,
+  });
+}
+
 export function diffStudySessions(previous, next) {
   if (previous === next) return null;
   const before = activeStudySession(previous);
   const after = activeStudySession(next);
   const activeChanged = before?.id !== after?.id;
-  const previousIds = new Set(previous.map((session) => session.id));
+  const previousById = new Map(previous.map((session) => [session.id, session]));
   const nextIds = new Set(next.map((session) => session.id));
-  const add = next.filter((session) => session.stoppedAt !== null && !previousIds.has(session.id));
+  const add = next.filter((session) => session.stoppedAt !== null && !previousById.has(session.id));
+  const update = next.filter((session) => {
+    const previousEntry = previousById.get(session.id);
+    return session.stoppedAt !== null && previousEntry && previousEntry.stoppedAt !== null &&
+      !sameStudyTime(previousEntry, session);
+  });
   const remove = previous.filter((session) => session.stoppedAt !== null && !nextIds.has(session.id))
     .map((session) => session.id);
-  if (!activeChanged && !add.length && !remove.length) return null;
+  if (!activeChanged && !add.length && !remove.length && !update.length) return null;
   const stopped = activeChanged && before
     ? next.find((session) => session.id === before.id && session.stoppedAt !== null)
     : null;
@@ -103,6 +130,7 @@ export function diffStudySessions(previous, next) {
     stop: stopped ?? null,
     add,
     remove,
+    update,
   };
 }
 
@@ -110,5 +138,6 @@ export function applyStudySessionPatch(sessions, patch) {
   const remaining = patch?.remove?.reduce(deleteStudySession, sessions) ?? sessions;
   const stopped = patch?.stop ? stopStudySession(remaining, patch.stop.id, patch.stop.stoppedAt) : remaining;
   const logged = patch?.add?.reduce(appendStudySession, stopped) ?? stopped;
-  return patch?.start ? startStudySession(logged, patch.start.id, patch.start.startedAt) : logged;
+  const edited = patch?.update?.reduce(replaceStudySession, logged) ?? logged;
+  return patch?.start ? startStudySession(edited, patch.start.id, patch.start.startedAt) : edited;
 }

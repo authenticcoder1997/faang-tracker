@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Play, Plus, Square, Timer, Trash2 } from 'lucide-react';
+import { ChevronDown, Pencil, Play, Plus, Square, Timer, Trash2 } from 'lucide-react';
 import { useWorkspace } from '../hooks/useWorkspace';
 import {
-  activeStudySession, deleteStudySession, logStudyTime, startStudySession, stopStudySession, studySessionsByDate,
+  activeStudySession, deleteStudySession, editStudySession, logStudyTime, startStudySession, stopStudySession,
+  studySessionDate, studySessionsByDate,
 } from '../lib/studySessions';
 import { dateKey, isValidDate } from '../lib/tasks';
 
@@ -22,9 +23,12 @@ function durationLabel(ms) {
   return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
 }
 
-function AddStudyTimeDialog({ date, today, onCancel, onSave }) {
+function StudyTimeDialog({ date, today, entry, onCancel, onSave }) {
   const dialog = useRef(null);
   const [error, setError] = useState('');
+  const duration = entry ? entry.durationMs ?? (entry.stoppedAt - entry.startedAt) : 0;
+  const [hours, minutes, seconds] = durationParts(duration);
+  const title = entry ? 'Edit study time' : 'Add study time';
   useEffect(() => {
     const element = dialog.current;
     element.showModal();
@@ -34,40 +38,53 @@ function AddStudyTimeDialog({ date, today, onCancel, onSave }) {
   function submit(event) {
     event.preventDefault();
     const fields = new FormData(event.currentTarget);
-    const minutes = Number(fields.get('hours')) * 60 + Number(fields.get('minutes'));
+    const wholeSeconds = Number(fields.get('hours')) * 3600 + Number(fields.get('minutes')) * 60 +
+      Number(fields.get('seconds'));
+    const durationMs = wholeSeconds === Math.floor(duration / 1000) ? duration : wholeSeconds * 1000;
     const studyDate = fields.get('date');
     if (!isValidDate(studyDate) || studyDate > dateKey()) {
       setError('Choose today or an earlier date.');
       return;
     }
-    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 24 * 60) {
-      setError('Enter a duration between 1 minute and 24 hours.');
+    if (!Number.isInteger(wholeSeconds) || durationMs < (entry ? 1000 : 60_000) || durationMs > 86_400_000) {
+      setError(entry ? 'Enter a duration between 1 second and 24 hours.' : 'Enter a duration between 1 minute and 24 hours.');
       return;
     }
-    onSave(minutes * 60_000, studyDate);
+    onSave(durationMs, studyDate);
   }
 
   return (
-    <dialog ref={dialog} aria-labelledby="add-study-title" onCancel={onCancel}
+    <dialog ref={dialog} aria-labelledby="study-time-dialog-title" onCancel={onCancel}
       className="task-dialog m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-line p-5 sm:p-6">
-      <h2 id="add-study-title" className="text-lg font-semibold">Add study time</h2>
+      <h2 id="study-time-dialog-title" className="text-lg font-semibold">{title}</h2>
       <form onSubmit={submit} onChange={() => setError('')} className="mt-3">
         <label className="block text-xs font-medium text-muted">
           Date studied
-          <input type="date" name="date" defaultValue={date} max={today} required className="input-control mt-1" />
+          <input type="date" name="date" defaultValue={entry ? studySessionDate(entry) : date}
+            max={today} required className="input-control mt-1" />
         </label>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className={`mt-4 grid gap-3 ${entry ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <label className="text-xs font-medium text-muted">
             Hours
             <input type="number" name="hours" min="0" max="24" step="1" inputMode="numeric"
-              placeholder="0" className="input-control mt-1" />
+              defaultValue={entry ? hours : ''} placeholder="0" className="input-control mt-1" />
           </label>
           <label className="text-xs font-medium text-muted">
             Minutes
             <input type="number" name="minutes" min="0" max="59" step="1" inputMode="numeric"
-              placeholder="0" className="input-control mt-1" />
+              defaultValue={entry ? minutes : ''} placeholder="0" className="input-control mt-1" />
           </label>
+          {entry && (
+            <label className="text-xs font-medium text-muted">
+              Seconds
+              <input type="number" name="seconds" min="0" max="59" step="1" inputMode="numeric"
+                defaultValue={seconds} placeholder="0" className="input-control mt-1" />
+            </label>
+          )}
         </div>
+        {entry && entry.durationMs === undefined && (
+          <p className="mt-3 text-xs text-muted">Saving a correction logs the full session on the selected date.</p>
+        )}
         {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <button type="button" className="button-secondary" onClick={onCancel}>Cancel</button>
@@ -112,7 +129,7 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
   const { updateData } = useWorkspace();
   const [now, setNow] = useState(Date.now);
   const [showHistory, setShowHistory] = useState(false);
-  const [showAddTime, setShowAddTime] = useState(false);
+  const [timeEditor, setTimeEditor] = useState(null);
   const [pendingDeletion, setPendingDeletion] = useState(null);
   const active = useMemo(() => activeStudySession(sessions), [sessions]);
   const isToday = date === today;
@@ -155,10 +172,15 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
     if (saveSessions((current) => deleteStudySession(current, session.id))) setPendingDeletion(null);
   }
 
-  function addTime(durationMs, studyDate) {
-    const id = crypto.randomUUID();
-    if (saveSessions((current) => logStudyTime(current, id, durationMs, Date.now(), studyDate))) {
-      setShowAddTime(false);
+  function saveTime(durationMs, studyDate) {
+    const { entry } = timeEditor;
+    const loggedAt = Date.now();
+    const id = entry?.id ?? crypto.randomUUID();
+    const change = entry
+      ? (current) => editStudySession(current, id, durationMs, studyDate)
+      : (current) => logStudyTime(current, id, durationMs, loggedAt, studyDate);
+    if (saveSessions(change)) {
+      setTimeEditor(null);
       if (studyDate !== date) onSelectDate(studyDate);
     }
   }
@@ -200,7 +222,7 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
       </div>
       <div id="study-session-history" hidden={!showHistory} className="mt-4 border-t border-line pt-2">
         <div className="flex justify-end pb-1">
-          <button type="button" className="button-secondary" onClick={() => setShowAddTime(true)}>
+          <button type="button" className="button-secondary" onClick={() => setTimeEditor({})}>
             <Plus size={14} aria-hidden="true" /> Add time
           </button>
         </div>
@@ -215,6 +237,11 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
                   <span className="font-medium tabular-nums text-ink">
                     {durationLabel(duration)}
                   </span>
+                  <button type="button" className="icon-button hover:text-accent"
+                    aria-label={`Edit study session from ${dateLabel}`}
+                    title="Edit study session" onClick={() => setTimeEditor({ entry: session })}>
+                    <Pencil size={15} aria-hidden="true" />
+                  </button>
                   <button type="button" className="icon-button hover:text-danger"
                     aria-label={`Delete study session from ${dateLabel}`}
                     title="Delete study session" onClick={() => setPendingDeletion(session)}>
@@ -226,8 +253,9 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
           </ul>
         ) : <p className="py-3 text-sm text-muted">{isToday ? 'No study sessions today.' : 'No study sessions for this date.'}</p>}
       </div>
-      {isActive && showAddTime && (
-        <AddStudyTimeDialog date={date} today={today} onCancel={() => setShowAddTime(false)} onSave={addTime} />
+      {isActive && timeEditor && (
+        <StudyTimeDialog date={date} today={today} entry={timeEditor.entry}
+          onCancel={() => setTimeEditor(null)} onSave={saveTime} />
       )}
       {isActive && pendingDeletion && (
         <DeleteSessionDialog session={pendingDeletion}
