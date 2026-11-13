@@ -22,8 +22,8 @@ export default function HldTracker({ isActive = true }) {
   const { schedule, hld, setHld } = useHomeworkSchedule(today, isActive);
   const items = useMemo(() => {
     if (!schedule) return hld;
-    const dates = new Map(schedule.flatMap(({ date, design }) =>
-      design?.track === 'hld' ? [[design.item.id, date]] : [],
+    const dates = new Map(schedule.flatMap(({ date, designs }) =>
+      designs.filter(({ track }) => track === 'hld').map(({ item }) => [item.id, date]),
     ));
     return hld.map((item) => {
       const date = item.completed ? item.homeworkDate : dates.get(item.id);

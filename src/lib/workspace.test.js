@@ -950,6 +950,21 @@ test('Homework batches sync independently and ignore duplicate or older requests
   assert.deepEqual(workspaceWriteFields(remote, reuseWorkspace(remote, saved)), { homework: extra.homework });
 });
 
+test('a saved weekend plan can add its missing design track without replacing the active batch', () => {
+  const before = base();
+  const design = { track: 'hld', id: 'hld-1' };
+  const legacy = { date: '2026-11-14', round: 0, dsa: ['dsa-1'], design };
+  const upgraded = { ...legacy, weekendDesigns: [design, { track: 'lld', id: 'lld-1' }] };
+  const initial = { ...before, homework: legacy };
+  const update = makeWorkspacePatch(initial, { ...initial, homework: upgraded });
+  const saved = applyWorkspacePatch(initial, update);
+  assert.deepEqual(saved.homework, upgraded);
+  assert.deepEqual(applyWorkspacePatch(saved, update).homework, upgraded);
+
+  const newer = { ...saved, homework: { ...upgraded, round: 1, dsa: ['dsa-2'], design: null, weekendDesigns: [] } };
+  assert.deepEqual(applyWorkspacePatch(newer, update).homework, newer.homework);
+});
+
 test('study sessions persist across devices, deduplicate starts and stops, and write only their own field', () => {
   const before = base();
   delete before.studySessions;

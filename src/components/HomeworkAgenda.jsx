@@ -184,9 +184,11 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
   ])].sort(), [schedule, completions, sessions, today, date]);
   const todaysAgenda = schedule.find((day) => day.date >= today);
   useEffect(() => {
-    if (todaysAgenda.date !== today || plan?.date >= today) return;
+    if (todaysAgenda.date !== today) return;
+    const next = homeworkPlanFor(todaysAgenda, plan);
+    if (next === plan) return;
     updateData((current) => current.homework === plan
-      ? { ...current, homework: homeworkPlanFor(todaysAgenda) }
+      ? { ...current, homework: next }
       : current);
   }, [plan, today, todaysAgenda, updateData]);
 
@@ -220,7 +222,8 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
   }
   const tracks = Object.values(TRACKS).flatMap((track) => {
     const { id } = track;
-    const assignments = id === 'dsa' ? day?.dsa || [] : day?.design?.track === id ? [day.design.item] : [];
+    const assignments = id === 'dsa' ? day?.dsa ?? []
+      : (day?.designs ?? []).filter((design) => design.track === id).map(({ item }) => item);
     const reviews = revisionsByTrack[id];
     if (!assignments.length && !reviews.length) return [];
     const reviewsById = new Map(reviews.map((review) => [review.revision.id, review]));

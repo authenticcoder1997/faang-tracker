@@ -539,9 +539,13 @@ export function applyValidatedWorkspacePatch(current, patch) {
       (set.snoozedUntil || set.deletedAt || set.completed || completedDates?.add.length)))) focus = null;
   const savedPlan = current.homework;
   const incomingPlan = patch.homework;
-  // A duplicate click or a stale device must never replace today's active batch.
+  // Upgrade a legacy weekend batch once without letting a stale client replace its assignments.
+  const upgradesWeekend = incomingPlan && savedPlan && incomingPlan.date === savedPlan.date &&
+    incomingPlan.round === savedPlan.round && incomingPlan.weekendDesigns !== undefined &&
+    savedPlan.weekendDesigns === undefined && equal(incomingPlan.dsa, savedPlan.dsa) &&
+    equal(incomingPlan.design, savedPlan.design);
   const homework = incomingPlan && (!savedPlan || incomingPlan.date > savedPlan.date ||
-    (incomingPlan.date === savedPlan.date && incomingPlan.round > savedPlan.round))
+    (incomingPlan.date === savedPlan.date && incomingPlan.round > savedPlan.round) || upgradesWeekend)
     ? incomingPlan : savedPlan;
   return normalizeWorkspace({
     schemaVersion: 1,
