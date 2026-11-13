@@ -15,13 +15,14 @@ test('revision due labels count calendar days across months and years', () => {
 
 test('reviews schedule increasingly spaced dates and only count once per day', () => {
   const initial = queueRevision([], 'dsa-5', 'am-600', '2026-11-09');
+  assert.equal(initial[0].dueDate, '2026-11-10');
   assert.equal(queueRevision(initial, 'dsa-5', 'tuf', '2026-11-09'), initial);
-  const first = markRevisionReviewed(initial, 'dsa-5', '2026-11-09');
-  assert.deepEqual(first[0], { id: 'dsa-5', source: 'am-600', reviewCount: 1, reviewedOn: '2026-11-09', dueDate: '2026-11-10' });
-  assert.deepEqual(markRevisionReviewed(first, 'dsa-5', '2026-11-09'), first);
-  const second = markRevisionReviewed(first, 'dsa-5', '2026-11-10');
+  const first = markRevisionReviewed(initial, 'dsa-5', '2026-11-10');
+  assert.deepEqual(first[0], { id: 'dsa-5', source: 'am-600', reviewCount: 1, reviewedOn: '2026-11-10', dueDate: '2026-11-11' });
+  assert.deepEqual(markRevisionReviewed(first, 'dsa-5', '2026-11-10'), first);
+  const second = markRevisionReviewed(first, 'dsa-5', '2026-11-11');
   assert.equal(second[0].reviewCount, 2);
-  assert.equal(second[0].dueDate, '2026-11-13');
+  assert.equal(second[0].dueDate, '2026-11-14');
 });
 
 test('revision writes merge across devices without modifying solved progress or notes', () => {
@@ -47,6 +48,7 @@ test('design revisions resolve to the right questions and use the existing revie
   const today = '2026-11-13';
   const lld = queueRevision([], 'lld-1', 'lld', today);
   const mixed = queueRevision(lld, 'hld-1', 'hld', today);
+  assert.ok(mixed.every((record) => record.dueDate === today));
   assert.equal(revisionTrack({ source: null }), 'dsa');
   assert.deepEqual(mixed.map((record) => revisionQuestion(record)?.title), ['Design Tic Tac Toe', 'Bitly']);
   assert.equal(revisionQuestion({ id: 'lld-missing', source: 'lld' }), undefined);

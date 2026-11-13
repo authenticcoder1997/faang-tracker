@@ -32,7 +32,8 @@ export function normalizeRevision(value) {
 
 export function queueRevision(revisions, id, source, today) {
   if (revisions.some((item) => item.id === id)) return revisions;
-  return [...revisions, normalizeRevision({ id, source, dueDate: today, reviewCount: 0 })];
+  const dueDate = revisionTrack({ source }) === 'dsa' ? addDays(today, 1) : today;
+  return [...revisions, normalizeRevision({ id, source, dueDate, reviewCount: 0 })];
 }
 
 export function markRevisionReviewed(revisions, id, today) {
