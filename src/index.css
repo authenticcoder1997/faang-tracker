@@ -345,6 +345,8 @@ button.study-activity-cell {
 }
 .study-activity-goal > span {
   z-index: 1;
+  /* The star's upper point sits above the center of its body. */
+  transform: translateY(1.5px);
 }
 .study-activity-goal-badge {
   padding: 1px 7px;
