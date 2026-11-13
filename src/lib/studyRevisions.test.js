@@ -1,10 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { markRevisionReviewed, queueRevision, revisionTrack } from './studyRevisions.js';
+import { markRevisionReviewed, queueRevision, revisionDueLabel, revisionTrack } from './studyRevisions.js';
 import { revisionQuestion } from './revisionQuestions.js';
 import { applyWorkspacePatch, makeWorkspacePatch, normalizeWorkspace, workspaceWriteFields, reuseWorkspace } from './workspace.js';
 import { createWorkspace } from './workspaceLegacy.js';
 import { mergeChangedStudyProgress } from './studyProgress.js';
+
+test('revision due labels count calendar days across months and years', () => {
+  assert.equal(revisionDueLabel('2026-12-31', '2027-01-01'), '1 day overdue');
+  assert.equal(revisionDueLabel('2026-12-30', '2027-01-02'), '3 days overdue');
+  assert.equal(revisionDueLabel('2027-01-02', '2027-01-02'), 'Due today');
+  assert.equal(revisionDueLabel('2027-01-03', '2027-01-02'), 'Due in 1 day');
+});
 
 test('reviews schedule increasingly spaced dates and only count once per day', () => {
   const initial = queueRevision([], 'dsa-5', 'am-600', '2026-11-09');
