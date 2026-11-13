@@ -3,6 +3,7 @@ import { studySessionsByDate } from '../lib/studySessions';
 import { addDays } from '../lib/tasks';
 
 const HOUR_MS = 3_600_000;
+const FIRST_HIGHLIGHTED_DAY = '2026-11-11';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
 const fullDate = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -59,13 +60,14 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
           const position = firstWeekday + index;
           const column = position % 7 + 1;
           const duration = totals.get(day) ?? 0;
-          const level = duration ? Math.max(1, Math.min(6, Math.floor(duration / HOUR_MS))) : 0;
+          const muted = day < FIRST_HIGHLIGHTED_DAY;
+          const level = !muted && duration ? Math.max(1, Math.min(6, Math.floor(duration / HOUR_MS))) : 0;
           const future = day > today;
           const studied = timeLabel(duration);
           const label = `${fullDate.format(calendarDate)}${future ? '' : ` · ${studied}`}`;
           return (
             <button key={day} type="button" className="study-activity-cell" data-level={level}
-              data-column={column} disabled={future}
+              data-column={column} data-muted={muted || undefined} disabled={future}
               ref={(cell) => {
                 if (cell) cells.current.set(day, cell);
                 else cells.current.delete(day);
