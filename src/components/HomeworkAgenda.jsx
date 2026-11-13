@@ -1,19 +1,19 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
-import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
-import { completedQuestionsByDate } from '../lib/studyProgress';
+import { completedQuestionsByDate, mergeChangedStudyProgress } from '../lib/studyProgress';
+import { revisionQuestion } from '../lib/revisionQuestions';
+import { markRevisionReviewed, revisionTrack } from '../lib/studyRevisions';
+import { dateKey, dueDateLabel } from '../lib/tasks';
 import { dsaCatalog } from '../lib/dsaCatalog';
 import { allDsaTopics } from '../lib/dsaPlan';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { useEffect, useMemo, useState } from 'react';
 import CompletedQuestions from './CompletedQuestions';
-import { RevisionRows } from './RevisionQueue';
 import {
   ArrowRight,
   BookOpen,
-  BookmarkCheck,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -33,7 +33,8 @@ const completionCatalogs = {
   hld: hldTopics,
 };
 
-const DESIGN_TRACKS = {
+const TRACKS = {
+  dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen, source: 'TakeUForward' },
   lld: {
     id: 'lld', label: 'LLD', title: 'LLD', icon: Layers,
     subtitle: 'Low-level design · AlgoMaster', source: 'AlgoMaster',
@@ -44,9 +45,9 @@ const DESIGN_TRACKS = {
   },
 };
 
-function AgendaSection({ track, onOpen }) {
+function AgendaSection({ track, today, onOpen, onComplete }) {
   const Icon = track.icon;
-  const count = track.items.length;
+  const { assignmentCount, revisionCount } = track;
   const unit = track.id === 'dsa' ? 'question' : 'exercise';
 
   return (
@@ -56,18 +57,23 @@ function AgendaSection({ track, onOpen }) {
     >
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-5 sm:px-6">
         <div className="min-w-0">
-          <div className="mb-1.5 flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <Icon size={17} className="shrink-0 text-accent" />
             <h3 id={`agenda-${track.id}`} className="section-heading">
               {track.title}
             </h3>
-            <span className="status-pill tabular-nums">
-              {count} {unit}{count === 1 ? '' : 's'}
-            </span>
+            {assignmentCount > 0 && (
+              <span className="status-pill tabular-nums">
+                {assignmentCount} {unit}{assignmentCount === 1 ? '' : 's'}
+              </span>
+            )}
+            {revisionCount > 0 && (
+              <span className="status-pill tabular-nums">
+                {revisionCount} {revisionCount === 1 ? 'revision' : 'revisions'}
+              </span>
+            )}
           </div>
-          <p className="max-w-lg text-xs leading-5 text-muted">
-            {track.subtitle}
-          </p>
+          {track.subtitle && <p className="mt-1.5 max-w-lg text-xs leading-5 text-muted">{track.subtitle}</p>}
         </div>
         <button
           type="button"
@@ -80,58 +86,74 @@ function AgendaSection({ track, onOpen }) {
       </header>
 
       <ul className="divide-y divide-line">
-        {track.items.map((item) => (
-          <li
-            key={item.id}
-            className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
-          >
-            <button
-              type="button"
-              onClick={() => track.complete(item.id)}
-              aria-label={`Mark complete: ${item.title}`}
-              title="Mark complete"
-              className="completion-button mt-0.5 shrink-0"
+        {track.items.map(({ question, assignment, revision }) => {
+          const item = assignment || question;
+          const action = assignment ? 'Mark complete' : 'Mark reviewed';
+          const source = question?.sourceLabel || track.source;
+          const url = question?.url || item.url;
+          return (
+            <li
+              key={assignment?.id || revision.id}
+              className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
             >
-              <Circle size={21} aria-hidden="true" />
-            </button>
-            <div className="min-w-0 flex-1">
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
+              <button
+                type="button"
+                onClick={() => onComplete(track.id, assignment, revision)}
+                aria-label={`${action}: ${item.title}`}
+                title={action}
+                className="completion-button mt-0.5 shrink-0"
               >
-                {item.title}
-              </a>
-              <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
-                {item.difficulty && (
-                  <span className="status-pill">{item.difficulty}</span>
-                )}
-                {(item.topic || item.section) && (
-                  <span className="status-pill">{item.topic || item.section}</span>
-                )}
-                {item.premium && (
-                  <span className="status-pill text-warning">Premium</span>
+                <Circle size={21} aria-hidden="true" />
+              </button>
+              <div className="min-w-0 flex-1">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
+                >
+                  {item.title}
+                </a>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
+                  {revision && (
+                    <>
+                      <span className="status-pill border-accent/30 bg-accent-soft font-semibold text-accent">Revision</span>
+                      <time dateTime={revision.dueDate}
+                        title={shortDate.format(atNoon(revision.dueDate))}
+                        className={revision.dueDate < today ? 'text-warning' : ''}>
+                        {dueDateLabel(revision.dueDate, today)}
+                      </time>
+                    </>
+                  )}
+                  {item.difficulty && (
+                    <span className="status-pill">{item.difficulty}</span>
+                  )}
+                  {(item.topic || item.section) && (
+                    <span className="status-pill">{item.topic || item.section}</span>
+                  )}
+                  {item.premium && (
+                    <span className="status-pill text-warning">Premium</span>
+                  )}
+                </div>
+                {item.description && (
+                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                    {item.description}
+                  </p>
                 )}
               </div>
-              {item.description && (
-                <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
-                  {item.description}
-                </p>
-              )}
-            </div>
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Open ${item.title} on ${track.source}`}
-              title={`Open on ${track.source}`}
-              className="icon-button -mr-1 shrink-0"
-            >
-              <ExternalLink size={15} />
-            </a>
-          </li>
-        ))}
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${item.title} on ${source}`}
+                title={`Open on ${source}`}
+                className="icon-button -mr-1 shrink-0"
+              >
+                <ExternalLink size={15} />
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
@@ -139,8 +161,8 @@ function AgendaSection({ track, onOpen }) {
 
 export default function HomeworkAgenda({ today, setActiveTab, children }) {
   const { updateData } = useWorkspace();
-  const { schedule, plan, dsa, setDsa, setLld, setHld } = useHomeworkSchedule(today);
-  const { revisions, markReviewed } = useStudyRevisions();
+  const { schedule, plan, dsa } = useHomeworkSchedule(today);
+  const revisions = useWorkspaceValue((state) => state.data.revisions);
   const progress = useWorkspaceValue((state) => state.data.progress);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
   const studyDates = useMemo(() => [...new Set([
@@ -156,33 +178,58 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
 
   const [chosenDate, setChosenDate] = useState(null);
   const date = studyDates.includes(chosenDate) ? chosenDate : todaysAgenda.date;
-  const dueRevisions = date === today ? revisions.filter((record) => record.dueDate <= today)
-    .sort((first, second) => first.dueDate.localeCompare(second.dueDate)) : [];
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
   const isPast = date < today;
   const completedQuestions = <CompletedQuestions date={date} today={today} questions={completions.get(date)} />;
 
-  const complete = (setItems, id) => setItems((items) => items.map((item) =>
-    item.id === id && !item.completed ? { ...item, completed: true, homeworkDate: date } : item,
-  ));
+  function complete(track, assignment, revision) {
+    const completedOn = dateKey();
+    updateData((current) => {
+      const next = {
+        ...current,
+        revisions: revision ? markRevisionReviewed(current.revisions, revision.id, completedOn) : current.revisions,
+      };
+      if (!assignment) return next;
+      const previous = { ...assignment, ...current.progress[track][assignment.id] };
+      if (previous.completed) return next;
+      const finished = { ...previous, completed: true, homeworkDate: date };
+      const progress = mergeChangedStudyProgress(current.progress[track], [previous], [finished], completedOn);
+      return { ...next, progress: { ...current.progress, [track]: progress } };
+    });
+  }
 
-  const dsaTrack = day?.dsa.length > 0 && {
-    id: 'dsa',
-    label: 'DSA',
-    title: 'DSA questions',
-    icon: BookOpen,
-    subtitle: [...new Set(day.dsa.map((item) => item.section))].join(' · '),
-    items: day.dsa,
-    complete: (id) => complete(setDsa, id),
-    source: 'TakeUForward',
-  };
-  const designTrack = day?.design && {
-    ...DESIGN_TRACKS[day.design.track],
-    items: [day.design.item],
-    complete: (id) => complete(day.design.track === 'lld' ? setLld : setHld, id),
-  };
-  const extraPlan = date === today && plan?.date === today && !dsaTrack && !designTrack
+  const revisionsByTrack = { dsa: [], lld: [], hld: [] };
+  if (date === today) {
+    const due = revisions.filter((record) => record.dueDate <= today)
+      .sort((first, second) => first.dueDate.localeCompare(second.dueDate));
+    for (const record of due) {
+      const question = revisionQuestion(record);
+      if (question) revisionsByTrack[revisionTrack(record)].push({ question, revision: record });
+    }
+  }
+  const tracks = Object.values(TRACKS).flatMap((track) => {
+    const { id } = track;
+    const assignments = id === 'dsa' ? day?.dsa || [] : day?.design?.track === id ? [day.design.item] : [];
+    const reviews = revisionsByTrack[id];
+    if (!assignments.length && !reviews.length) return [];
+    const reviewsById = new Map(reviews.map((review) => [review.revision.id, review]));
+    const rows = assignments.map((assignment) => {
+      const review = reviewsById.get(assignment.id);
+      reviewsById.delete(assignment.id);
+      return { ...review, assignment };
+    });
+    return [{
+      ...track,
+      subtitle: id === 'dsa' ? [...new Set(assignments.map((item) => item.section))].join(' · ') : track.subtitle,
+      items: [...rows, ...reviewsById.values()],
+      assignmentCount: assignments.length,
+      revisionCount: reviews.length,
+    }];
+  });
+  const dsaTrack = tracks.find(({ id }) => id === 'dsa');
+  const designTracks = tracks.filter(({ id }) => id !== 'dsa');
+  const extraPlan = date === today && plan?.date === today && !tracks.length
     ? extraHomeworkPlan(plan, dsa)
     : null;
 
@@ -244,16 +291,16 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
       </header>
 
       {isPast && <div className="mb-4">{completedQuestions}</div>}
-      {!isPast && !dsaTrack && !designTrack && (
+      {!isPast && !tracks.length && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <p className="flex items-center gap-2 text-sm text-muted">
             <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
-            {dueRevisions.length ? 'Today’s practice assignments are complete.'
-              : extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
+            {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
           </p>
           {extraPlan && (
             <button type="button" className="button-secondary"
-              onClick={() => updateData((current) => current.homework === plan
+              onClick={() => updateData((current) => current.homework === plan &&
+                !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
                 ? { ...current, homework: extraPlan }
                 : current)}>
               Get more work
@@ -261,25 +308,15 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
           )}
         </div>
       )}
-      <div className={`grid items-start gap-4 ${dsaTrack && designTrack ? 'lg:grid-cols-2' : ''}`}>
-        {dsaTrack && <AgendaSection track={dsaTrack} onOpen={setActiveTab} />}
+      <div className={`grid items-start gap-4 ${dsaTrack && designTracks.length ? 'lg:grid-cols-2' : ''}`}>
+        {dsaTrack && <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete} />}
         <div className="grid min-w-0 gap-4">
-          {designTrack && <AgendaSection track={designTrack} onOpen={setActiveTab} />}
+          {designTracks.map((track) => (
+            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
+          ))}
           {children}
         </div>
       </div>
-      {dueRevisions.length > 0 && (
-        <section className="panel mt-4 min-w-0 overflow-hidden" aria-labelledby="homework-revisions-title">
-          <header className="flex items-center gap-2 border-b border-line px-4 py-3 sm:px-5">
-            <BookmarkCheck size={17} aria-hidden="true" className="text-accent" />
-            <h3 id="homework-revisions-title" className="section-heading">Revisions due</h3>
-            <span className="status-pill tabular-nums">{dueRevisions.length}</span>
-          </header>
-          <ul className="divide-y divide-line">
-            <RevisionRows records={dueRevisions} today={today} onReviewed={markReviewed} />
-          </ul>
-        </section>
-      )}
       {date === today && completedQuestions}
     </section>
   );

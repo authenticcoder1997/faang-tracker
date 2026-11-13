@@ -8,7 +8,7 @@ import { EmptyState } from './ui/Workspace';
 
 const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
 
-export function RevisionRows({ records, today, onReviewed, onRemove }) {
+function RevisionRows({ records, today, onReviewed, onRemove }) {
   return records.map((record) => {
     const entry = revisionQuestion(record);
     const reviewedToday = record.reviewedOn === today;
@@ -30,7 +30,7 @@ export function RevisionRows({ records, today, onReviewed, onRemove }) {
               {dueDateLabel(record.dueDate, today)}
             </span>
             <time dateTime={record.dueDate}>{dateFormat.format(new Date(`${record.dueDate}T12:00:00`))}</time>
-            {onRemove && <span>{record.reviewCount} {record.reviewCount === 1 ? 'review' : 'reviews'}</span>}
+            <span>{record.reviewCount} {record.reviewCount === 1 ? 'review' : 'reviews'}</span>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -38,12 +38,10 @@ export function RevisionRows({ records, today, onReviewed, onRemove }) {
             aria-label={`${action}: ${name}`} onClick={() => onReviewed(record.id)}>
             <Check size={15} aria-hidden="true" /> {action}
           </button>
-          {onRemove && (
-            <button type="button" className="icon-button" title="Remove from revision"
-              aria-label={`Remove from revision: ${name}`} onClick={() => onRemove(record.id)}>
-              <Trash2 size={16} aria-hidden="true" />
-            </button>
-          )}
+          <button type="button" className="icon-button" title="Remove from revision"
+            aria-label={`Remove from revision: ${name}`} onClick={() => onRemove(record.id)}>
+            <Trash2 size={16} aria-hidden="true" />
+          </button>
         </div>
       </li>
     );
