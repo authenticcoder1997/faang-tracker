@@ -80,10 +80,12 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
               aria-label={goalReached ? `${label} · Study goal reached` : label}
               aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
               onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
-              <span className="flex items-center justify-center gap-px">
-                {index + 1}
-                {goalReached && <Star size={11} className="study-activity-star" aria-hidden="true" />}
-              </span>
+              {goalReached ? (
+                <span className="study-activity-goal" aria-hidden="true">
+                  <Star size={26} className="study-activity-star" />
+                  <span>{index + 1}</span>
+                </span>
+              ) : index + 1}
               {!future && (
                 <span className="study-activity-tooltip" aria-hidden="true">
                   {shortDate.format(calendarDate)} · {studied}
@@ -102,7 +104,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
         aria-label={`Study time scale from 0 hours to a gold star at ${STUDY_GOAL_HOURS} hours`}>
         <span>0 h</span>
         <div className="flex gap-1" aria-hidden="true">
-          {Array.from({ length: STUDY_GOAL_HOURS + 1 }, (_, level) => (
+          {Array.from({ length: STUDY_GOAL_HOURS }, (_, level) => (
             <span key={level} className="study-activity-cell" data-level={level} />
           ))}
         </div>
