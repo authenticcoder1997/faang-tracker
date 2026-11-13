@@ -2,15 +2,6 @@ import { addDays, isValidDate } from './tasks.js';
 
 const intervals = [1, 3, 7, 14, 30];
 
-export function revisionDueLabel(dueDate, today) {
-  // ISO calendar dates parse at UTC midnight, so DST does not affect the day count.
-  const days = (Date.parse(dueDate) - Date.parse(today)) / 86_400_000;
-  if (days === 0) return 'Due today';
-  const count = Math.abs(days);
-  const duration = `${count} ${count === 1 ? 'day' : 'days'}`;
-  return days < 0 ? `${duration} overdue` : `Due in ${duration}`;
-}
-
 export function revisionTrack({ source }) {
   return source === 'lld' || source === 'hld' ? source : 'dsa';
 }

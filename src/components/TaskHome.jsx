@@ -37,6 +37,7 @@ import {
   completeTask,
   dateKey,
   deleteTaskList,
+  dueDateLabel,
   getTaskRows,
   LIST_COLORS,
   mergeTaskEdits,
@@ -1182,8 +1183,13 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
               <span
                 className={`flex items-center gap-1 ${!isCompleted && row.date < today ? 'text-danger' : !isCompleted && row.date === today ? 'text-accent' : ''}`}
               >
-                <CalendarDays size={11} />
-                {prettyDate(row.date, today)}
+                <CalendarDays size={11} className="shrink-0" aria-hidden="true" />
+                <time dateTime={row.date}>
+                  {isCompleted ? prettyDate(row.date, today) : dueDateLabel(row.date, today)}
+                  {!isCompleted && row.date !== today && (
+                    <span className="text-muted"> · {prettyDate(row.date, today)}</span>
+                  )}
+                </time>
               </span>
             )}
             {row.task.repeat !== 'none' && (

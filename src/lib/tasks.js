@@ -83,6 +83,15 @@ export function addDays(key, amount) {
   return dateKey(new Date(year, month - 1, day + amount, 12));
 }
 
+export function dueDateLabel(dueDate, today) {
+  // ISO calendar dates parse at UTC midnight, so DST does not affect the day count.
+  const days = (Date.parse(dueDate) - Date.parse(today)) / 86_400_000;
+  if (days === 0) return 'Due today';
+  const count = Math.abs(days);
+  const duration = `${count} ${count === 1 ? 'day' : 'days'}`;
+  return days < 0 ? `${duration} overdue` : `Due in ${duration}`;
+}
+
 export function isValidDate(key) {
   return (
     typeof key === 'string' &&

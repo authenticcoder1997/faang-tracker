@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ArrowUpRight, CalendarCheck, Check, Trash2 } from 'lucide-react';
 import { revisionQuestion } from '../lib/revisionQuestions';
-import { revisionDueLabel, revisionTrack } from '../lib/studyRevisions';
+import { revisionTrack } from '../lib/studyRevisions';
+import { dueDateLabel } from '../lib/tasks';
 import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import { EmptyState } from './ui/Workspace';
 
@@ -26,7 +27,7 @@ export function RevisionRows({ records, today, onReviewed, onRemove }) {
             <span className="status-pill">{revisionTrack(record).toUpperCase()}</span>
             {entry?.sourceLabel && <span>{entry.sourceLabel}</span>}
             <span className={`font-medium ${record.dueDate < today ? 'text-warning' : 'text-secondary'}`}>
-              {revisionDueLabel(record.dueDate, today)}
+              {dueDateLabel(record.dueDate, today)}
             </span>
             <time dateTime={record.dueDate}>{dateFormat.format(new Date(`${record.dueDate}T12:00:00`))}</time>
             {onRemove && <span>{record.reviewCount} {record.reviewCount === 1 ? 'review' : 'reviews'}</span>}

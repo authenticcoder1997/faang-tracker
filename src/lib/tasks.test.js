@@ -5,6 +5,7 @@ import {
   completeTask,
   dateKey,
   deleteTaskList,
+  dueDateLabel,
   getTaskRows,
   INITIAL_TASK_DATA,
   isValidDate,
@@ -87,6 +88,14 @@ test('dates follow the local calendar across month and year boundaries', () => {
   assert.equal(addDays('2026-12-31', 1), '2027-01-01');
   assert.equal(addDays('2028-02-28', 1), '2028-02-29');
   assert.equal(isValidDate('2026-02-30'), false);
+});
+
+test('due labels count calendar days across months and years', () => {
+  assert.equal(dueDateLabel('2026-12-31', '2027-01-01'), '1 day overdue');
+  assert.equal(dueDateLabel('2026-12-30', '2027-01-02'), '3 days overdue');
+  assert.equal(dueDateLabel('2027-01-02', '2027-01-02'), 'Due today');
+  assert.equal(dueDateLabel('2027-01-03', '2027-01-02'), 'Due in 1 day');
+  assert.equal(dueDateLabel('2027-02-02', '2027-01-31'), 'Due in 2 days');
 });
 
 test('focus presets and custom hours end at the requested time or local midnight', () => {
