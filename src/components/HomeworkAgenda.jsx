@@ -4,6 +4,7 @@ import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from '../lib/studyProgress';
 import { revisionQuestion } from '../lib/revisionQuestions';
 import { markRevisionReviewed, revisionTrack } from '../lib/studyRevisions';
+import { studySessionDate } from '../lib/studySessions';
 import { dateKey, dueDateLabel } from '../lib/tasks';
 import { dsaCatalog } from '../lib/dsaCatalog';
 import { allDsaTopics } from '../lib/dsaPlan';
@@ -11,6 +12,8 @@ import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { useEffect, useMemo, useState } from 'react';
 import CompletedQuestions from './CompletedQuestions';
+import StudyActivity from './StudyActivity';
+import StudyTimer from './StudyTimer';
 import {
   ArrowRight,
   BookOpen,
@@ -159,15 +162,25 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
   );
 }
 
-export default function HomeworkAgenda({ today, setActiveTab, children }) {
+export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa } = useHomeworkSchedule(today);
   const revisions = useWorkspaceValue((state) => state.data.revisions);
   const progress = useWorkspaceValue((state) => state.data.progress);
+  const sessions = useWorkspaceValue((state) => state.data.studySessions);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
+  const [chosenDate, setChosenDate] = useState(null);
   const studyDates = useMemo(() => [...new Set([
     ...schedule.map(({ date }) => date), ...completions.keys(),
-  ])].sort(), [schedule, completions]);
+    ...sessions.flatMap((session) => {
+      const { startedAt, stoppedAt, durationMs } = session;
+      if (stoppedAt === null) return [];
+      const firstDay = studySessionDate(session);
+      return durationMs !== undefined || stoppedAt === startedAt ? [firstDay]
+        : [firstDay, dateKey(new Date(stoppedAt - 1))];
+    }),
+    ...(chosenDate ? [chosenDate] : []),
+  ])].sort(), [schedule, completions, sessions, chosenDate]);
   const todaysAgenda = schedule.find((day) => day.date >= today);
   useEffect(() => {
     if (todaysAgenda.date !== today || plan?.date >= today) return;
@@ -176,8 +189,7 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
       : current);
   }, [plan, today, todaysAgenda, updateData]);
 
-  const [chosenDate, setChosenDate] = useState(null);
-  const date = studyDates.includes(chosenDate) ? chosenDate : todaysAgenda.date;
+  const date = chosenDate ?? todaysAgenda.date;
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
   const isPast = date < today;
@@ -310,13 +322,18 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
       )}
       <div className={`grid items-start gap-4 ${dsaTrack && designTracks.length ? 'lg:grid-cols-2' : ''}`}>
         {dsaTrack && <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete} />}
-        <div className="grid min-w-0 gap-4">
-          {designTracks.map((track) => (
-            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
-          ))}
-          {children}
-        </div>
+        {(designTracks.length > 0 || date <= today) && (
+          <div className="grid min-w-0 gap-4">
+            {designTracks.map((track) => (
+              <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
+            ))}
+            {date <= today && (
+              <StudyTimer date={date} today={today} isActive={isActive} sessions={sessions} onSelectDate={setChosenDate} />
+            )}
+          </div>
+        )}
       </div>
+      <StudyActivity date={date} today={today} sessions={sessions} onSelectDate={setChosenDate} />
       {date === today && completedQuestions}
     </section>
   );

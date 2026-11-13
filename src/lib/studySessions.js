@@ -1,26 +1,70 @@
+import { addDays, dateKey, isValidDate } from './tasks.js';
+
 export function activeStudySession(sessions) {
   return sessions.find((session) => session.stoppedAt === null);
 }
 
 export function normalizeStudySession(value) {
-  const { id, startedAt, stoppedAt, durationMs } = value ?? {};
+  const { id, startedAt, stoppedAt, durationMs, studyDate } = value ?? {};
   const validTime = (time) => Number.isSafeInteger(time) && time >= 0 && time <= 8640000000000000;
   if (typeof id !== 'string' || !id || id.length > 300 || !validTime(startedAt) ||
       (stoppedAt !== null && (!validTime(stoppedAt) || stoppedAt < startedAt)) ||
       (durationMs !== undefined && (startedAt !== stoppedAt || !Number.isSafeInteger(durationMs) ||
-        durationMs <= 0 || durationMs > 86_400_000))) {
+        durationMs <= 0 || durationMs > 86_400_000)) ||
+      (studyDate !== undefined && (durationMs === undefined || !isValidDate(studyDate)))) {
     throw new Error('Invalid study session');
   }
-  return { id, startedAt, stoppedAt, ...(durationMs !== undefined ? { durationMs } : {}) };
+  return { id, startedAt, stoppedAt, ...(durationMs !== undefined ? { durationMs } : {}),
+    ...(studyDate !== undefined ? { studyDate } : {}) };
 }
 
 function appendStudySession(sessions, session) {
   return sessions.some(({ id }) => id === session.id) ? sessions : [...sessions, session];
 }
 
-export function logStudyTime(sessions, id, durationMs, loggedAt) {
-  const session = normalizeStudySession({ id, startedAt: loggedAt, stoppedAt: loggedAt, durationMs });
+export function logStudyTime(sessions, id, durationMs, loggedAt, studyDate) {
+  const session = normalizeStudySession({ id, startedAt: loggedAt, stoppedAt: loggedAt, durationMs, studyDate });
   return appendStudySession(sessions, session);
+}
+
+export function studySessionDate(session) {
+  return session.studyDate ?? dateKey(new Date(session.startedAt));
+}
+
+export function studySessionsByDate(sessions, firstDate, lastDate = firstDate) {
+  const days = new Map();
+  const rangeStart = new Date(`${firstDate}T00:00:00`).getTime();
+  const rangeEnd = new Date(`${addDays(lastDate, 1)}T00:00:00`).getTime();
+
+  function record(date, entry) {
+    if (!days.has(date)) days.set(date, []);
+    days.get(date).push(entry);
+  }
+
+  for (const session of sessions) {
+    const { startedAt, stoppedAt, durationMs } = session;
+    if (stoppedAt === null) continue;
+    if (durationMs !== undefined) {
+      const date = studySessionDate(session);
+      if (date >= firstDate && date <= lastDate) {
+        record(date, { session, start: startedAt, end: stoppedAt, duration: durationMs });
+      }
+      continue;
+    }
+    let start = Math.max(startedAt, rangeStart);
+    const stop = Math.min(stoppedAt, rangeEnd);
+    if (startedAt === stoppedAt && startedAt >= rangeStart && startedAt < rangeEnd) {
+      record(studySessionDate(session), { session, start, end: stop, duration: 0 });
+    }
+    while (start < stop) {
+      const day = new Date(start);
+      const date = dateKey(day);
+      const end = Math.min(stop, day.setHours(24, 0, 0, 0));
+      record(date, { session, start, end, duration: end - start });
+      start = end;
+    }
+  }
+  return days;
 }
 
 export function startStudySession(sessions, id, startedAt) {
