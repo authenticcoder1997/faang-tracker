@@ -6,6 +6,7 @@ const HOUR_MS = 3_600_000;
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
 const fullDate = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+const shortDate = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' });
 const dayTime = (date) => new Date(`${date}T12:00:00`);
 
 function timeLabel(duration) {
@@ -54,21 +55,30 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
         ))}
         {Array.from({ length: daysInMonth }, (_, index) => {
           const day = addDays(firstDate, index);
+          const calendarDate = dayTime(day);
           const position = firstWeekday + index;
+          const column = position % 7 + 1;
           const duration = totals.get(day) ?? 0;
           const level = duration ? Math.max(1, Math.min(6, Math.floor(duration / HOUR_MS))) : 0;
           const future = day > today;
-          const label = `${fullDate.format(dayTime(day))}${future ? '' : ` · ${timeLabel(duration)}`}`;
+          const studied = timeLabel(duration);
+          const label = `${fullDate.format(calendarDate)}${future ? '' : ` · ${studied}`}`;
           return (
-            <button key={day} type="button" className="study-activity-cell" data-level={level} disabled={future}
+            <button key={day} type="button" className="study-activity-cell" data-level={level}
+              data-column={column} disabled={future}
               ref={(cell) => {
                 if (cell) cells.current.set(day, cell);
                 else cells.current.delete(day);
               }}
-              style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: position % 7 + 1 }}
-              aria-label={label} title={label} aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
+              style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: column }}
+              aria-label={label} aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
               onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
               {index + 1}
+              {!future && (
+                <span className="study-activity-tooltip" aria-hidden="true">
+                  {shortDate.format(calendarDate)} · {studied}
+                </span>
+              )}
             </button>
           );
         })}
