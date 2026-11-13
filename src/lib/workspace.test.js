@@ -14,7 +14,7 @@ import { createWorkspace, legacyFirestoreValues, mergeLegacyWorkspace } from './
 import { LEGACY_STORAGE_KEYS } from './workspaceLegacyKeys.js';
 import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList, reorderTasks, taskFocus } from './tasks.js';
-import { deleteStudySession, startStudySession, stopStudySession } from './studySessions.js';
+import { deleteStudySession, logStudyTime, startStudySession, stopStudySession } from './studySessions.js';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from './studyProgress.js';
 
 const copy = (value) => structuredClone(value);
@@ -966,6 +966,18 @@ test('study sessions persist across devices, deduplicate starts and stops, and w
   assert.deepEqual(confirmed.studySessions, [{ id: 'laptop', startedAt: 10000, stoppedAt: 75000 }]);
   assert.deepEqual(applyWorkspacePatch(confirmed, makeWorkspacePatch(laptop, laterStop)).studySessions, confirmed.studySessions);
   assert.deepEqual(workspaceWriteFields(saved, reuseWorkspace(saved, confirmed)), { studySessions: done.studySessions });
+});
+
+test('manual study time syncs as a finished session alongside a running timer and another device’s entry', () => {
+  const before = { ...base(), studySessions: startStudySession([], 'timer', 1000) };
+  const phone = { ...before, studySessions: logStudyTime(before.studySessions, 'phone', 45 * 60_000, 2000) };
+  const laptop = { ...before, studySessions: logStudyTime(before.studySessions, 'laptop', 15 * 60_000, 3000) };
+  const patch = JSON.parse(JSON.stringify(makeWorkspacePatch(before, phone)));
+  const synced = applyWorkspacePatch(laptop, patch);
+  assert.deepEqual(synced.studySessions, [...laptop.studySessions, phone.studySessions[1]]);
+  assert.deepEqual(applyWorkspacePatch(synced, patch).studySessions, synced.studySessions);
+  const after = { ...synced, studySessions: deleteStudySession(synced.studySessions, 'phone') };
+  assert.deepEqual(applyWorkspacePatch(synced, makeWorkspacePatch(synced, after)).studySessions, laptop.studySessions);
 });
 
 test('a delayed study stop leaves a newer session running and clock skew cannot create a negative duration', () => {

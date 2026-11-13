@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Play, Square, Timer, Trash2 } from 'lucide-react';
+import { ChevronDown, Play, Plus, Square, Timer, Trash2 } from 'lucide-react';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
-import { activeStudySession, deleteStudySession, startStudySession, stopStudySession } from '../lib/studySessions';
+import { activeStudySession, deleteStudySession, logStudyTime, startStudySession, stopStudySession } from '../lib/studySessions';
 
 const sessionDate = new Intl.DateTimeFormat('en', {
   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit',
@@ -21,8 +21,58 @@ function durationLabel(ms) {
   return `${hours}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
 }
 
+function AddStudyTimeDialog({ onCancel, onSave }) {
+  const dialog = useRef(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    const element = dialog.current;
+    element.showModal();
+    return () => element.close();
+  }, []);
+
+  function submit(event) {
+    event.preventDefault();
+    const fields = new FormData(event.currentTarget);
+    const minutes = Number(fields.get('hours')) * 60 + Number(fields.get('minutes'));
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 24 * 60) {
+      setError('Enter a duration between 1 minute and 24 hours.');
+      return;
+    }
+    onSave(minutes * 60_000);
+  }
+
+  return (
+    <dialog ref={dialog} aria-labelledby="add-study-title" onCancel={onCancel}
+      className="task-dialog m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-line p-5 sm:p-6">
+      <h2 id="add-study-title" className="text-lg font-semibold">Add study time</h2>
+      <form onSubmit={submit} onChange={() => setError('')} className="mt-3">
+        <p className="text-sm text-muted">How much time did you study today?</p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <label className="text-xs font-medium text-muted">
+            Hours
+            <input type="number" name="hours" min="0" max="24" step="1" inputMode="numeric"
+              placeholder="0" className="input-control mt-1" />
+          </label>
+          <label className="text-xs font-medium text-muted">
+            Minutes
+            <input type="number" name="minutes" min="0" max="59" step="1" inputMode="numeric"
+              placeholder="0" className="input-control mt-1" />
+          </label>
+        </div>
+        {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          <button type="button" className="button-secondary" onClick={onCancel}>Cancel</button>
+          <button type="submit" className="button-primary">Save time</button>
+        </div>
+      </form>
+    </dialog>
+  );
+}
+
 function DeleteSessionDialog({ session, onCancel, onConfirm }) {
   const dialog = useRef(null);
+  const label = session.durationMs ? 'Manual entry' : sessionDate.formatRange(session.startedAt, session.stoppedAt);
+  const duration = session.durationMs ?? (session.stoppedAt - session.startedAt);
   useEffect(() => {
     const element = dialog.current;
     element.showModal();
@@ -35,7 +85,7 @@ function DeleteSessionDialog({ session, onCancel, onConfirm }) {
       className="task-dialog m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line p-5 sm:p-6">
       <h2 id="delete-study-title" className="text-lg font-semibold">Delete this study session?</h2>
       <div id="delete-study-detail" className="mt-3 space-y-2 text-sm text-muted">
-        <p>{sessionDate.formatRange(session.startedAt, session.stoppedAt)} · {durationLabel(session.stoppedAt - session.startedAt)}</p>
+        <p>{label} · {durationLabel(duration)}</p>
         <p>This removes the entire session from your study history.</p>
       </div>
       <div className="mt-5 flex flex-wrap justify-end gap-2">
@@ -54,6 +104,7 @@ export default function StudyTimer({ isActive }) {
   const sessions = useWorkspaceValue((state) => state.data.studySessions);
   const [now, setNow] = useState(Date.now);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAddTime, setShowAddTime] = useState(false);
   const [pendingDeletion, setPendingDeletion] = useState(null);
   const active = useMemo(() => activeStudySession(sessions), [sessions]);
   const todayStart = new Date(now).setHours(0, 0, 0, 0);
@@ -63,9 +114,11 @@ export default function StudyTimer({ isActive }) {
       const { startedAt, stoppedAt } = session;
       if (stoppedAt === null || startedAt >= todayEnd ||
           (startedAt < todayStart && stoppedAt <= todayStart)) return [];
-      return [{ session, start: Math.max(startedAt, todayStart), end: Math.min(stoppedAt, todayEnd) }];
+      const start = Math.max(startedAt, todayStart);
+      const end = Math.min(stoppedAt, todayEnd);
+      return [{ session, start, end, duration: session.durationMs ?? (end - start) }];
     }).sort((first, second) => second.session.startedAt - first.session.startedAt);
-    const studiedToday = history.reduce((sum, { start, end }) => sum + end - start, 0);
+    const studiedToday = history.reduce((sum, { duration }) => sum + duration, 0);
     return { history, studiedToday };
   }, [sessions, todayStart]);
 
@@ -105,6 +158,13 @@ export default function StudyTimer({ isActive }) {
     if (saveSessions((current) => deleteStudySession(current, session.id))) setPendingDeletion(null);
   }
 
+  function addTime(durationMs) {
+    const id = crypto.randomUUID();
+    const loggedAt = Date.now();
+    setNow(loggedAt);
+    if (saveSessions((current) => logStudyTime(current, id, durationMs, loggedAt))) setShowAddTime(false);
+  }
+
   const elapsed = active ? Math.max(0, now - active.startedAt) : 0;
 
   return (
@@ -137,16 +197,21 @@ export default function StudyTimer({ isActive }) {
         </button>
       </div>
       <div id="study-session-history" hidden={!showHistory} className="mt-4 border-t border-line pt-2">
+        <div className="flex justify-end pb-1">
+          <button type="button" className="button-secondary" onClick={() => setShowAddTime(true)}>
+            <Plus size={14} aria-hidden="true" /> Add time
+          </button>
+        </div>
         {history.length ? (
           <ul aria-label="Today’s study sessions" className="max-h-60 divide-y divide-line overflow-y-auto">
-            {history.map(({ session, start, end }) => (
+            {history.map(({ session, start, end, duration }) => (
               <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
                 <span className="text-muted">
-                  {sessionDate.formatRange(start, end)}
+                  {session.durationMs ? 'Manual entry' : sessionDate.formatRange(start, end)}
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-medium tabular-nums text-ink">
-                    {durationLabel(end - start)}
+                    {durationLabel(duration)}
                   </span>
                   <button type="button" className="icon-button hover:text-danger"
                     aria-label={`Delete study session from ${sessionDate.format(session.startedAt)}`}
@@ -159,6 +224,9 @@ export default function StudyTimer({ isActive }) {
           </ul>
         ) : <p className="py-3 text-sm text-muted">No study sessions today.</p>}
       </div>
+      {isActive && showAddTime && (
+        <AddStudyTimeDialog onCancel={() => setShowAddTime(false)} onSave={addTime} />
+      )}
       {isActive && pendingDeletion && (
         <DeleteSessionDialog session={pendingDeletion}
           onCancel={() => setPendingDeletion(null)} onConfirm={() => remove(pendingDeletion)} />
