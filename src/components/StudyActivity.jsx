@@ -33,6 +33,8 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const firstWeekday = (month.getDay() + 6) % 7;
   const activeDate = date >= firstDate && date <= today ? date : today;
+  const selectedTotal = totals.get(date) ?? 0;
+  const selectedGoalReached = date >= FIRST_HIGHLIGHTED_DAY && selectedTotal >= STUDY_GOAL_HOURS * HOUR_MS;
 
   function moveDay(event, day) {
     const offsets = { ArrowUp: -7, ArrowDown: 7, ArrowLeft: -1, ArrowRight: 1 };
@@ -47,8 +49,8 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
   }
 
   return (
-    <section aria-labelledby="study-activity-title" className="px-4 py-3">
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+    <section aria-labelledby="study-activity-title" className="px-4 py-4">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h3 id="study-activity-title" className="section-heading">Study activity</h3>
         <p className="text-xs text-muted">{monthName}</p>
       </div>
@@ -82,7 +84,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
               onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
               {goalReached ? (
                 <span className="study-activity-goal" aria-hidden="true">
-                  <Star size={26} className="study-activity-star" />
+                  <Star size={30} className="study-activity-star" />
                   <span>{index + 1}</span>
                 </span>
               ) : index + 1}
@@ -96,9 +98,14 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
         })}
       </div>
       {date === activeDate && (
-        <p className="mt-2 text-xs tabular-nums text-muted">
-          {fullDate.format(dayTime(date))} · {timeLabel(totals.get(date) ?? 0)}
-        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs tabular-nums text-muted">
+            {fullDate.format(dayTime(date))} · {timeLabel(selectedTotal)}
+          </p>
+          {selectedGoalReached && (
+            <span className="study-activity-goal-badge">{STUDY_GOAL_HOURS}+ h Star Goal</span>
+          )}
+        </div>
       )}
       <div className="mt-2 flex items-center justify-end gap-2 text-xs tabular-nums text-muted"
         aria-label={`Study time scale from 0 hours to a gold star at ${STUDY_GOAL_HOURS} hours`}>
@@ -109,7 +116,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
           ))}
         </div>
         <span className="inline-flex items-center gap-1">
-          <Star size={12} className="study-activity-star" aria-hidden="true" /> {STUDY_GOAL_HOURS}+ h
+          <Star size={15} className="study-activity-star" aria-hidden="true" /> {STUDY_GOAL_HOURS}+ h
         </span>
       </div>
     </section>
