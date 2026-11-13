@@ -56,7 +56,7 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
       className="min-w-0 border-b border-line"
       aria-labelledby={`agenda-${track.id}`}
     >
-      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pt-3 sm:px-4">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 pt-4 pb-1 sm:px-6">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <Icon size={17} className="shrink-0 text-accent" />
@@ -94,7 +94,7 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
           return (
             <li
               key={assignment?.id || revision.id}
-              className="flex items-start gap-2.5 px-3 py-2 transition-colors hover:bg-hover sm:px-4"
+              className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-hover sm:gap-4 sm:px-6"
             >
               <button
                 type="button"
@@ -106,7 +106,7 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
                 <Circle size={21} aria-hidden="true" />
               </button>
               <div className="min-w-0 flex-1">
-                <div className="flex min-h-8 flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1">
                   <a
                     href={url}
                     target="_blank"
@@ -115,7 +115,7 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
                   >
                     {item.title}
                   </a>
-                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-muted">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
                     {revision && (
                       <>
                         <span className="status-pill border-accent/30 bg-accent-soft font-semibold text-accent">Revision</span>
@@ -138,7 +138,7 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
                   </div>
                 </div>
                 {item.description && (
-                  <p className="mb-1 line-clamp-2 text-xs leading-5 text-muted">
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
                     {item.description}
                   </p>
                 )}
@@ -237,13 +237,14 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
     : null;
 
   return (
-    <>
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2 sm:px-4">
-        <div>
-          <p className="flex items-center gap-1.5 text-sm text-muted">
-            <CalendarDays size={14} className="text-accent" aria-hidden="true" />
+    <section aria-labelledby="homework-title" className="panel min-w-0">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-line px-4 py-4 sm:px-6">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 id="homework-title" className="text-lg font-semibold tracking-tight">Homework</h2>
+          <time dateTime={date} className="inline-flex items-center gap-1.5 text-sm text-muted">
+            <CalendarDays size={14} className="shrink-0 text-accent" aria-hidden="true" />
             {agendaDate.format(atNoon(date))}
-          </p>
+          </time>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -293,9 +294,9 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       </header>
 
       {(!isPast || tracks.length > 0) && (
-        <div className="homework-assignments min-h-0">
+        <>
           {!tracks.length && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-3 sm:px-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-4 sm:px-6">
               <p className="flex items-center gap-2 text-sm text-muted">
                 <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
                 {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
@@ -314,9 +315,9 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
           {tracks.map((track) => (
             <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
           ))}
-        </div>
+        </>
       )}
       <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
-    </>
+    </section>
   );
 }

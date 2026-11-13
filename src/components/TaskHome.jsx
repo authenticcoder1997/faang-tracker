@@ -54,10 +54,6 @@ const TASK_VIEWS = [
   { id: 'completed', name: 'Completed' },
   { id: 'deleted', name: 'Recently deleted' },
 ];
-const HOME_VIEWS = [
-  { id: 'homework', name: 'Homework' },
-  { id: 'tasks', name: 'Tasks' },
-];
 const EMPTY_VIEWS = {
   today: ['A fresh start for today', 'Add something you’d like to get done. Keep it simple, or make it a routine.'],
   completed: ['Small wins belong here', 'Completed tasks and recurring check-ins will appear here.'],
@@ -739,7 +735,6 @@ function SnoozeDialog({ task, today, onSnooze, onClose }) {
 export default function TaskHome({ setActiveTab, isActive = true }) {
   const { data, updateData, error, saving } = useTasks();
   const sessions = useWorkspaceValue((state) => state.data.studySessions);
-  const [homeView, setHomeView] = useState('homework');
   const [chosenStudyDate, setChosenStudyDate] = useState(null);
   const [chosenView, setView] = useState('all');
   const [query, setQuery] = useState('');
@@ -938,7 +933,6 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
       })
     ) {
       setTaskEditor(null);
-      if (!previous && !unavailable) setHomeView('tasks');
       setNotice({
         message: unavailable
           ? 'This task was deleted elsewhere. Your changes were not saved.'
@@ -1217,20 +1211,6 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
     setChosenStudyDate(date === today ? null : date);
   }
 
-  function switchHomeView(event) {
-    const destinations = {
-      Home: 'homework',
-      End: 'tasks',
-      ArrowLeft: homeView === 'homework' ? 'tasks' : 'homework',
-      ArrowRight: homeView === 'homework' ? 'tasks' : 'homework',
-    };
-    const next = destinations[event.key];
-    if (!next) return;
-    event.preventDefault();
-    setHomeView(next);
-    event.currentTarget.querySelector(`#home-view-${next}`)?.focus();
-  }
-
   return (
     <div className="page-frame task-home">
       <header className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -1260,168 +1240,151 @@ export default function TaskHome({ setActiveTab, isActive = true }) {
         </p>
       )}
       <div className="home-board grid min-w-0 items-start gap-4">
-        <div className="home-workspace panel flex min-h-0 min-w-0 flex-col">
-          <div role="tablist" aria-label="Home views" onKeyDown={switchHomeView}
-            className="flex shrink-0 gap-1 border-b border-line px-2 py-1.5 sm:px-3">
-            {HOME_VIEWS.map(({ id, name }) => (
-              <button key={id} id={`home-view-${id}`} role="tab" type="button"
-                aria-selected={homeView === id} aria-controls={`home-panel-${id}`}
-                tabIndex={homeView === id ? 0 : -1}
-                className="home-view-tab rounded-lg px-3 py-2 text-sm font-semibold text-muted hover:bg-hover"
-                onClick={() => setHomeView(id)}>{name}</button>
-            ))}
-          </div>
-          <div id="home-panel-homework" role="tabpanel" aria-labelledby="home-view-homework"
-            className="home-view min-h-0" hidden={homeView !== 'homework'}>
-            <HomeworkAgenda date={studyDate} today={today} sessions={sessions}
-              onSelectDate={selectStudyDate} setActiveTab={setActiveTab} />
-          </div>
-          <div id="home-panel-tasks" role="tabpanel" aria-labelledby="home-view-tasks"
-            className="home-view min-h-0" data-task-scroll-area hidden={homeView !== 'tasks'}>
-            <section aria-label="Tasks" className="flex min-w-0 flex-col px-3 sm:px-4">
-              <p id="task-reorder-help" className="sr-only">Drag this handle or use the Up and Down arrow keys to move the task.</p>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line py-2">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <div className="relative min-w-0 max-w-[min(100%,20rem)]">
-                    <select aria-label="Filter tasks" value={view}
-                      onChange={(event) => {
-                        setView(event.target.value);
-                        setQuery('');
-                      }}
-                      className="task-view-select block min-h-10 max-w-full appearance-none rounded-lg py-1 pr-8 pl-2 text-xl font-semibold tracking-tight text-ink hover:bg-hover focus-visible:outline-offset-0"
-                    >
-                      {TASK_VIEWS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-                      {data.lists.length > 0 && (
-                        <optgroup label="My lists">
-                          {data.lists.map(({ id, name }) => <option key={id} value={`list:${id}`}>{name}</option>)}
-                        </optgroup>
-                      )}
-                    </select>
-                    <ChevronDown size={15} className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-muted" aria-hidden="true" />
-                  </div>
-                  <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] tabular-nums text-accent">
-                    {rows.length}
-                  </span>
-                  {selectedList && (
-                    <div className="flex items-center gap-1">
-                      <button type="button" onClick={() => setListEditor({ list: selectedList })}
-                        aria-label={`Edit ${selectedList.name} list`} title="Edit list" className="icon-button">
-                        <Pencil size={14} aria-hidden="true" />
-                      </button>
-                      <button type="button" onClick={() => {
-                        setListDeletion(selectedList);
-                        setListDeleteError('');
-                      }} aria-label={`Delete ${selectedList.name} list`} title="Delete list"
-                        className="icon-button hover:!text-danger">
-                        <Trash2 size={14} aria-hidden="true" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-                <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-                  <div className="relative min-w-0 flex-1 sm:w-48 lg:w-64">
-                    <Search size={14} className="pointer-events-none absolute top-3 left-3 text-faint" aria-hidden="true" />
-                    <input
-                      aria-label="Search tasks"
-                      type="search"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="Search this view"
-                      className="input-control task-search pl-9"
-                    />
-                  </div>
-                  <button type="button" onClick={() => setListEditor({ list: null })} className="button-secondary shrink-0">
-                    <Plus size={15} aria-hidden="true" /> New list
-                  </button>
-                </div>
-              </div>
-              {rows.length > 0 ? (
-                <div className="mt-1">
-                  {groups.map(([group, entries]) => {
-                    if (!entries.length) return null;
-                    const ids = canAdd ? entries.map(({ key }) => key) : null;
-                    return (
-                      <div key={group}>
-                        {group !== 'tasks' && (
-                          <h3
-                            className={`mt-6 mb-1 text-xs font-semibold ${group === 'focus' ? 'text-accent' : group === 'overdue' ? 'text-danger' : 'text-muted'}`}
-                          >
-                            {group === 'focus' ? 'Focus' : group === 'overdue' ? 'Overdue' : prettyDate(group, today)}
-                          </h3>
-                        )}
-                        <ul>
-                          {entries.map((row, index) =>
-                            renderRow(row, view === 'completed', view === 'deleted', ids && { ids, index }),
-                          )}
-                        </ul>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-accent-soft text-accent">
-                    <CircleCheck size={25} strokeWidth={1.25} />
-                  </div>
-                  <h3 className="text-base font-semibold text-ink">
-                    {emptyTitle}
-                  </h3>
-                  <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
-                    {emptyDescription}
-                  </p>
-                  {canAdd && !query && (
-                    <button onClick={openNewTask} className="button-secondary mt-5">
-                      <Plus size={15} />
-                      Add a task
-                    </button>
-                  )}
-                </div>
-              )}
-              {canAdd && rows.length > 0 && (
-                <button
-                  onClick={openNewTask}
-                  className="mt-4 flex items-center gap-3 self-start rounded-lg px-1 py-2 text-sm text-accent hover:text-accent"
-                >
-                  <Plus size={20} />
-                  Add a task
-                </button>
-              )}
-              {canAdd && doneRows.length > 0 && (
-                <div className="mt-7 border-t border-line pt-4">
-                  <button
-                    onClick={() => setShowCompleted(!showCompleted)}
-                    aria-expanded={showCompleted}
-                    className="flex items-center gap-2 text-xs text-muted hover:text-secondary"
-                  >
-                    <ChevronDown
-                      size={14}
-                      className={showCompleted ? '' : '-rotate-90'}
-                    />
-                    Completed · {doneRows.length}
-                  </button>
-                  {showCompleted && (
-                    <ul className="mt-2">
-                      {doneRows.map((row) => renderRow(row, true))}
-                    </ul>
-                  )}
-                </div>
-              )}
-              <div className="mt-4 border-t border-line py-3 text-[11px] text-faint">
-                <span className="flex items-center gap-1.5">
-                  <span className={`h-1 w-1 rounded-full ${error ? 'bg-warning' : saving ? 'bg-accent' : 'bg-success/70'}`} />
-                  {error ? 'Unable to save to Firebase' : saving ? 'Saving to Firebase…' : 'Saved to Firebase'}
-                </span>
-              </div>
-            </section>
-          </div>
-        </div>
-        <aside aria-label="Study tools" className="home-study panel min-w-0">
+        <HomeworkAgenda date={studyDate} today={today} sessions={sessions}
+          onSelectDate={selectStudyDate} setActiveTab={setActiveTab} />
+        <aside aria-label="Study tools" className="panel min-w-0">
           {studyDate <= today && (
             <StudyTimer date={studyDate} today={today} isActive={isActive} sessions={sessions} onSelectDate={selectStudyDate} />
           )}
           <StudyActivity date={studyDate} today={today} sessions={sessions} onSelectDate={selectStudyDate} />
         </aside>
       </div>
+      <section aria-labelledby="home-tasks-title" className="panel mt-6 min-w-0 px-4 sm:px-6">
+        <p id="task-reorder-help" className="sr-only">Drag this handle or use the Up and Down arrow keys to move the task.</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line py-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h2 id="home-tasks-title" className="mr-1 text-lg font-semibold tracking-tight">Tasks</h2>
+            <div className="relative min-w-0 max-w-[min(100%,20rem)]">
+              <select aria-label="Filter tasks" value={view}
+                onChange={(event) => {
+                  setView(event.target.value);
+                  setQuery('');
+                }}
+                className="task-view-select block min-h-10 max-w-full appearance-none rounded-lg py-1 pr-8 pl-2 text-base font-semibold text-ink hover:bg-hover focus-visible:outline-offset-0"
+              >
+                {TASK_VIEWS.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+                {data.lists.length > 0 && (
+                  <optgroup label="My lists">
+                    {data.lists.map(({ id, name }) => <option key={id} value={`list:${id}`}>{name}</option>)}
+                  </optgroup>
+                )}
+              </select>
+              <ChevronDown size={15} className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-muted" aria-hidden="true" />
+            </div>
+            <span className="rounded-md bg-accent-soft px-2 py-0.5 text-[11px] tabular-nums text-accent">
+              {rows.length}
+            </span>
+            {selectedList && (
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={() => setListEditor({ list: selectedList })}
+                  aria-label={`Edit ${selectedList.name} list`} title="Edit list" className="icon-button">
+                  <Pencil size={14} aria-hidden="true" />
+                </button>
+                <button type="button" onClick={() => {
+                  setListDeletion(selectedList);
+                  setListDeleteError('');
+                }} aria-label={`Delete ${selectedList.name} list`} title="Delete list"
+                  className="icon-button hover:!text-danger">
+                  <Trash2 size={14} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+            <div className="relative min-w-0 flex-1 sm:w-48 lg:w-64">
+              <Search size={14} className="pointer-events-none absolute top-3 left-3 text-faint" aria-hidden="true" />
+              <input
+                aria-label="Search tasks"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search this view"
+                className="input-control task-search pl-9"
+              />
+            </div>
+            <button type="button" onClick={() => setListEditor({ list: null })} className="button-secondary shrink-0">
+              <Plus size={15} aria-hidden="true" /> New list
+            </button>
+          </div>
+        </div>
+        {rows.length > 0 ? (
+          <div className="mt-1">
+            {groups.map(([group, entries]) => {
+              if (!entries.length) return null;
+              const ids = canAdd ? entries.map(({ key }) => key) : null;
+              return (
+                <div key={group}>
+                  {group !== 'tasks' && (
+                    <h3
+                      className={`mt-6 mb-1 text-xs font-semibold ${group === 'focus' ? 'text-accent' : group === 'overdue' ? 'text-danger' : 'text-muted'}`}
+                    >
+                      {group === 'focus' ? 'Focus' : group === 'overdue' ? 'Overdue' : prettyDate(group, today)}
+                    </h3>
+                  )}
+                  <ul>
+                    {entries.map((row, index) =>
+                      renderRow(row, view === 'completed', view === 'deleted', ids && { ids, index }),
+                    )}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center">
+            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-accent-soft text-accent">
+              <CircleCheck size={25} strokeWidth={1.25} />
+            </div>
+            <h3 className="text-base font-semibold text-ink">
+              {emptyTitle}
+            </h3>
+            <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
+              {emptyDescription}
+            </p>
+            {canAdd && !query && (
+              <button onClick={openNewTask} className="button-secondary mt-5">
+                <Plus size={15} />
+                Add a task
+              </button>
+            )}
+          </div>
+        )}
+        {canAdd && rows.length > 0 && (
+          <button
+            onClick={openNewTask}
+            className="mt-4 flex items-center gap-3 self-start rounded-lg px-1 py-2 text-sm text-accent hover:text-accent"
+          >
+            <Plus size={20} />
+            Add a task
+          </button>
+        )}
+        {canAdd && doneRows.length > 0 && (
+          <div className="mt-7 border-t border-line pt-4">
+            <button
+              onClick={() => setShowCompleted(!showCompleted)}
+              aria-expanded={showCompleted}
+              className="flex items-center gap-2 text-xs text-muted hover:text-secondary"
+            >
+              <ChevronDown
+                size={14}
+                className={showCompleted ? '' : '-rotate-90'}
+              />
+              Completed · {doneRows.length}
+            </button>
+            {showCompleted && (
+              <ul className="mt-2">
+                {doneRows.map((row) => renderRow(row, true))}
+              </ul>
+            )}
+          </div>
+        )}
+        <div className="mt-4 border-t border-line py-3 text-[11px] text-faint">
+          <span className="flex items-center gap-1.5">
+            <span className={`h-1 w-1 rounded-full ${error ? 'bg-warning' : saving ? 'bg-accent' : 'bg-success/70'}`} />
+            {error ? 'Unable to save to Firebase' : saving ? 'Saving to Firebase…' : 'Saved to Firebase'}
+          </span>
+        </div>
+      </section>
       {taskEditor && isActive && (
         <TaskForm
           task={taskEditor.task}

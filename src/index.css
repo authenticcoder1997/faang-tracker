@@ -286,17 +286,6 @@ select {
   border: 1px solid var(--border);
   border-radius: 16px;
 }
-.home-view-tab[aria-selected='true'] {
-  background: var(--selected);
-  color: var(--accent);
-}
-.home-view {
-  scrollbar-gutter: stable;
-}
-#home-panel-homework:not([hidden]) {
-  display: flex;
-  flex-direction: column;
-}
 @media (min-width: 48rem) {
   .home-board {
     grid-template-columns: minmax(0, 1fr) clamp(17rem, 27vw, 20rem);
@@ -305,16 +294,6 @@ select {
 @media (min-width: 48rem) and (min-height: 34rem) {
   .page-frame.task-home {
     padding-block: 14px 16px;
-  }
-  .home-workspace {
-    max-height: calc(100dvh - var(--workspace-header-height, 120px) - var(--header-inset, 0px) - 90px);
-  }
-  :is(#home-panel-tasks, .homework-assignments, .homework-completed-list) {
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-  }
-  .homework-completed {
-    max-height: min(25dvh, 13rem);
   }
 }
 .study-activity-grid {
