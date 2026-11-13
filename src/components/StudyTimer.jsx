@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Pencil, Play, Plus, Square, Timer, Trash2 } from 'lucide-react';
+import { Pencil, Play, Plus, Square, Timer, Trash2, X } from 'lucide-react';
 import { useWorkspace } from '../hooks/useWorkspace';
 import {
   activeStudySession, deleteStudySession, editStudySession, logStudyTime, startStudySession, stopStudySession,
@@ -127,8 +127,8 @@ function DeleteSessionDialog({ session, onCancel, onConfirm }) {
 
 export default function StudyTimer({ date, today, isActive, sessions, onSelectDate }) {
   const { updateData } = useWorkspace();
+  const historyDialog = useRef(null);
   const [now, setNow] = useState(Date.now);
-  const [showHistory, setShowHistory] = useState(false);
   const [timeEditor, setTimeEditor] = useState(null);
   const [pendingDeletion, setPendingDeletion] = useState(null);
   const active = useMemo(() => activeStudySession(sessions), [sessions]);
@@ -165,7 +165,7 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
   function stop() {
     const stoppedAt = Date.now();
     setNow(stoppedAt);
-    if (saveSessions((current) => stopStudySession(current, active.id, stoppedAt))) setShowHistory(true);
+    saveSessions((current) => stopStudySession(current, active.id, stoppedAt));
   }
 
   function remove(session) {
@@ -188,42 +188,49 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
   const elapsed = active ? Math.max(0, now - active.startedAt) : 0;
 
   return (
-    <section aria-labelledby="study-timer-title" className="panel px-4 py-4 sm:px-5">
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <Timer size={20} className="shrink-0 text-accent" aria-hidden="true" />
-          <div>
-            <h3 id="study-timer-title" className="section-heading">{isToday ? 'Study timer' : 'Study time'}</h3>
-            <p className="mt-0.5 text-xs text-muted">
-              {isToday ? (active ? 'Session running' : 'Ready to study') : dateLabel}
-            </p>
-          </div>
+    <section aria-labelledby="study-timer-title" className="border-b border-line px-4 py-3">
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2">
+        <h3 id="study-timer-title" className="section-heading flex items-center gap-2">
+          <Timer size={17} className="shrink-0 text-accent" aria-hidden="true" /> Study time
+        </h3>
+        <span className="text-xs text-muted">{isToday ? 'Today' : dateLabel}</span>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-lg font-semibold tabular-nums">{durationLabel(studied)}</p>
+          <p className="text-xs text-muted">Studied</p>
         </div>
         {isToday && (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span role="timer" aria-label="Current session" className="text-xl font-semibold tabular-nums text-ink">
-              {durationParts(elapsed).map((part) => String(part).padStart(2, '0')).join(':')}
-            </span>
-            <button type="button" className="button-primary" onClick={active ? stop : start}>
-              {active ? <Square size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-              {active ? 'Stop' : 'Start'}
-            </button>
-          </div>
+          <button type="button" className="button-primary" onClick={active ? stop : start}>
+            {active ? <Square size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+            {active ? 'Stop' : 'Start'}
+            {active && (
+              <span role="timer" aria-label="Current session" className="tabular-nums">
+                {durationParts(elapsed).map((part) => String(part).padStart(2, '0')).join(':')}
+              </span>
+            )}
+          </button>
         )}
-        <div>
-          <p className="text-xs text-muted">{isToday ? 'Studied today' : 'Time studied'}</p>
-          <p className="mt-0.5 font-semibold tabular-nums text-ink">{durationLabel(studied)}</p>
-        </div>
-        <button type="button" className="button-secondary" aria-expanded={showHistory}
-          aria-controls="study-session-history" onClick={() => setShowHistory(!showHistory)}>
-          {isToday ? 'Today’s history' : 'History'} <span className="tabular-nums text-muted">{history.length}</span>
-          <ChevronDown size={14} aria-hidden="true" className={showHistory ? 'rotate-180' : ''} />
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button type="button" className="button-secondary" aria-haspopup="dialog"
+          onClick={() => historyDialog.current.showModal()}>
+          History <span className="tabular-nums text-muted">{history.length}</span>
+        </button>
+        <button type="button" className="button-secondary" aria-haspopup="dialog" onClick={() => setTimeEditor({})}>
+          <Plus size={14} aria-hidden="true" /> Add time
         </button>
       </div>
-      <div id="study-session-history" hidden={!showHistory} className="mt-4 border-t border-line pt-2">
-        <div className="flex justify-end pb-1">
-          <button type="button" className="button-secondary" onClick={() => setTimeEditor({})}>
-            <Plus size={14} aria-hidden="true" /> Add time
+      <dialog ref={historyDialog} aria-labelledby="study-history-title"
+        className="task-dialog m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-2 border-b border-line pb-2">
+          <div>
+            <h2 id="study-history-title" className="text-lg font-semibold">Study history</h2>
+            <p className="text-xs text-muted">{dateLabel}</p>
+          </div>
+          <button type="button" aria-label="Close study history" className="icon-button"
+            onClick={() => historyDialog.current.close()}>
+            <X size={17} aria-hidden="true" />
           </button>
         </div>
         {history.length ? (
@@ -252,7 +259,7 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
             ))}
           </ul>
         ) : <p className="py-3 text-sm text-muted">{isToday ? 'No study sessions today.' : 'No study sessions for this date.'}</p>}
-      </div>
+      </dialog>
       {isActive && timeEditor && (
         <StudyTimeDialog date={date} today={today} entry={timeEditor.entry}
           onCancel={() => setTimeEditor(null)} onSave={saveTime} />

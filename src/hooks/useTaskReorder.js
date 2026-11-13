@@ -20,12 +20,16 @@ export function useTaskReorder(onReorder) {
   function scrollWhileDragging(current) {
     if (!current.list.isConnected) return;
     const edge = 64;
-    const top = current.list.closest('.app-shell')?.querySelector('header')?.getBoundingClientRect().bottom || 0;
-    const bottom = window.innerHeight;
+    const panel = current.list.closest('[data-task-scroll-area]');
+    const scroller = panel && getComputedStyle(panel).overflowY === 'auto' ? panel : window;
+    const bounds = scroller === window ? null : panel.getBoundingClientRect();
+    const headerBottom = current.list.closest('.app-shell')?.querySelector('header')?.getBoundingClientRect().bottom || 0;
+    const top = Math.max(headerBottom, bounds?.top ?? 0);
+    const bottom = Math.min(window.innerHeight, bounds?.bottom ?? window.innerHeight);
     const delta = current.y < top + edge ? current.y - top - edge
       : current.y > bottom - edge ? current.y - bottom + edge : 0;
     if (!delta) return;
-    window.scrollBy({ top: Math.max(-18, Math.min(18, delta / 4)), behavior: 'instant' });
+    scroller.scrollBy({ top: Math.max(-18, Math.min(18, delta / 4)), behavior: 'instant' });
     updateTarget(current);
     current.frame = requestAnimationFrame(() => scrollWhileDragging(current));
   }

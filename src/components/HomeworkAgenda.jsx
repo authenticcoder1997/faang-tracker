@@ -10,10 +10,8 @@ import { dsaCatalog } from '../lib/dsaCatalog';
 import { allDsaTopics } from '../lib/dsaPlan';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import CompletedQuestions from './CompletedQuestions';
-import StudyActivity from './StudyActivity';
-import StudyTimer from './StudyTimer';
 import {
   ArrowRight,
   BookOpen,
@@ -40,11 +38,11 @@ const TRACKS = {
   dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen, source: 'TakeUForward' },
   lld: {
     id: 'lld', label: 'LLD', title: 'LLD', icon: Layers,
-    subtitle: 'Low-level design · AlgoMaster', source: 'AlgoMaster',
+    source: 'AlgoMaster',
   },
   hld: {
     id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor,
-    subtitle: 'System design · Hello Interview', source: 'Hello Interview',
+    source: 'Hello Interview',
   },
 };
 
@@ -55,10 +53,10 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
 
   return (
     <section
-      className="panel min-w-0 overflow-hidden"
+      className="min-w-0 border-b border-line"
       aria-labelledby={`agenda-${track.id}`}
     >
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-5 sm:px-6">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-3 pt-3 sm:px-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <Icon size={17} className="shrink-0 text-accent" />
@@ -76,7 +74,6 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
               </span>
             )}
           </div>
-          {track.subtitle && <p className="mt-1.5 max-w-lg text-xs leading-5 text-muted">{track.subtitle}</p>}
         </div>
         <button
           type="button"
@@ -97,49 +94,51 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
           return (
             <li
               key={assignment?.id || revision.id}
-              className="flex items-start gap-3.5 px-5 py-4 transition-colors hover:bg-hover sm:px-6"
+              className="flex items-start gap-2.5 px-3 py-2 transition-colors hover:bg-hover sm:px-4"
             >
               <button
                 type="button"
                 onClick={() => onComplete(track.id, assignment, revision)}
                 aria-label={`${action}: ${item.title}`}
                 title={action}
-                className="completion-button mt-0.5 shrink-0"
+                className="completion-button shrink-0"
               >
                 <Circle size={21} aria-hidden="true" />
               </button>
               <div className="min-w-0 flex-1">
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
-                >
-                  {item.title}
-                </a>
-                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-muted">
-                  {revision && (
-                    <>
-                      <span className="status-pill border-accent/30 bg-accent-soft font-semibold text-accent">Revision</span>
-                      <time dateTime={revision.dueDate}
-                        title={shortDate.format(atNoon(revision.dueDate))}
-                        className={revision.dueDate < today ? 'text-warning' : ''}>
-                        {dueDateLabel(revision.dueDate, today)}
-                      </time>
-                    </>
-                  )}
-                  {item.difficulty && (
-                    <span className="status-pill">{item.difficulty}</span>
-                  )}
-                  {(item.topic || item.section) && (
-                    <span className="status-pill">{item.topic || item.section}</span>
-                  )}
-                  {item.premium && (
-                    <span className="status-pill text-warning">Premium</span>
-                  )}
+                <div className="flex min-h-8 flex-wrap items-center gap-x-2.5 gap-y-0.5">
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
+                  >
+                    {item.title}
+                  </a>
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-muted">
+                    {revision && (
+                      <>
+                        <span className="status-pill border-accent/30 bg-accent-soft font-semibold text-accent">Revision</span>
+                        <time dateTime={revision.dueDate}
+                          title={shortDate.format(atNoon(revision.dueDate))}
+                          className={revision.dueDate < today ? 'text-warning' : ''}>
+                          {dueDateLabel(revision.dueDate, today)}
+                        </time>
+                      </>
+                    )}
+                    {item.difficulty && (
+                      <span className="status-pill">{item.difficulty}</span>
+                    )}
+                    {(item.topic || item.section) && (
+                      <span className="status-pill">{item.topic || item.section}</span>
+                    )}
+                    {item.premium && (
+                      <span className="status-pill text-warning">Premium</span>
+                    )}
+                  </div>
                 </div>
                 {item.description && (
-                  <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted">
+                  <p className="mb-1 line-clamp-2 text-xs leading-5 text-muted">
                     {item.description}
                   </p>
                 )}
@@ -162,16 +161,14 @@ function AgendaSection({ track, today, onOpen, onComplete }) {
   );
 }
 
-export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
+export default function HomeworkAgenda({ date, today, sessions, onSelectDate, setActiveTab }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa } = useHomeworkSchedule(today);
   const revisions = useWorkspaceValue((state) => state.data.revisions);
   const progress = useWorkspaceValue((state) => state.data.progress);
-  const sessions = useWorkspaceValue((state) => state.data.studySessions);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
-  const [chosenDate, setChosenDate] = useState(null);
   const studyDates = useMemo(() => [...new Set([
-    ...schedule.map(({ date }) => date), ...completions.keys(),
+    today, date, ...schedule.map(({ date }) => date), ...completions.keys(),
     ...sessions.flatMap((session) => {
       const { startedAt, stoppedAt, durationMs } = session;
       if (stoppedAt === null) return [];
@@ -179,8 +176,7 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
       return durationMs !== undefined || stoppedAt === startedAt ? [firstDay]
         : [firstDay, dateKey(new Date(stoppedAt - 1))];
     }),
-    ...(chosenDate ? [chosenDate] : []),
-  ])].sort(), [schedule, completions, sessions, chosenDate]);
+  ])].sort(), [schedule, completions, sessions, today, date]);
   const todaysAgenda = schedule.find((day) => day.date >= today);
   useEffect(() => {
     if (todaysAgenda.date !== today || plan?.date >= today) return;
@@ -189,11 +185,9 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
       : current);
   }, [plan, today, todaysAgenda, updateData]);
 
-  const date = chosenDate ?? todaysAgenda.date;
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
   const isPast = date < today;
-  const completedQuestions = <CompletedQuestions date={date} today={today} questions={completions.get(date)} />;
 
   function complete(track, assignment, revision) {
     const completedOn = dateKey();
@@ -233,24 +227,20 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
     });
     return [{
       ...track,
-      subtitle: id === 'dsa' ? [...new Set(assignments.map((item) => item.section))].join(' · ') : track.subtitle,
       items: [...rows, ...reviewsById.values()],
       assignmentCount: assignments.length,
       revisionCount: reviews.length,
     }];
   });
-  const dsaTrack = tracks.find(({ id }) => id === 'dsa');
-  const designTracks = tracks.filter(({ id }) => id !== 'dsa');
   const extraPlan = date === today && plan?.date === today && !tracks.length
     ? extraHomeworkPlan(plan, dsa)
     : null;
 
   return (
-    <section aria-labelledby="homework-title" className="mb-8">
-      <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
+    <>
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2 sm:px-4">
         <div>
-          <h2 id="homework-title" className="text-lg font-semibold tracking-tight text-ink">Homework</h2>
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+          <p className="flex items-center gap-1.5 text-sm text-muted">
             <CalendarDays size={14} className="text-accent" aria-hidden="true" />
             {agendaDate.format(atNoon(date))}
           </p>
@@ -258,7 +248,7 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setChosenDate(null)}
+            onClick={() => onSelectDate(today)}
             className="button-secondary"
           >
             Today
@@ -266,7 +256,7 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
           <div className="flex min-w-0 items-center gap-1 rounded-xl border border-line bg-surface p-1">
             <button
               type="button"
-              onClick={() => setChosenDate(studyDates[selectedDayIndex - 1])}
+              onClick={() => onSelectDate(studyDates[selectedDayIndex - 1])}
               disabled={selectedDayIndex <= 0}
               aria-label="Previous study day"
               className="icon-button disabled:cursor-default disabled:opacity-30"
@@ -279,7 +269,7 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
             <select
               id="date-selector"
               value={date}
-              onChange={(event) => setChosenDate(event.target.value)}
+              onChange={(event) => onSelectDate(event.target.value)}
               className="min-w-24 cursor-pointer appearance-none bg-transparent px-1 py-2 text-center text-sm font-medium text-ink outline-none focus-visible:outline-2 focus-visible:outline-accent"
               style={{ textAlignLast: 'center' }}
             >
@@ -291,7 +281,7 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
             </select>
             <button
               type="button"
-              onClick={() => setChosenDate(studyDates[selectedDayIndex + 1])}
+              onClick={() => onSelectDate(studyDates[selectedDayIndex + 1])}
               disabled={selectedDayIndex >= studyDates.length - 1}
               aria-label="Next study day"
               className="icon-button disabled:cursor-default disabled:opacity-30"
@@ -302,39 +292,31 @@ export default function HomeworkAgenda({ today, setActiveTab, isActive }) {
         </div>
       </header>
 
-      {isPast && <div className="mb-4">{completedQuestions}</div>}
-      {!isPast && !tracks.length && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
-          <p className="flex items-center gap-2 text-sm text-muted">
-            <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
-            {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
-          </p>
-          {extraPlan && (
-            <button type="button" className="button-secondary"
-              onClick={() => updateData((current) => current.homework === plan &&
-                !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
-                ? { ...current, homework: extraPlan }
-                : current)}>
-              Get more work
-            </button>
+      {(!isPast || tracks.length > 0) && (
+        <div className="homework-assignments min-h-0">
+          {!tracks.length && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3 py-3 sm:px-4">
+              <p className="flex items-center gap-2 text-sm text-muted">
+                <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
+                {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
+              </p>
+              {extraPlan && (
+                <button type="button" className="button-secondary"
+                  onClick={() => updateData((current) => current.homework === plan &&
+                    !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
+                    ? { ...current, homework: extraPlan }
+                    : current)}>
+                  Get more work
+                </button>
+              )}
+            </div>
           )}
+          {tracks.map((track) => (
+            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
+          ))}
         </div>
       )}
-      <div className={`grid items-start gap-4 ${dsaTrack && designTracks.length ? 'lg:grid-cols-2' : ''}`}>
-        {dsaTrack && <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete} />}
-        {(designTracks.length > 0 || date <= today) && (
-          <div className="grid min-w-0 gap-4">
-            {designTracks.map((track) => (
-              <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
-            ))}
-            {date <= today && (
-              <StudyTimer date={date} today={today} isActive={isActive} sessions={sessions} onSelectDate={setChosenDate} />
-            )}
-          </div>
-        )}
-      </div>
-      <StudyActivity date={date} today={today} sessions={sessions} onSelectDate={setChosenDate} />
-      {date === today && completedQuestions}
-    </section>
+      <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { studySessionsByDate } from '../lib/studySessions';
 import { addDays } from '../lib/tasks';
 
 const HOUR_MS = 3_600_000;
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
 const fullDate = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 const dayTime = (date) => new Date(`${date}T12:00:00`);
@@ -30,7 +31,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
   const activeDate = date >= firstDate && date <= today ? date : today;
 
   function moveDay(event, day) {
-    const offsets = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
+    const offsets = { ArrowUp: -7, ArrowDown: 7, ArrowLeft: -1, ArrowRight: 1 };
     const offset = offsets[event.key];
     if (offset === undefined) return;
     event.preventDefault();
@@ -42,15 +43,15 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
   }
 
   return (
-    <section aria-labelledby="study-activity-title" className="panel mt-4 w-full max-w-xs px-4 py-4 sm:px-5">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+    <section aria-labelledby="study-activity-title" className="px-4 py-3">
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h3 id="study-activity-title" className="section-heading">Study activity</h3>
         <p className="text-xs text-muted">{monthName}</p>
       </div>
       <div className="study-activity-grid" role="group" aria-label={`Study time by day in ${monthName}`}>
-        <span className="study-activity-weekday" style={{ gridRow: 1 }} aria-hidden="true">Mon</span>
-        <span className="study-activity-weekday" style={{ gridRow: 3 }} aria-hidden="true">Wed</span>
-        <span className="study-activity-weekday" style={{ gridRow: 5 }} aria-hidden="true">Fri</span>
+        {WEEKDAYS.map((weekday) => (
+          <span key={weekday} className="study-activity-weekday" aria-hidden="true">{weekday}</span>
+        ))}
         {Array.from({ length: daysInMonth }, (_, index) => {
           const day = addDays(firstDate, index);
           const position = firstWeekday + index;
@@ -64,9 +65,11 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
                 if (cell) cells.current.set(day, cell);
                 else cells.current.delete(day);
               }}
-              style={{ gridRow: position % 7 + 1, gridColumn: Math.floor(position / 7) + 2 }}
+              style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: position % 7 + 1 }}
               aria-label={label} title={label} aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
-              onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)} />
+              onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
+              {index + 1}
+            </button>
           );
         })}
       </div>

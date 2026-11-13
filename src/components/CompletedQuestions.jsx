@@ -4,14 +4,14 @@ const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short
 
 export default function CompletedQuestions({ date, today, questions = [] }) {
   return (
-    <section aria-labelledby="completed-questions-title" className="panel mt-4 px-4 py-4 sm:px-5">
-      <h3 id="completed-questions-title" className="section-heading flex items-center gap-2">
+    <section aria-labelledby="completed-questions-title" className="homework-completed flex shrink-0 flex-col px-3 py-3 sm:px-4">
+      <h3 id="completed-questions-title" className="section-heading flex flex-wrap items-center gap-x-2 gap-y-1">
         <CheckCircle2 size={17} className="shrink-0 text-accent" aria-hidden="true" />
         {date === today ? 'Questions completed today' : 'Questions completed on ' + dateFormat.format(new Date(date + 'T12:00:00'))}
         <span className="text-xs tabular-nums text-muted">({questions.length})</span>
       </h3>
       {questions.length ? (
-        <ul className="mt-2 max-h-60 divide-y divide-line overflow-y-auto">
+        <ul className="homework-completed-list mt-1 min-h-0 divide-y divide-line">
           {questions.map(({ id, track, title, url, onlyHomeworkDate }) => (
             <li key={track + ':' + id} className="flex flex-wrap items-center gap-2 py-2 text-sm">
               <span className="status-pill shrink-0">{track.toUpperCase()}</span>
