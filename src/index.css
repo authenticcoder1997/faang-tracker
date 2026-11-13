@@ -315,9 +315,8 @@ select {
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--text) 13%, transparent);
   border-radius: 5px;
-  background: var(--activity-color, var(--well));
-}
-button.study-activity-cell {
+  background: var(--activity-color, transparent);
+  color: var(--activity-ink, var(--text));
   position: relative;
   font-size: 11px;
   font-weight: 600;
@@ -385,18 +384,14 @@ button.study-activity-cell {
 .study-activity-cell:focus-visible .study-activity-tooltip {
   visibility: visible;
 }
-button.study-activity-cell[data-level]:not([data-level='0']) { color: #fff; }
-button.study-activity-cell:is([data-level='3'], [data-level='4'], [data-level='5']) { color: #1b251d; }
-span.study-activity-cell { width: 12px; height: 12px; border-radius: 3px; }
-.study-activity-cell[data-level='0'] { --activity-color: transparent; }
-.study-activity-cell[data-level='1'] { --activity-color: #702a34; }
-.study-activity-cell[data-level='2'] { --activity-color: #ba4447; }
-.study-activity-cell[data-level='3'] { --activity-color: #db8738; }
-.study-activity-cell[data-level='4'] { --activity-color: #e9c24f; }
-.study-activity-cell[data-level='5'] { --activity-color: #619e53; }
-.study-activity-cell[data-level='6'] {
+.study-activity-gradient {
+  width: 7rem;
+  max-width: 45%;
+  height: 8px;
+  border-radius: 999px;
+}
+.study-activity-cell[data-goal] {
   border-color: transparent;
-  background: transparent;
 }
 .study-activity-cell:is(:disabled, [data-muted]) {
   background: transparent;
@@ -411,10 +406,10 @@ span.study-activity-cell { width: 12px; height: 12px; border-radius: 3px; }
   outline: 1px solid var(--text);
   outline-offset: 1px;
 }
-.study-activity-cell[data-level='6'][aria-pressed='true']:not(:focus-visible) {
+.study-activity-cell[data-goal][aria-pressed='true']:not(:focus-visible) {
   outline: none;
 }
-.study-activity-cell[data-level='6'][aria-pressed='true'] .study-activity-star {
+.study-activity-cell[data-goal][aria-pressed='true'] .study-activity-star {
   stroke: #914000;
   stroke-width: 1.9px;
   filter: drop-shadow(0 1px 3px #da790070);
@@ -427,7 +422,7 @@ span.study-activity-cell { width: 12px; height: 12px; border-radius: 3px; }
   .study-activity-cell:enabled:hover {
     z-index: 2;
   }
-  .study-activity-cell:enabled:hover:not([data-level='6']) {
+  .study-activity-cell:enabled:hover:not([data-goal]) {
     outline: 1px solid var(--text);
     outline-offset: 1px;
   }

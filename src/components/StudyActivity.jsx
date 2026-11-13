@@ -4,13 +4,44 @@ import { studySessionsByDate } from '../lib/studySessions';
 import { addDays } from '../lib/tasks';
 
 const HOUR_MS = 3_600_000;
-const STUDY_GOAL_HOURS = 6;
+const STUDY_COLORS = [
+  [86, 35, 45],
+  [112, 42, 52],
+  [186, 68, 71],
+  [219, 135, 56],
+  [233, 194, 79],
+  [97, 158, 83],
+  [40, 126, 71],
+];
+const STUDY_GOAL_HOURS = STUDY_COLORS.length - 1;
+const STUDY_GOAL_MS = STUDY_GOAL_HOURS * HOUR_MS;
+const rgb = (channels) => `rgb(${channels.join(' ')})`;
+const STUDY_GRADIENT = `linear-gradient(to right in srgb, ${STUDY_COLORS.map(rgb).join(', ')})`;
 const FIRST_HIGHLIGHTED_DAY = '2026-11-11';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const monthLabel = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
 const fullDate = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
 const shortDate = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' });
 const dayTime = (date) => new Date(`${date}T12:00:00`);
+
+function activityColors(duration) {
+  const hours = duration / HOUR_MS;
+  const lowerHour = Math.floor(hours);
+  const fraction = hours - lowerHour;
+  const upperColor = STUDY_COLORS[lowerHour + 1];
+  const channels = STUDY_COLORS[lowerHour].map((start, channel) =>
+    Math.round(start + (upperColor[channel] - start) * fraction));
+  const [red, green, blue] = channels.map((channel) => {
+    const value = channel / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+  return {
+    '--activity-color': rgb(channels),
+    // Use whichever text color has the higher contrast against this shade.
+    '--activity-ink': luminance > Math.sqrt(0.05 * 1.05) - 0.05 ? '#000' : '#fff',
+  };
+}
 
 function timeLabel(duration) {
   if (!duration) return '0 h';
@@ -34,7 +65,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
   const firstWeekday = (month.getDay() + 6) % 7;
   const activeDate = date >= firstDate && date <= today ? date : today;
   const selectedTotal = totals.get(date) ?? 0;
-  const selectedGoalReached = date >= FIRST_HIGHLIGHTED_DAY && selectedTotal >= STUDY_GOAL_HOURS * HOUR_MS;
+  const selectedGoalReached = date >= FIRST_HIGHLIGHTED_DAY && selectedTotal >= STUDY_GOAL_MS;
 
   function moveDay(event, day) {
     const offsets = { ArrowUp: -7, ArrowDown: 7, ArrowLeft: -1, ArrowRight: 1 };
@@ -65,20 +96,19 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
           const column = position % 7 + 1;
           const duration = totals.get(day) ?? 0;
           const muted = day < FIRST_HIGHLIGHTED_DAY;
-          const level = !muted && duration
-            ? Math.max(1, Math.min(STUDY_GOAL_HOURS, Math.floor(duration / HOUR_MS))) : 0;
           const future = day > today;
-          const goalReached = level === STUDY_GOAL_HOURS;
+          const goalReached = !muted && duration >= STUDY_GOAL_MS;
+          const colors = !muted && duration > 0 && !goalReached ? activityColors(duration) : undefined;
           const studied = timeLabel(duration);
           const label = `${fullDate.format(calendarDate)}${future ? '' : ` · ${studied}`}`;
           return (
-            <button key={day} type="button" className="study-activity-cell" data-level={level}
+            <button key={day} type="button" className="study-activity-cell" data-goal={goalReached || undefined}
               data-column={column} data-muted={muted || undefined} disabled={future}
               ref={(cell) => {
                 if (cell) cells.current.set(day, cell);
                 else cells.current.delete(day);
               }}
-              style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: column }}
+              style={{ gridRow: Math.floor(position / 7) + 2, gridColumn: column, ...colors }}
               aria-label={goalReached ? `${label} · Study goal reached` : label}
               aria-pressed={!future && day === date} tabIndex={day === activeDate ? 0 : -1}
               onClick={() => onSelectDate(day)} onKeyDown={(event) => moveDay(event, day)}>
@@ -110,11 +140,7 @@ export default function StudyActivity({ date, today, sessions, onSelectDate }) {
       <div className="mt-2 flex items-center justify-end gap-2 text-xs tabular-nums text-muted"
         aria-label={`Study time scale from 0 hours to a gold star at ${STUDY_GOAL_HOURS} hours`}>
         <span>0 h</span>
-        <div className="flex gap-1" aria-hidden="true">
-          {Array.from({ length: STUDY_GOAL_HOURS }, (_, level) => (
-            <span key={level} className="study-activity-cell" data-level={level} />
-          ))}
-        </div>
+        <span className="study-activity-gradient" style={{ backgroundImage: STUDY_GRADIENT }} aria-hidden="true" />
         <span className="inline-flex items-center gap-1">
           <Star size={15} className="study-activity-star" aria-hidden="true" /> {STUDY_GOAL_HOURS}+ h
         </span>
