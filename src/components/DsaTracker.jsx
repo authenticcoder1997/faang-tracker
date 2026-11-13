@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, BookmarkCheck, ListTodo, Upload } from 'lucide-react';
 import { useCloudStorage } from '../hooks/useCloudStorage';
+import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import {
   allDsaSections, mergeDsaSolved, parseDsaSolvedLinks, STRIVER_DSA_URL,
 } from '../lib/dsaPlan';
 import DsaProblemList from './DsaProblemList';
-import DsaRevisionQueue from './DsaRevisionQueue';
+import RevisionQueue from './RevisionQueue';
 import { dsaCatalog, DSA_SOURCES, matchesDsaSources } from '../lib/dsaCatalog';
 import { EMPTY_DSA_FILTERS, filterDsaProblems } from '../lib/dsaFilters';
-import { queueDsaRevision, reviewDsaProblem } from '../lib/dsaRevision';
 import { dateKey } from '../lib/tasks';
 import { PageHeader, StatsStrip } from './ui/Workspace';
 
@@ -31,8 +31,7 @@ export default function DsaTracker() {
   const saving = progressSaving || revisionSaving;
   const error = useWorkspaceValue((state) => state.error);
   const [catalog, setItems] = useCloudStorage('dsa', dsaCatalog);
-  const revisions = useWorkspaceValue((state) => state.data.revisions);
-  const queuedIds = useMemo(() => new Set(revisions.map((record) => record.id)), [revisions]);
+  const { revisions, queuedIds, toggleRevision, markReviewed, removeRevision } = useStudyRevisions('dsa');
   const items = useMemo(() => catalog.filter((item) => matchesDsaSources(item, sources)), [catalog, sources]);
   const matchingItems = useMemo(() => filterDsaProblems(items, filters, sources), [items, filters, sources]);
   const solved = matchingItems.filter((item) => item.completed).length;
@@ -46,19 +45,6 @@ export default function DsaTracker() {
     return () => { window.removeEventListener('focus', refresh); window.clearInterval(timer); };
   }, []);
 
-  const toggleRevision = useCallback((id, source) => updateData((current) => ({
-    ...current,
-    revisions: current.revisions.some((record) => record.id === id)
-      ? current.revisions.filter((record) => record.id !== id)
-      : queueDsaRevision(current.revisions, id, source, dateKey()),
-  })), [updateData]);
-
-  const markReviewed = (id) => updateData((current) => ({
-    ...current, revisions: reviewDsaProblem(current.revisions, id, dateKey()),
-  }));
-  const removeRevision = (id) => updateData((current) => ({
-    ...current, revisions: current.revisions.filter((record) => record.id !== id),
-  }));
   function importSolved(event) {
     event.preventDefault();
     const { ids, unmatched } = parseDsaSolvedLinks(links);
@@ -149,10 +135,7 @@ export default function DsaTracker() {
           queuedIds={queuedIds} onRevision={toggleRevision} />
       </div>
       <div hidden={view !== 'revision'}>
-        <p role="status" className={`mb-4 text-xs ${error ? 'text-warning' : 'text-muted'}`}>
-          {error ? 'Unable to save revisions to Firebase.' : revisionSaving ? 'Saving revisions…' : 'Revisions saved to Firebase'}
-        </p>
-        <DsaRevisionQueue revisions={revisions} catalog={catalog} today={today}
+        <RevisionQueue track="dsa" revisions={revisions} today={today}
           onReviewed={markReviewed} onRemove={removeRevision} onBrowse={() => setView('problems')} />
       </div>
     </div>

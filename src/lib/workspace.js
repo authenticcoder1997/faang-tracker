@@ -1,4 +1,4 @@
-import { normalizeDsaRevision } from './dsaRevision.js';
+import { normalizeRevision } from './studyRevisions.js';
 import { normalizeHomeworkPlan } from './homeworkSchedule.js';
 import { applyStudySessionPatch, diffStudySessions, normalizeStudySession } from './studySessions.js';
 import { normalizeBookmark } from './bookmarks.js';
@@ -173,7 +173,7 @@ export function normalizeWorkspace(value, previous) {
     studySessions: previous && value.studySessions === previous.studySessions
       ? previous.studySessions : studySessions(value.studySessions),
     revisions: previous && value.revisions === previous.revisions ? previous.revisions
-      : uniqueEntities(value.revisions === undefined ? [] : value.revisions, 'DSA revisions', normalizeDsaRevision),
+      : uniqueEntities(value.revisions === undefined ? [] : value.revisions, 'study revisions', normalizeRevision),
     notes: previous && value.notes === previous.notes ? previous.notes : notes(value.notes),
     appearance: previous && value.appearance === previous.appearance ? previous.appearance : appearance(value.appearance),
     progress: Object.fromEntries(

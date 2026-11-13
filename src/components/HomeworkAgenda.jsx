@@ -1,4 +1,5 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
+import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
 import { completedQuestionsByDate } from '../lib/studyProgress';
@@ -8,9 +9,11 @@ import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
 import { useEffect, useMemo, useState } from 'react';
 import CompletedQuestions from './CompletedQuestions';
+import { RevisionRows } from './RevisionQueue';
 import {
   ArrowRight,
   BookOpen,
+  BookmarkCheck,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -137,6 +140,7 @@ function AgendaSection({ track, onOpen }) {
 export default function HomeworkAgenda({ today, setActiveTab, children }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa, setDsa, setLld, setHld } = useHomeworkSchedule(today);
+  const { revisions, markReviewed } = useStudyRevisions();
   const progress = useWorkspaceValue((state) => state.data.progress);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
   const studyDates = useMemo(() => [...new Set([
@@ -152,6 +156,8 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
 
   const [chosenDate, setChosenDate] = useState(null);
   const date = studyDates.includes(chosenDate) ? chosenDate : todaysAgenda.date;
+  const dueRevisions = date === today ? revisions.filter((record) => record.dueDate <= today)
+    .sort((first, second) => first.dueDate.localeCompare(second.dueDate)) : [];
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
   const isPast = date < today;
@@ -242,7 +248,8 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <p className="flex items-center gap-2 text-sm text-muted">
             <CheckCircle2 size={16} className="text-accent" aria-hidden="true" />
-            {extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
+            {dueRevisions.length ? 'Today’s practice assignments are complete.'
+              : extraPlan ? 'Today’s homework is complete.' : 'No unfinished work for this day.'}
           </p>
           {extraPlan && (
             <button type="button" className="button-secondary"
@@ -261,6 +268,18 @@ export default function HomeworkAgenda({ today, setActiveTab, children }) {
           {children}
         </div>
       </div>
+      {dueRevisions.length > 0 && (
+        <section className="panel mt-4 min-w-0 overflow-hidden" aria-labelledby="homework-revisions-title">
+          <header className="flex items-center gap-2 border-b border-line px-4 py-3 sm:px-5">
+            <BookmarkCheck size={17} aria-hidden="true" className="text-accent" />
+            <h3 id="homework-revisions-title" className="section-heading">Revisions due</h3>
+            <span className="status-pill tabular-nums">{dueRevisions.length}</span>
+          </header>
+          <ul className="divide-y divide-line">
+            <RevisionRows records={dueRevisions} today={today} onReviewed={markReviewed} />
+          </ul>
+        </section>
+      )}
       {date === today && completedQuestions}
     </section>
   );

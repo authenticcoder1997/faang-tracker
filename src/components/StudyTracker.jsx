@@ -1,7 +1,9 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   ArrowUpRight,
   BookOpen,
+  BookmarkCheck,
+  BookmarkPlus,
   CheckCircle2,
   ChevronDown,
   ChevronsDownUp,
@@ -14,8 +16,11 @@ import {
 } from 'lucide-react';
 import NoteModal from './NoteModal';
 import CompletionDate from './CompletionDate';
+import RevisionQueue from './RevisionQueue';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
+import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
+import { dateKey } from '../lib/tasks';
 
 function Difficulty({ value }) {
   const tone =
@@ -70,7 +75,11 @@ export default function StudyTracker({
   accessFilter = false,
 }) {
   const saving = useWorkspaceSaving(id);
+  const revisionSaving = useWorkspaceSaving('revisions');
   const error = useWorkspaceValue((state) => state.error);
+  const { revisions, queuedIds, toggleRevision, markReviewed, removeRevision } = useStudyRevisions(id);
+  const [showRevision, setShowRevision] = useState(false);
+  const [today, setToday] = useState(dateKey);
   const [query, setQuery] = useState('');
   const [difficulty, setDifficulty] = useState('All');
   const [context, setContext] = useState('All');
@@ -80,7 +89,19 @@ export default function StudyTracker({
   const [collapsed, setCollapsed] = useState({});
   const [noteId, setNoteId] = useState(null);
   const activeNote = items.find((item) => item.id === noteId);
-  const showCompletionDay = id === 'lld' || id === 'hld';
+  const isDesignTrack = id === 'lld' || id === 'hld';
+  const dueCount = revisions.filter((record) => record.dueDate <= today).length;
+
+  useEffect(() => {
+    if (!isDesignTrack) return;
+    const refresh = () => setToday(dateKey());
+    window.addEventListener('focus', refresh);
+    const timer = window.setInterval(refresh, 60000);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.clearInterval(timer);
+    };
+  }, [isDesignTrack]);
 
   const sectionNames = [
     ...new Set(items.map((item) => item.section).filter(Boolean)),
@@ -213,7 +234,7 @@ export default function StudyTracker({
           {item.title}
         </a>
         {item.completed && <span className="sr-only">Completed</span>}
-        {showCompletionDay && item.completed && item.completedOn && (
+        {isDesignTrack && item.completed && item.completedOn && (
           <p className="mt-0.5 text-xs text-muted sm:hidden">Last completed day · <CompletionDate date={item.completedOn} /></p>
         )}
         {item.description && (
@@ -266,17 +287,26 @@ export default function StudyTracker({
           </span>
         )}
       </div>
-      {showCompletionDay && (
+      {isDesignTrack && (
         <div className="hidden w-28 shrink-0 pt-1 text-xs text-muted sm:block">
           {item.completed && item.completedOn && (
             <><span className="sr-only">Last completed day </span><CompletionDate date={item.completedOn} /></>
           )}
         </div>
       )}
-      <div className={`flex shrink-0 items-center gap-2 sm:gap-5 ${showCompletionDay ? 'sm:w-28 sm:justify-end' : ''}`}>
+      <div className={`flex shrink-0 items-center gap-2 ${isDesignTrack ? 'sm:w-32 sm:justify-end' : 'sm:gap-5'}`}>
         <span className="hidden sm:block">
           <Difficulty value={item.difficulty} />
         </span>
+        {isDesignTrack && (
+          <button type="button" className={`icon-button ${queuedIds.has(item.id) ? 'text-accent' : ''}`}
+            aria-pressed={queuedIds.has(item.id)}
+            aria-label={`${queuedIds.has(item.id) ? 'Remove from revision' : 'Add to revision'}: ${item.title}`}
+            title={queuedIds.has(item.id) ? 'Remove from revision' : 'Add to revision'}
+            onClick={() => toggleRevision(item.id, id)}>
+            {queuedIds.has(item.id) ? <BookmarkCheck size={16} aria-hidden="true" /> : <BookmarkPlus size={16} aria-hidden="true" />}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => setNoteId(item.id)}
@@ -310,6 +340,24 @@ export default function StudyTracker({
         }
       />
 
+      {isDesignTrack && (
+        <div role="group" aria-label={`${id.toUpperCase()} view`}
+          className="glass-segment mb-5 inline-flex flex-wrap gap-1 rounded-xl border border-line p-1">
+          <button type="button" aria-pressed={!showRevision} onClick={() => setShowRevision(false)}
+            className={`filter-tag ${!showRevision ? 'font-medium' : ''}`}>
+            <BookOpen size={15} aria-hidden="true" /> Questions
+          </button>
+          <button type="button" aria-pressed={showRevision} onClick={() => setShowRevision(true)} className="filter-tag">
+            <BookmarkCheck size={15} aria-hidden="true" /> Revision
+            {dueCount > 0 && <span className="status-pill">{dueCount} due</span>}
+          </button>
+        </div>
+      )}
+      {showRevision && (
+        <RevisionQueue track={id} revisions={revisions} today={today}
+          onReviewed={markReviewed} onRemove={removeRevision} onBrowse={() => setShowRevision(false)} />
+      )}
+      <div hidden={showRevision}>
       <StatsStrip
         items={[
           {
@@ -348,7 +396,7 @@ export default function StudyTracker({
       </div>
 
       <p className={`mb-5 text-xs ${error ? 'text-warning' : 'text-muted'}`} role="status">
-        {error ? 'Unable to save progress to Firebase.' : saving ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
+        {error ? 'Unable to save progress to Firebase.' : saving || (isDesignTrack && revisionSaving) ? 'Saving progress to Firebase…' : 'Progress saved to Firebase'}
       </p>
 
       <div className="mb-6 space-y-4">
@@ -523,7 +571,7 @@ export default function StudyTracker({
                       aria-hidden="true"
                     />
                   </button>
-                ) : !showCompletionDay && (
+                ) : !isDesignTrack && (
                   <div className="flex items-center justify-between gap-4 px-5 py-3 text-[11px] text-muted">
                     <span>Interview questions</span>
                     <span>Difficulty & notes</span>
@@ -531,11 +579,11 @@ export default function StudyTracker({
                 )}
                 {!closed && (
                   <div id={sectionId}>
-                    {showCompletionDay && (
+                    {isDesignTrack && (
                       <div className="hidden items-center gap-4 px-5 py-3 text-[11px] text-muted sm:flex">
                         <span className="min-w-0 flex-1">Question</span>
                         <span className="w-28 shrink-0">Last completed day</span>
-                        <span className="w-28 shrink-0 text-right">Difficulty &amp; notes</span>
+                        <span className="w-32 shrink-0 text-right">Difficulty &amp; actions</span>
                       </div>
                     )}
                     {rows.map(renderRow)}
@@ -562,6 +610,7 @@ export default function StudyTracker({
         />
       )}
 
+      </div>
       <NoteModal
         isOpen={!!activeNote}
         onClose={() => setNoteId(null)}
