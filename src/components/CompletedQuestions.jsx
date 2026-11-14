@@ -2,7 +2,7 @@ import { CheckCircle2 } from 'lucide-react';
 
 const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
 
-export default function CompletedQuestions({ date, today, questions = [], renderTags }) {
+export default function CompletedQuestions({ date, today, questions = [] }) {
   return (
     <section aria-labelledby="completed-questions-title" className="panel min-w-0 px-4 py-4 sm:px-6">
       <h3 id="completed-questions-title" className="section-heading flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -12,13 +12,12 @@ export default function CompletedQuestions({ date, today, questions = [], render
       </h3>
       {questions.length ? (
         <ul className="mt-2 divide-y divide-line">
-          {questions.map((item) => (
-            <li key={item.track + ':' + item.id} className="flex flex-wrap items-center gap-2 py-2.5 text-sm">
-              <span className="status-pill shrink-0">{item.track.toUpperCase()}</span>
-              {item.url ? <a href={item.url} target="_blank" rel="noopener noreferrer"
-                className="min-w-0 break-words hover:text-accent hover:underline">{item.title}</a> : <span>{item.title}</span>}
-              {renderTags(item.track, item)}
-              {item.onlyHomeworkDate && <span className="text-xs text-muted">Homework date</span>}
+          {questions.map(({ id, track, title, url, onlyHomeworkDate }) => (
+            <li key={track + ':' + id} className="flex flex-wrap items-center gap-2 py-2.5 text-sm">
+              <span className="status-pill shrink-0">{track.toUpperCase()}</span>
+              {url ? <a href={url} target="_blank" rel="noopener noreferrer"
+                className="min-w-0 break-words hover:text-accent hover:underline">{title}</a> : <span>{title}</span>}
+              {onlyHomeworkDate && <span className="text-xs text-muted">Homework date</span>}
             </li>
           ))}
         </ul>

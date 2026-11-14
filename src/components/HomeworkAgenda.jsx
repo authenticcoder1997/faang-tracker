@@ -1,20 +1,17 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
-import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from '../lib/studyProgress';
 import { revisionQuestion } from '../lib/revisionQuestions';
 import { markRevisionReviewed, revisionTrack } from '../lib/studyRevisions';
 import { studySessionDate } from '../lib/studySessions';
-import { dateKey } from '../lib/tasks';
+import { dateKey, dueDateLabel } from '../lib/tasks';
 import { dsaCatalog } from '../lib/dsaCatalog';
 import { allDsaTopics } from '../lib/dsaPlan';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import CompletedQuestions from './CompletedQuestions';
-import HomeworkQuestionTags from './HomeworkQuestionTags';
-import NoteModal from './NoteModal';
 import {
   ArrowRight,
   BookOpen,
@@ -48,7 +45,7 @@ const TRACKS = {
   },
 };
 
-function AgendaSection({ track, onOpen, onComplete, renderTags, emptyMessage, emptyAction }) {
+function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAction }) {
   const Icon = track.icon;
   const { assignmentCount, revisionCount } = track;
   const unit = track.id === 'dsa' ? 'question' : 'exercise';
@@ -95,11 +92,10 @@ function AgendaSection({ track, onOpen, onComplete, renderTags, emptyMessage, em
       )}
       <ul className="divide-y divide-line">
         {track.items.map(({ question, assignment, revision }) => {
-          const item = question && assignment
-            ? { ...assignment, ...question, title: assignment.title }
-            : question || assignment;
+          const item = assignment || question;
           const action = assignment ? 'Mark complete' : 'Mark reviewed';
           const source = question?.sourceLabel || track.source;
+          const url = question?.url || item.url;
           return (
             <li
               key={assignment?.id || revision.id}
@@ -117,14 +113,34 @@ function AgendaSection({ track, onOpen, onComplete, renderTags, emptyMessage, em
               <div className="min-w-0 flex-1">
                 <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1">
                   <a
-                    href={item.url}
+                    href={url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="break-words text-sm font-semibold leading-6 text-ink transition-colors hover:text-accent"
                   >
                     {item.title}
                   </a>
-                  {renderTags(track.id, item)}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                    {revision && (
+                      <>
+                        <span className="status-pill border-accent/30 bg-accent-soft font-semibold text-accent">Revision</span>
+                        <time dateTime={revision.dueDate}
+                          title={shortDate.format(atNoon(revision.dueDate))}
+                          className={revision.dueDate < today ? 'text-warning' : ''}>
+                          {dueDateLabel(revision.dueDate, today)}
+                        </time>
+                      </>
+                    )}
+                    {item.difficulty && (
+                      <span className="status-pill">{item.difficulty}</span>
+                    )}
+                    {(item.topic || item.section) && (
+                      <span className="status-pill">{item.topic || item.section}</span>
+                    )}
+                    {item.premium && (
+                      <span className="status-pill text-warning">Premium</span>
+                    )}
+                  </div>
                 </div>
                 {item.description && (
                   <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">
@@ -133,7 +149,7 @@ function AgendaSection({ track, onOpen, onComplete, renderTags, emptyMessage, em
                 )}
               </div>
               <a
-                href={item.url}
+                href={url}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`Open ${item.title} on ${source}`}
@@ -153,10 +169,8 @@ function AgendaSection({ track, onOpen, onComplete, renderTags, emptyMessage, em
 export default function HomeworkAgenda({ date, today, sessions, onSelectDate, setActiveTab }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa } = useHomeworkSchedule(today);
-  const { revisions, toggleRevision } = useStudyRevisions();
+  const revisions = useWorkspaceValue((state) => state.data.revisions);
   const progress = useWorkspaceValue((state) => state.data.progress);
-  const [noteTarget, setNoteTarget] = useState(null);
-  const revisionsById = useMemo(() => new Map(revisions.map((revision) => [revision.id, revision])), [revisions]);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
   const studyDates = useMemo(() => [...new Set([
     today, date, ...schedule.map(({ date }) => date), ...completions.keys(),
@@ -180,26 +194,6 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
 
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
-
-  function openNotes(track, item) {
-    setNoteTarget({ track, item, initialNote: progress[track][item.id]?.note ?? item.note ?? '' });
-  }
-
-  function saveNote(note) {
-    const { track, item, initialNote } = noteTarget;
-    if (note === initialNote) return;
-    updateData((current) => {
-      const previous = { ...item, ...current.progress[track][item.id] };
-      const progress = mergeChangedStudyProgress(current.progress[track], [previous], [{ ...previous, note }]);
-      return progress === current.progress[track] ? current
-        : { ...current, progress: { ...current.progress, [track]: progress } };
-    });
-  }
-
-  function renderTags(track, item) {
-    return <HomeworkQuestionTags item={item} track={track} progress={progress[track][item.id]}
-      revision={revisionsById.get(item.id)} today={today} onNotes={openNotes} onRevision={toggleRevision} />;
-  }
 
   function complete(track, assignment, revision) {
     const completedOn = dateKey();
@@ -311,7 +305,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       </header>
 
       <div className="panel min-w-0 overflow-hidden">
-        <AgendaSection track={dsaTrack} onOpen={setActiveTab} onComplete={complete} renderTags={renderTags}
+        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete}
           emptyMessage={extraPlan ? 'Today’s homework is complete.' : 'No DSA questions for this day.'}
           emptyAction={extraPlan && (
             <button type="button" className="button-secondary"
@@ -326,7 +320,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       <div className="panel min-w-0 divide-y divide-line overflow-hidden">
         {designTracks.length > 0 ? (
           designTracks.map((track) => (
-            <AgendaSection key={track.id} track={track} onOpen={setActiveTab} onComplete={complete} renderTags={renderTags} />
+            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
           ))
         ) : (
           <section aria-labelledby="agenda-design" className="px-4 py-4 sm:px-6">
@@ -337,11 +331,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
           </section>
         )}
       </div>
-      <CompletedQuestions date={date} today={today} questions={completions.get(date)} renderTags={renderTags} />
-      {noteTarget && (
-        <NoteModal isOpen problemTitle={noteTarget.item.title} initialNote={noteTarget.initialNote}
-          onClose={() => setNoteTarget(null)} onSave={saveNote} />
-      )}
+      <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
     </section>
   );
 }

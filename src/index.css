@@ -618,14 +618,6 @@ textarea::placeholder {
   font-weight: 500;
   line-height: 1.3;
 }
-.question-tag-action {
-  min-height: 26px;
-}
-.question-tag-action:is(:hover, :focus-visible, [data-active]) {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  background: var(--accent-soft);
-  color: var(--accent);
-}
 .completion-button {
   display: inline-flex;
   align-items: center;

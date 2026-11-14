@@ -13,11 +13,14 @@ const designByTrack = {
 
 export function revisionQuestion(record) {
   const track = revisionTrack(record);
-  if (track !== 'dsa') return designByTrack[track].get(record.id);
+  if (track !== 'dsa') {
+    const item = designByTrack[track].get(record.id);
+    return item && { title: item.title, url: item.url };
+  }
   const item = dsaById.get(record.id);
   const earlierTuf = !item || (record.source === 'tuf' && !item.sources.tuf)
     ? earlierTufById.get(record.id) : undefined;
   const source = earlierTuf ? 'tuf' : item && (item.sources[record.source] ? record.source : dsaSourceFor(item));
   const entry = earlierTuf || item?.sources[source];
-  return entry && { ...item, ...entry, source, sourceLabel: DSA_SOURCE_LABELS[source] };
+  return entry && { title: entry.title, url: entry.url, sourceLabel: DSA_SOURCE_LABELS[source] };
 }
