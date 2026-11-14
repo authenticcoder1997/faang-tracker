@@ -1,6 +1,7 @@
 import { addDays, isValidDate } from './tasks.js';
 
-const intervals = [1, 3, 7, 14, 30];
+export const DEFAULT_REVISION_DELAY_DAYS = 2;
+const intervals = [DEFAULT_REVISION_DELAY_DAYS, 3, 7, 14, 30];
 
 export function revisionTrack({ source }) {
   return source === 'lld' || source === 'hld' ? source : 'dsa';
@@ -23,7 +24,7 @@ export function normalizeRevision(value) {
 
 export function queueRevision(revisions, id, source, today) {
   if (revisions.some((item) => item.id === id)) return revisions;
-  const dueDate = revisionTrack({ source }) === 'dsa' ? addDays(today, 1) : today;
+  const dueDate = addDays(today, DEFAULT_REVISION_DELAY_DAYS);
   return [...revisions, normalizeRevision({ id, source, dueDate, reviewCount: 0 })];
 }
 

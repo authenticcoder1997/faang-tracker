@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowUpRight, CalendarCheck, Check, Trash2 } from 'lucide-react';
 import { revisionQuestion } from '../lib/revisionQuestions';
-import { revisionTrack } from '../lib/studyRevisions';
+import { DEFAULT_REVISION_DELAY_DAYS, revisionTrack } from '../lib/studyRevisions';
 import { dueDateLabel } from '../lib/tasks';
 import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import { EmptyState } from './ui/Workspace';
@@ -68,7 +68,7 @@ export default function RevisionQueue({ track, revisions, today, onReviewed, onR
             <p className="eyebrow mb-1">Spaced repetition</p>
             <h2 id={`${track}-revision-title`} className="text-xl font-semibold tracking-tight">Revision tracker</h2>
             <p className="mt-2 text-sm text-muted">
-              {track === 'dsa' ? 'Newly saved problems are due the next day. ' : 'Save questions to review. '}
+              Newly saved questions are due in {DEFAULT_REVISION_DELAY_DAYS} days.{' '}
               Mark a review done to schedule the next one.
             </p>
           </div>
