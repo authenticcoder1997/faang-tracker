@@ -1,4 +1,5 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
+import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
 import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from '../lib/studyProgress';
@@ -14,38 +15,49 @@ import { useEffect, useMemo } from 'react';
 import CompletedQuestions from './CompletedQuestions';
 import {
   ArrowRight,
+  BookmarkCheck,
+  BookmarkPlus,
   BookOpen,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
   Circle,
-  ExternalLink,
   Layers,
   Monitor,
+  RotateCcw,
 } from 'lucide-react';
 
 const shortDate = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' });
 const agendaDate = new Intl.DateTimeFormat('en', { weekday: 'long', day: 'numeric', month: 'short' });
 const atNoon = (date) => new Date(date + 'T12:00:00');
+const dsaById = new Map([...allDsaTopics, ...dsaCatalog].map((item) => [item.id, item]));
 const completionCatalogs = {
-  dsa: [...new Map([...allDsaTopics, ...dsaCatalog].map((item) => [item.id, item])).values()],
+  dsa: [...dsaById.values()],
   lld: lldTopics,
   hld: hldTopics,
 };
 
 const TRACKS = {
-  dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen, source: 'TakeUForward' },
-  lld: {
-    id: 'lld', label: 'LLD', title: 'LLD', icon: Layers,
-    source: 'AlgoMaster',
-  },
-  hld: {
-    id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor,
-    source: 'Hello Interview',
-  },
+  dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen },
+  lld: { id: 'lld', label: 'LLD', title: 'LLD', icon: Layers },
+  hld: { id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor },
 };
 
-function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAction }) {
+function RevisionButton({ item, revision, today, onAdd, onReview }) {
+  const reviewedToday = revision?.reviewedOn === today;
+  const action = reviewedToday ? 'Reviewed today' : revision ? 'Mark reviewed' : 'Add to revision';
+  const Icon = reviewedToday ? BookmarkCheck : revision ? RotateCcw : BookmarkPlus;
+  return (
+    <button type="button" className={`icon-button -mr-1 shrink-0${revision ? ' !text-accent' : ''}`}
+      aria-label={`${action}: ${item.title}`} disabled={reviewedToday}
+      title={revision ? `${action} · ${dueDateLabel(revision.dueDate, today)}` : action}
+      onClick={revision ? onReview : onAdd}>
+      <Icon size={15} aria-hidden="true" />
+    </button>
+  );
+}
+
+function AgendaSection({ track, today, onOpen, onComplete, renderRevision, emptyMessage, emptyAction }) {
   const Icon = track.icon;
   const { assignmentCount, revisionCount } = track;
   const unit = track.id === 'dsa' ? 'question' : 'exercise';
@@ -94,11 +106,11 @@ function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAc
         {track.items.map(({ question, assignment, revision }) => {
           const item = assignment || question;
           const action = assignment ? 'Mark complete' : 'Mark reviewed';
-          const source = question?.sourceLabel || track.source;
           const url = question?.url || item.url;
+          const id = assignment?.id || revision.id;
           return (
             <li
-              key={assignment?.id || revision.id}
+              key={id}
               className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-hover sm:gap-4 sm:px-6"
             >
               <button
@@ -148,16 +160,7 @@ function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAc
                   </p>
                 )}
               </div>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open ${item.title} on ${source}`}
-                title={`Open on ${source}`}
-                className="icon-button -mr-1 shrink-0"
-              >
-                <ExternalLink size={15} />
-              </a>
+              {renderRevision(track.id, assignment || { ...question, id })}
             </li>
           );
         })}
@@ -169,7 +172,8 @@ function AgendaSection({ track, today, onOpen, onComplete, emptyMessage, emptyAc
 export default function HomeworkAgenda({ date, today, sessions, onSelectDate, setActiveTab }) {
   const { updateData } = useWorkspace();
   const { schedule, plan, dsa } = useHomeworkSchedule(today);
-  const revisions = useWorkspaceValue((state) => state.data.revisions);
+  const { revisions, addRevision, markReviewed } = useStudyRevisions();
+  const revisionsById = useMemo(() => new Map(revisions.map((record) => [record.id, record])), [revisions]);
   const progress = useWorkspaceValue((state) => state.data.progress);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
   const studyDates = useMemo(() => [...new Set([
@@ -194,6 +198,18 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
 
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
+
+  function renderRevision(track, item) {
+    const revision = revisionsById.get(item.id);
+    function add() {
+      const sources = dsaById.get(item.id)?.sources ?? {};
+      const source = track === 'dsa'
+        ? Object.keys(sources).find((key) => sources[key].url === item.url) ?? 'tuf'
+        : track;
+      addRevision(item.id, source);
+    }
+    return <RevisionButton item={item} revision={revision} today={today} onAdd={add} onReview={() => markReviewed(item.id)} />;
+  }
 
   function complete(track, assignment, revision) {
     const completedOn = dateKey();
@@ -305,7 +321,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       </header>
 
       <div className="panel min-w-0 overflow-hidden">
-        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete}
+        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete} renderRevision={renderRevision}
           emptyMessage={extraPlan ? 'Today’s homework is complete.' : 'No DSA questions for this day.'}
           emptyAction={extraPlan && (
             <button type="button" className="button-secondary"
@@ -320,7 +336,8 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       <div className="panel min-w-0 divide-y divide-line overflow-hidden">
         {designTracks.length > 0 ? (
           designTracks.map((track) => (
-            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete} />
+            <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete}
+              renderRevision={renderRevision} />
           ))
         ) : (
           <section aria-labelledby="agenda-design" className="px-4 py-4 sm:px-6">
@@ -331,7 +348,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
           </section>
         )}
       </div>
-      <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
+      <CompletedQuestions date={date} today={today} questions={completions.get(date)} renderRevision={renderRevision} />
     </section>
   );
 }

@@ -9,6 +9,10 @@ export function useStudyRevisions(track) {
   const revisions = useMemo(() => track ? saved.filter((record) => revisionTrack(record) === track) : saved, [saved, track]);
   const queuedIds = useMemo(() => new Set(revisions.map(({ id }) => id)), [revisions]);
 
+  const addRevision = useCallback((id, source) => updateData((current) => {
+    const revisions = queueRevision(current.revisions, id, source, dateKey());
+    return revisions === current.revisions ? current : { ...current, revisions };
+  }), [updateData]);
   const toggleRevision = useCallback((id, source) => updateData((current) => ({
     ...current,
     revisions: current.revisions.some((record) => record.id === id)
@@ -22,5 +26,5 @@ export function useStudyRevisions(track) {
     ...current, revisions: current.revisions.filter((record) => record.id !== id),
   })), [updateData]);
 
-  return { revisions, queuedIds, toggleRevision, markReviewed, removeRevision };
+  return { revisions, queuedIds, addRevision, toggleRevision, markReviewed, removeRevision };
 }
