@@ -44,10 +44,19 @@ test('design revisions resolve to the right questions and are due in two days', 
   assert.ok(mixed.every((record) => record.dueDate === '2026-11-15'));
   assert.equal(revisionTrack({ source: null }), 'dsa');
   assert.deepEqual(mixed.map((record) => revisionQuestion(record)?.title), ['Design Tic Tac Toe', 'Bitly']);
+  assert.equal(revisionQuestion(mixed[0]).pattern, 'Strategy');
   assert.equal(revisionQuestion({ id: 'lld-missing', source: 'lld' }), undefined);
   const reviewed = markRevisionReviewed(mixed, 'lld-1', '2026-11-15');
   assert.equal(reviewed[0].dueDate, '2026-11-17');
   assert.equal(reviewed[1], mixed[1]);
+});
+
+test('DSA revisions retain the selected source patterns and problem difficulty', () => {
+  const question = revisionQuestion({ id: 'dsa-5', source: 'am-600' });
+  assert.equal(question.id, 'dsa-5');
+  assert.equal(question.source, 'am-600');
+  assert.equal(question.difficulty, 'Medium');
+  assert.ok(question.patterns.some((pattern) => pattern.includes('Kadane')));
 });
 
 test('one study edit does not create progress for the rest of an imported catalog', () => {

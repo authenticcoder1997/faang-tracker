@@ -20,13 +20,13 @@ export function mergeChangedStudyProgress(progress, previous, next, today) {
 export function completedQuestionsByDate(progress, catalogs) {
   const days = new Map();
   for (const [track, items] of Object.entries(catalogs)) {
-    for (const { id, title, url } of items) {
-      const entry = progress[track]?.[id];
+    for (const item of items) {
+      const entry = progress[track]?.[item.id];
       if (!entry?.completed) continue;
       const date = entry.completedOn || entry.homeworkDate;
       if (!date) continue;
       if (!days.has(date)) days.set(date, []);
-      days.get(date).push({ id, title, url, track, onlyHomeworkDate: !entry.completedOn });
+      days.get(date).push({ ...item, track, onlyHomeworkDate: !entry.completedOn });
     }
   }
   return days;
