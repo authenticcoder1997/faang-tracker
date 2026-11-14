@@ -212,13 +212,10 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
           </button>
         )}
       </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2">
         <button type="button" className="button-secondary" aria-haspopup="dialog"
           onClick={() => historyDialog.current.showModal()}>
           History <span className="tabular-nums text-muted">{history.length}</span>
-        </button>
-        <button type="button" className="button-secondary" aria-haspopup="dialog" onClick={() => setTimeEditor({})}>
-          <Plus size={14} aria-hidden="true" /> Add time
         </button>
       </div>
       <dialog ref={historyDialog} aria-labelledby="study-history-title"
@@ -259,6 +256,11 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
             ))}
           </ul>
         ) : <p className="py-3 text-sm text-muted">{isToday ? 'No study sessions today.' : 'No study sessions for this date.'}</p>}
+        <div className="flex justify-end border-t border-line pt-3">
+          <button type="button" className="button-secondary" aria-haspopup="dialog" onClick={() => setTimeEditor({})}>
+            <Plus size={14} aria-hidden="true" /> Add time
+          </button>
+        </div>
       </dialog>
       {isActive && timeEditor && (
         <StudyTimeDialog date={date} today={today} entry={timeEditor.entry}
