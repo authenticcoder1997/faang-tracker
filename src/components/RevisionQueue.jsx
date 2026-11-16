@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, CalendarCheck, Check, Trash2 } from 'lucide-react';
+import { ArrowUpRight, CalendarCheck, CheckCircle2, Circle, Trash2 } from 'lucide-react';
 import { revisionQuestion } from '../lib/revisionQuestions';
 import { DEFAULT_REVISION_DELAY_DAYS, revisionTrack } from '../lib/studyRevisions';
 import { dueDateLabel } from '../lib/tasks';
@@ -17,7 +17,12 @@ function RevisionRows({ records, skipDates, today, onReviewed, onRemove }) {
     const action = reviewedToday ? 'Reviewed today' : 'Mark reviewed';
     const name = entry?.title || record.id;
     return (
-      <li key={record.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+      <li key={record.id} className="flex items-start gap-3 px-4 py-3 sm:px-5">
+        <button type="button" className="completion-button mt-0.5" disabled={reviewedToday || !entry}
+          aria-label={`${action}: ${name}`} aria-pressed={reviewedToday} title={action}
+          onClick={() => onReviewed(record.id)}>
+          {reviewedToday ? <CheckCircle2 size={21} aria-hidden="true" /> : <Circle size={21} aria-hidden="true" />}
+        </button>
         <div className="min-w-0 flex-1">
           {entry ? (
             <a href={entry.url} target="_blank" rel="noopener noreferrer"
@@ -42,16 +47,10 @@ function RevisionRows({ records, skipDates, today, onReviewed, onRemove }) {
             <span>{record.reviewCount} {record.reviewCount === 1 ? 'review' : 'reviews'}</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button type="button" className="button-secondary" disabled={reviewedToday || !entry}
-            aria-label={`${action}: ${name}`} onClick={() => onReviewed(record.id)}>
-            <Check size={15} aria-hidden="true" /> {action}
-          </button>
-          <button type="button" className="icon-button" title="Remove from revision"
-            aria-label={`Remove from revision: ${name}`} onClick={() => onRemove(record.id)}>
-            <Trash2 size={16} aria-hidden="true" />
-          </button>
-        </div>
+        <button type="button" className="icon-button" title="Remove from revision"
+          aria-label={`Remove from revision: ${name}`} onClick={() => onRemove(record.id)}>
+          <Trash2 size={16} aria-hidden="true" />
+        </button>
       </li>
     );
   });
