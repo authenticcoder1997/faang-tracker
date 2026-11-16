@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowUpRight, CalendarCheck, Check, Trash2 } from 'lucide-react';
 import { revisionQuestion } from '../lib/revisionQuestions';
 import { DEFAULT_REVISION_DELAY_DAYS, revisionTrack } from '../lib/studyRevisions';
@@ -7,10 +7,12 @@ import { useWorkspaceSaving, useWorkspaceValue } from '../hooks/useWorkspace';
 import { EmptyState } from './ui/Workspace';
 
 const dateFormat = new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short', year: 'numeric' });
+const formatDate = (date) => dateFormat.format(new Date(`${date}T12:00:00`));
 
-function RevisionRows({ records, today, onReviewed, onRemove }) {
+function RevisionRows({ records, skipDates, today, onReviewed, onRemove }) {
   return records.map((record) => {
     const entry = revisionQuestion(record);
+    const returnDate = skipDates.get(record.id);
     const reviewedToday = record.reviewedOn === today;
     const action = reviewedToday ? 'Reviewed today' : 'Mark reviewed';
     const name = entry?.title || record.id;
@@ -26,10 +28,17 @@ function RevisionRows({ records, today, onReviewed, onRemove }) {
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
             <span className="status-pill">{revisionTrack(record).toUpperCase()}</span>
             {entry?.sourceLabel && <span>{entry.sourceLabel}</span>}
+            {returnDate && (
+              <span className="whitespace-nowrap">
+                Skipped until <time dateTime={returnDate} className="font-medium text-secondary">{formatDate(returnDate)}</time>
+              </span>
+            )}
+            <span className="whitespace-nowrap">
+              Revision due <time dateTime={record.dueDate} className="font-medium text-secondary">{formatDate(record.dueDate)}</time>
+            </span>
             <span className={`font-medium ${record.dueDate < today ? 'text-warning' : 'text-secondary'}`}>
               {dueDateLabel(record.dueDate, today)}
             </span>
-            <time dateTime={record.dueDate}>{dateFormat.format(new Date(`${record.dueDate}T12:00:00`))}</time>
             <span>{record.reviewCount} {record.reviewCount === 1 ? 'review' : 'reviews'}</span>
           </p>
         </div>
@@ -52,6 +61,8 @@ export default function RevisionQueue({ track, revisions, today, onReviewed, onR
   const [filter, setFilter] = useState('due');
   const saving = useWorkspaceSaving('revisions');
   const error = useWorkspaceValue((state) => state.error);
+  const skips = useWorkspaceValue((state) => state.data.homeworkSkips);
+  const skipDates = useMemo(() => new Map(skips.map(({ id, until }) => [id, until])), [skips]);
   const ordered = [...revisions].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   const due = ordered.filter((record) => record.dueDate <= today).length;
   const rows = ordered.filter((record) => filter === 'all' ||
@@ -85,7 +96,7 @@ export default function RevisionQueue({ track, revisions, today, onReviewed, onR
       </div>
       {rows.length ? (
         <ul className="study-section divide-y divide-line">
-          <RevisionRows records={rows} today={today} onReviewed={onReviewed} onRemove={onRemove} />
+          <RevisionRows records={rows} skipDates={skipDates} today={today} onReviewed={onReviewed} onRemove={onRemove} />
         </ul>
       ) : (
         <EmptyState icon={CalendarCheck}
