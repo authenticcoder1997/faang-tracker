@@ -21,10 +21,21 @@ test('reviews schedule increasingly spaced dates and only count once per day', (
 test('skipping a revision postpones its due date and keeps its review history', () => {
   const initial = queueRevision([], 'dsa-5', 'tuf', '2026-11-09');
   const reviewed = markRevisionReviewed(initial, 'dsa-5', '2026-11-11');
-  const skipped = deferRevision(reviewed, 'dsa-5', '2026-11-18');
+  const skipped = deferRevision(reviewed, 'dsa-5', 'tuf', '2026-11-18');
   assert.deepEqual(skipped[0], { ...reviewed[0], dueDate: '2026-11-18' });
-  assert.equal(deferRevision(skipped, 'dsa-5', '2026-11-17'), skipped);
+  assert.equal(deferRevision(skipped, 'dsa-5', 'tuf', '2026-11-17'), skipped);
   assert.equal(markRevisionReviewed(skipped, 'dsa-5', '2026-11-18')[0].reviewCount, 2);
+});
+
+test('a skipped question joins the appropriate revision list on its return date', () => {
+  const until = '2026-11-19';
+  for (const [id, source, track] of [['dsa-5', 'tuf', 'dsa'], ['lld-1', 'lld', 'lld'], ['hld-1', 'hld', 'hld']]) {
+    const revisions = deferRevision([], id, source, until);
+    assert.deepEqual(revisions, [{ id, source, dueDate: until, reviewCount: 0, reviewedOn: null }]);
+    assert.equal(revisionTrack(revisions[0]), track);
+    assert.ok(revisionQuestion(revisions[0])?.url);
+    assert.equal(deferRevision(revisions, id, source, until), revisions);
+  }
 });
 
 test('completing with help saves progress and the chosen revision date in the same cloud update', () => {

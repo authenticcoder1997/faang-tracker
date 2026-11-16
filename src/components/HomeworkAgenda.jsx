@@ -34,9 +34,9 @@ const completionCatalogs = {
 };
 
 const TRACKS = {
-  dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen },
-  lld: { id: 'lld', label: 'LLD', title: 'LLD', icon: Layers },
-  hld: { id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor },
+  dsa: { id: 'dsa', label: 'DSA', title: 'DSA questions', icon: BookOpen, source: 'tuf' },
+  lld: { id: 'lld', label: 'LLD', title: 'LLD', icon: Layers, source: 'lld' },
+  hld: { id: 'hld', label: 'HLD', title: 'HLD', icon: Monitor, source: 'hld' },
 };
 
 function SkipQuestionDialog({ question, from, onSkip, onClose }) {
@@ -67,6 +67,7 @@ function SkipQuestionDialog({ question, from, onSkip, onClose }) {
         <p className="min-h-5 text-sm text-muted" aria-live="polite">
           {until && <>Back in Homework on <time dateTime={until}>{agendaDate.format(atNoon(until))}</time></>}
         </p>
+        <p className="text-sm text-muted">Also adds the question to your Revision list.</p>
         <div className="flex justify-end gap-2 border-t border-line pt-3">
           <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
           <button type="submit" className="button-primary" disabled={!until}>Skip</button>
@@ -161,7 +162,7 @@ function AgendaSection({ track, onOpen, onComplete, onSkip, emptyMessage, emptyA
               )}
             </div>
             <button type="button" className="icon-button" aria-label={`Skip ${item.title}`} title="Skip question"
-              aria-haspopup="dialog" onClick={() => onSkip(item)}>
+              aria-haspopup="dialog" onClick={() => onSkip({ item, source: track.source })}>
               <ClockArrowUp size={15} aria-hidden="true" />
             </button>
           </li>
@@ -202,11 +203,11 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
   const day = schedule.find((day) => day.date === date);
 
   function postpone(until) {
-    const id = skipQuestion.id;
+    const { item: { id }, source } = skipQuestion;
     if (updateData((current) => ({
       ...current,
       homeworkSkips: deferHomeworkQuestion(current.homeworkSkips, id, until),
-      revisions: deferRevision(current.revisions, id, until),
+      revisions: deferRevision(current.revisions, id, source, until),
     }))) setSkipQuestion(null);
   }
 
@@ -304,8 +305,8 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       </div>
       <CompletedQuestions date={date} today={today} questions={completions.get(date)} />
       {completion && <QuestionCompletionDialog track={completion.track} item={completion.item} homeworkDate={date}
-        source={completion.track === 'dsa' ? 'tuf' : completion.track} onClose={() => setCompletion(null)} />}
-      {skipQuestion && <SkipQuestionDialog question={skipQuestion} from={date < today ? today : date}
+        source={TRACKS[completion.track].source} onClose={() => setCompletion(null)} />}
+      {skipQuestion && <SkipQuestionDialog question={skipQuestion.item} from={date < today ? today : date}
         onSkip={postpone} onClose={() => setSkipQuestion(null)} />}
     </section>
   );

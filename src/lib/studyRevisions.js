@@ -42,8 +42,8 @@ export function markRevisionReviewed(revisions, id, today) {
   });
 }
 
-export function deferRevision(revisions, id, until) {
+export function deferRevision(revisions, id, source, until) {
   const revision = revisions.find((item) => item.id === id);
-  if (!revision || revision.dueDate >= until) return revisions;
-  return revisions.map((item) => item === revision ? { ...item, dueDate: until } : item);
+  if (revision?.dueDate >= until) return revisions;
+  return scheduleRevision(revisions, id, source, until);
 }
