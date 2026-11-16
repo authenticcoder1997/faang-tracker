@@ -68,7 +68,7 @@ export default function RevisionQueue({ track, revisions, today, onReviewed, onR
             <p className="eyebrow mb-1">Spaced repetition</p>
             <h2 id={`${track}-revision-title`} className="text-xl font-semibold tracking-tight">Revision tracker</h2>
             <p className="mt-2 text-sm text-muted">
-              Newly saved questions are due in {DEFAULT_REVISION_DELAY_DAYS} days.{' '}
+              New revisions default to {DEFAULT_REVISION_DELAY_DAYS} days.{' '}
               Mark a review done to schedule the next one.
             </p>
           </div>

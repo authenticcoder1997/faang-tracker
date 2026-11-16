@@ -4,7 +4,7 @@ import { deferRevision, markRevisionReviewed, queueRevision, revisionTrack } fro
 import { revisionQuestion } from './revisionQuestions.js';
 import { applyWorkspacePatch, makeWorkspacePatch, normalizeWorkspace, workspaceWriteFields, reuseWorkspace } from './workspace.js';
 import { createWorkspace } from './workspaceLegacy.js';
-import { mergeChangedStudyProgress } from './studyProgress.js';
+import { completeStudyQuestion, mergeChangedStudyProgress } from './studyProgress.js';
 
 test('reviews schedule increasingly spaced dates and only count once per day', () => {
   const initial = queueRevision([], 'dsa-5', 'am-600', '2026-11-09');
@@ -25,6 +25,37 @@ test('skipping a revision postpones its due date and keeps its review history', 
   assert.deepEqual(skipped[0], { ...reviewed[0], dueDate: '2026-11-18' });
   assert.equal(deferRevision(skipped, 'dsa-5', '2026-11-17'), skipped);
   assert.equal(markRevisionReviewed(skipped, 'dsa-5', '2026-11-18')[0].reviewCount, 2);
+});
+
+test('completing with help saves progress and the chosen revision date in the same cloud update', () => {
+  const before = createWorkspace();
+  const item = { id: 'lld-1' };
+  const completedOn = '2026-11-16';
+  const homeworkDate = '2026-11-15';
+  const reviewOn = '2026-11-21';
+  const options = { homeworkDate, source: 'lld', reviewOn };
+  const saved = completeStudyQuestion(before, 'lld', item, completedOn, options);
+  const remote = { ...before, progress: { ...before.progress, lld: {
+    ...before.progress.lld, [item.id]: { completed: false, note: 'An edit from another device' },
+  } } };
+  const result = applyWorkspacePatch(remote, makeWorkspacePatch(before, saved));
+  assert.deepEqual(result.progress.lld[item.id], {
+    completed: true, note: 'An edit from another device', completedOn, homeworkDate,
+  });
+  assert.deepEqual(result.revisions, [{ id: item.id, source: 'lld', dueDate: reviewOn, reviewCount: 0, reviewedOn: null }]);
+  assert.equal(completeStudyQuestion(result, 'lld', item, completedOn, options), result);
+});
+
+test('completing without help keeps an existing revision and a chosen date preserves its review history', () => {
+  const item = { id: 'hld-1' };
+  const before = createWorkspace();
+  const initial = queueRevision([], item.id, 'hld', '2026-11-09');
+  before.revisions = markRevisionReviewed(initial, item.id, '2026-11-11');
+  const completedOn = '2026-11-16';
+  const reviewOn = '2026-11-21';
+  assert.equal(completeStudyQuestion(before, 'hld', item, completedOn).revisions, before.revisions);
+  const scheduled = completeStudyQuestion(before, 'hld', item, completedOn, { source: 'hld', reviewOn });
+  assert.deepEqual(scheduled.revisions, [{ ...before.revisions[0], dueDate: reviewOn }]);
 });
 
 test('revision writes merge across devices without modifying solved progress or notes', () => {

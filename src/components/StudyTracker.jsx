@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import NoteModal from './NoteModal';
+import QuestionCompletionDialog from './QuestionCompletionDialog';
 import CompletionDate from './CompletionDate';
 import RevisionQueue from './RevisionQueue';
 import { EmptyState, PageHeader, StatsStrip } from './ui/Workspace';
@@ -88,6 +89,7 @@ export default function StudyTracker({
   const [completion, setCompletion] = useState('All');
   const [collapsed, setCollapsed] = useState({});
   const [noteId, setNoteId] = useState(null);
+  const [pendingCompletion, setPendingCompletion] = useState(null);
   const activeNote = items.find((item) => item.id === noteId);
   const isDesignTrack = id === 'lld' || id === 'hld';
   const dueCount = revisions.filter((record) => record.dueDate <= today).length;
@@ -182,12 +184,17 @@ export default function StudyTracker({
     setAccess('All');
     setCompletion('All');
   };
-  const toggleItem = (itemId) =>
+  function toggleItem(item) {
+    if (isDesignTrack && !item.completed) {
+      setPendingCompletion(item);
+      return;
+    }
     setItems(
-      (current) => current.map((item) =>
-        item.id === itemId ? { ...item, completed: !item.completed } : item,
+      (current) => current.map((entry) =>
+        entry.id === item.id ? { ...entry, completed: !isDesignTrack && !entry.completed } : entry,
       ),
     );
+  }
   const toggleSections = () =>
     setCollapsed(
       Object.fromEntries(
@@ -213,8 +220,9 @@ export default function StudyTracker({
     >
       <button
         type="button"
-        onClick={() => toggleItem(item.id)}
+        onClick={() => toggleItem(item)}
         aria-label={`${item.completed ? 'Mark incomplete' : 'Mark complete'}: ${item.title}`}
+        aria-haspopup={isDesignTrack && !item.completed ? 'dialog' : undefined}
         aria-pressed={!!item.completed}
         className="completion-button mt-0.5 shrink-0"
       >
@@ -611,6 +619,8 @@ export default function StudyTracker({
       )}
 
       </div>
+      {pendingCompletion && <QuestionCompletionDialog track={id} item={pendingCompletion} source={id}
+        onClose={() => setPendingCompletion(null)} />}
       <NoteModal
         isOpen={!!activeNote}
         onClose={() => setNoteId(null)}

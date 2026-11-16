@@ -24,8 +24,14 @@ export function normalizeRevision(value) {
 
 export function queueRevision(revisions, id, source, today) {
   if (revisions.some((item) => item.id === id)) return revisions;
-  const dueDate = addDays(today, DEFAULT_REVISION_DELAY_DAYS);
-  return [...revisions, normalizeRevision({ id, source, dueDate, reviewCount: 0 })];
+  return scheduleRevision(revisions, id, source, addDays(today, DEFAULT_REVISION_DELAY_DAYS));
+}
+
+export function scheduleRevision(revisions, id, source, dueDate) {
+  const existing = revisions.find((item) => item.id === id);
+  if (existing && existing.dueDate === dueDate) return revisions;
+  const scheduled = normalizeRevision({ id, source, reviewCount: 0, ...existing, dueDate });
+  return existing ? revisions.map((item) => item === existing ? scheduled : item) : [...revisions, scheduled];
 }
 
 export function markRevisionReviewed(revisions, id, today) {

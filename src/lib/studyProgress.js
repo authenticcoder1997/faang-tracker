@@ -1,3 +1,5 @@
+import { scheduleRevision } from './studyRevisions.js';
+
 export function mergeChangedStudyProgress(progress, previous, next, today) {
   const oldItems = new Map(previous.map((item) => [item.id, item]));
   const changed = next.flatMap((item) => {
@@ -15,6 +17,18 @@ export function mergeChangedStudyProgress(progress, previous, next, today) {
     }]];
   });
   return changed.length ? { ...progress, ...Object.fromEntries(changed) } : progress;
+}
+
+export function completeStudyQuestion(workspace, track, item, completedOn, { homeworkDate, source, reviewOn } = {}) {
+  const previous = { ...item, ...workspace.progress[track][item.id] };
+  if (previous.completed) return workspace;
+  const finished = { ...previous, completed: true, homeworkDate };
+  const progress = mergeChangedStudyProgress(workspace.progress[track], [previous], [finished], completedOn);
+  return {
+    ...workspace,
+    progress: { ...workspace.progress, [track]: progress },
+    revisions: reviewOn ? scheduleRevision(workspace.revisions, item.id, source, reviewOn) : workspace.revisions,
+  };
 }
 
 export function completedQuestionsByDate(progress, catalogs) {

@@ -3,6 +3,7 @@ import { BookOpen, BookmarkCheck, BookmarkPlus, Check, CheckCircle2, Circle, Fil
 import { EMPTY_DSA_FILTERS, filterDsaProblems } from '../lib/dsaFilters';
 import { DSA_SOURCES, DSA_SOURCE_LABELS, dsaPatternsFor, dsaSourceFor } from '../lib/dsaCatalog';
 import NoteModal from './NoteModal';
+import QuestionCompletionDialog from './QuestionCompletionDialog';
 import CompletionDate from './CompletionDate';
 import { EmptyState } from './ui/Workspace';
 
@@ -51,7 +52,8 @@ const ProblemRow = memo(function ProblemRow({ item, sources, patterns, queued, o
           aria-pressed={solved}
           aria-label={`${label}: ${link.title}`}
           title={label}
-          onClick={() => onToggle(item.id)}
+          aria-haspopup={solved ? undefined : 'dialog'}
+          onClick={() => onToggle(item, source, link.title)}
         >
           {solved ? <CheckCircle2 size={20} aria-hidden="true" /> : <Circle size={20} aria-hidden="true" />}
         </button>
@@ -120,6 +122,7 @@ export default function DsaProblemList({
   sourceCounts, queuedIds, onRevision,
 }) {
   const [noteId, setNoteId] = useState(null);
+  const [pendingCompletion, setPendingCompletion] = useState(null);
   const [patternQuery, setPatternQuery] = useState('');
   const [limit, setLimit] = useState(PAGE_SIZE);
   const activeNote = items.find((item) => item.id === noteId);
@@ -182,9 +185,13 @@ export default function DsaProblemList({
     });
   }
 
-  const toggleProblem = useCallback((id) => setItems((current) => current.map((item) =>
-    item.id === id ? { ...item, completed: !item.completed } : item,
-  )), [setItems]);
+  const toggleProblem = useCallback((item, source, title) => {
+    if (!item.completed) {
+      setPendingCompletion({ item: { ...item, title }, source });
+      return;
+    }
+    setItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, completed: false } : entry));
+  }, [setItems]);
 
   return (
     <div className="dsa-workspace grid min-w-0 gap-6">
@@ -317,6 +324,8 @@ export default function DsaProblemList({
         )}
       </section>
 
+      {pendingCompletion && <QuestionCompletionDialog track="dsa" item={pendingCompletion.item}
+        source={pendingCompletion.source} onClose={() => setPendingCompletion(null)} />}
       <NoteModal
         isOpen={!!activeNote}
         onClose={() => setNoteId(null)}
