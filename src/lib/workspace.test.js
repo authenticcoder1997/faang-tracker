@@ -16,6 +16,7 @@ import { dsaTopics } from '../data/dsaTopics.js';
 import { deleteTaskList, reorderTasks, taskFocus } from './tasks.js';
 import { deleteStudySession, logStudyTime, startStudySession, stopStudySession } from './studySessions.js';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from './studyProgress.js';
+import { deferHomeworkQuestion } from './homeworkSchedule.js';
 
 const copy = (value) => structuredClone(value);
 const task = (overrides = {}) => ({
@@ -49,6 +50,22 @@ const base = () => ({
   bookmarks: [bookmark()],
   notes: [note()],
   tasks: { ...createWorkspace().tasks, tasks: [task()] },
+});
+
+test('Homework skips sync independently from another device’s daily plan and skips', () => {
+  const before = base();
+  delete before.homeworkSkips;
+  const skips = deferHomeworkQuestion([], 'dsa-5', '2026-11-19');
+  const phone = { ...before, homeworkSkips: skips };
+  const mac = { ...before, homeworkSkips: deferHomeworkQuestion([], 'hld-1', '2026-11-20'),
+    homework: { date: '2026-11-17', round: 0, dsa: ['dsa-5'], design: null } };
+  const patch = makeWorkspacePatch(before, phone);
+  const merged = applyWorkspacePatch(mac, patch);
+  assert.deepEqual(merged.homework, mac.homework);
+  assert.deepEqual(merged.homeworkSkips, [...mac.homeworkSkips, ...skips]);
+  assert.deepEqual(applyWorkspacePatch(merged, patch), merged);
+  const previous = normalizeWorkspace(mac);
+  assert.deepEqual(Object.keys(workspaceWriteFields(previous, reuseWorkspace(previous, merged))), ['homeworkSkips']);
 });
 
 test('task order and snooze survive the Firebase merge alongside another device’s edits', () => {

@@ -1,5 +1,5 @@
 import { normalizeRevision } from './studyRevisions.js';
-import { normalizeHomeworkPlan } from './homeworkSchedule.js';
+import { normalizeHomeworkPlan, normalizeHomeworkSkip } from './homeworkSchedule.js';
 import { applyStudySessionPatch, diffStudySessions, normalizeStudySession } from './studySessions.js';
 import { normalizeBookmark } from './bookmarks.js';
 import { canFocusTask, dateKey, isValidDate, LIST_COLORS, normalizeTaskLinks, taskFocus, validateTaskData } from './tasks.js';
@@ -170,6 +170,8 @@ export function normalizeWorkspace(value, previous) {
     bookmarks: previous && value.bookmarks === previous.bookmarks ? previous.bookmarks : bookmarks(value.bookmarks),
     homework: previous && value.homework === previous.homework
       ? previous.homework : normalizeHomeworkPlan(value.homework),
+    homeworkSkips: previous && value.homeworkSkips === previous.homeworkSkips ? previous.homeworkSkips
+      : uniqueEntities(value.homeworkSkips === undefined ? [] : value.homeworkSkips, 'Homework skips', normalizeHomeworkSkip),
     studySessions: previous && value.studySessions === previous.studySessions
       ? previous.studySessions : studySessions(value.studySessions),
     revisions: previous && value.revisions === previous.revisions ? previous.revisions
@@ -206,7 +208,7 @@ function equal(left, right) {
   return false;
 }
 
-const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions', 'homework', 'studySessions'];
+const SECTIONS = ['tasks', 'bookmarks', 'notes', 'appearance', 'revisions', 'homework', 'homeworkSkips', 'studySessions'];
 
 // Keep unchanged sections referentially stable across cloud snapshots and acks.
 export function reuseWorkspace(previous, next) {
@@ -349,6 +351,7 @@ export function diffWorkspace(previous, next) {
     bookmarks: entityPatch(previous.bookmarks, next.bookmarks),
     revisions: entityPatch(previous.revisions, next.revisions),
     homework: equal(previous.homework, next.homework) ? null : next.homework,
+    homeworkSkips: entityPatch(previous.homeworkSkips, next.homeworkSkips),
     studySessions: diffStudySessions(previous.studySessions, next.studySessions),
     notes: entityPatch(previous.notes, next.notes),
     appearance: fieldPatch(previous.appearance, next.appearance),
@@ -561,6 +564,7 @@ export function applyValidatedWorkspacePatch(current, patch) {
         }, patch.listMoves || {}),
     bookmarks: applyEntities(current.bookmarks, patch.bookmarks),
     homework,
+    homeworkSkips: patch.homeworkSkips ? applyEntities(current.homeworkSkips, patch.homeworkSkips) : current.homeworkSkips,
     studySessions: applyStudySessionPatch(current.studySessions, patch.studySessions),
     revisions: patch.revisions ? applyEntities(current.revisions, patch.revisions) : current.revisions,
     notes: applyEntities(current.notes, patch.notes),

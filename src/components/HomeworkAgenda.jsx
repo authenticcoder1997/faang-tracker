@@ -1,17 +1,17 @@
 import { useHomeworkSchedule } from '../hooks/useHomeworkSchedule';
 import { useStudyRevisions } from '../hooks/useStudyRevisions';
 import { useWorkspace, useWorkspaceValue } from '../hooks/useWorkspace';
-import { extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
+import { deferHomeworkQuestion, extraHomeworkPlan, homeworkPlanFor } from '../lib/homeworkSchedule';
 import { completedQuestionsByDate, mergeChangedStudyProgress } from '../lib/studyProgress';
 import { revisionQuestion } from '../lib/revisionQuestions';
-import { markRevisionReviewed, revisionTrack } from '../lib/studyRevisions';
+import { deferRevision, markRevisionReviewed, revisionTrack } from '../lib/studyRevisions';
 import { studySessionDate } from '../lib/studySessions';
-import { dateKey, dueDateLabel } from '../lib/tasks';
+import { addDays, dateKey, dueDateLabel } from '../lib/tasks';
 import { dsaCatalog } from '../lib/dsaCatalog';
 import { allDsaTopics } from '../lib/dsaPlan';
 import { lldTopics } from '../data/lldTopics';
 import { hldTopics } from '../data/hldTopics';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import CompletedQuestions from './CompletedQuestions';
 import {
   ArrowRight,
@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Circle,
+  ClockArrowUp,
   Layers,
   Monitor,
   RotateCcw,
@@ -57,7 +58,44 @@ function RevisionButton({ item, revision, today, onAdd, onReview }) {
   );
 }
 
-function AgendaSection({ track, today, onOpen, onComplete, renderRevision, emptyMessage, emptyAction }) {
+function SkipQuestionDialog({ question, from, onSkip, onClose }) {
+  const dialog = useRef(null);
+  const [days, setDays] = useState('1');
+  const count = Number(days);
+  const until = Number.isInteger(count) && count >= 1 && count <= 365 ? addDays(from, count) : null;
+  useEffect(() => {
+    const element = dialog.current;
+    element.showModal();
+    return () => element.close();
+  }, []);
+
+  return (
+    <dialog ref={dialog} aria-labelledby="skip-question-title" onCancel={onClose}
+      className="task-dialog m-auto w-[calc(100%-2rem)] max-w-sm rounded-2xl border border-line p-5">
+      <h2 id="skip-question-title" className="text-lg font-semibold">Skip question</h2>
+      <p className="mt-1 break-words text-sm text-muted">{question.title}</p>
+      <form className="mt-4 space-y-3" onSubmit={(event) => {
+        event.preventDefault();
+        if (until) onSkip(until);
+      }}>
+        <label className="block text-sm text-muted">
+          Number of days
+          <input type="number" min="1" max="365" step="1" inputMode="numeric" required
+            className="input-control mt-1 !text-base" value={days} onChange={(event) => setDays(event.target.value)} />
+        </label>
+        <p className="min-h-5 text-sm text-muted" aria-live="polite">
+          {until && <>Back in Homework on <time dateTime={until}>{agendaDate.format(atNoon(until))}</time></>}
+        </p>
+        <div className="flex justify-end gap-2 border-t border-line pt-3">
+          <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
+          <button type="submit" className="button-primary" disabled={!until}>Skip</button>
+        </div>
+      </form>
+    </dialog>
+  );
+}
+
+function AgendaSection({ track, today, onOpen, onComplete, onSkip, renderRevision, emptyMessage, emptyAction }) {
   const Icon = track.icon;
   const { assignmentCount, revisionCount } = track;
   const unit = track.id === 'dsa' ? 'question' : 'exercise';
@@ -160,7 +198,13 @@ function AgendaSection({ track, today, onOpen, onComplete, renderRevision, empty
                   </p>
                 )}
               </div>
-              {renderRevision(track.id, assignment || { ...question, id })}
+              <div className="flex shrink-0 items-center gap-1">
+                <button type="button" className="icon-button" aria-label={`Skip ${item.title}`} title="Skip question"
+                  aria-haspopup="dialog" onClick={() => onSkip({ id, title: item.title })}>
+                  <ClockArrowUp size={15} aria-hidden="true" />
+                </button>
+                {renderRevision(track.id, assignment || { ...question, id })}
+              </div>
             </li>
           );
         })}
@@ -171,13 +215,19 @@ function AgendaSection({ track, today, onOpen, onComplete, renderRevision, empty
 
 export default function HomeworkAgenda({ date, today, sessions, onSelectDate, setActiveTab }) {
   const { updateData } = useWorkspace();
-  const { schedule, plan, dsa } = useHomeworkSchedule(today);
+  const { schedule, plan, skips, dsa } = useHomeworkSchedule(today);
   const { revisions, addRevision, markReviewed } = useStudyRevisions();
   const revisionsById = useMemo(() => new Map(revisions.map((record) => [record.id, record])), [revisions]);
+  const skipDates = useMemo(() => new Map(skips.map(({ id, until }) => [id, until])), [skips]);
+  const [skipQuestion, setSkipQuestion] = useState(null);
   const progress = useWorkspaceValue((state) => state.data.progress);
   const completions = useMemo(() => completedQuestionsByDate(progress, completionCatalogs), [progress]);
   const studyDates = useMemo(() => [...new Set([
     today, date, ...schedule.map(({ date }) => date), ...completions.keys(),
+    ...revisions.flatMap(({ id, dueDate }) => {
+      const until = skipDates.get(id);
+      return until > today && dueDate <= until ? [until] : [];
+    }),
     ...sessions.flatMap((session) => {
       const { startedAt, stoppedAt, durationMs } = session;
       if (stoppedAt === null) return [];
@@ -185,19 +235,28 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       return durationMs !== undefined || stoppedAt === startedAt ? [firstDay]
         : [firstDay, dateKey(new Date(stoppedAt - 1))];
     }),
-  ])].sort(), [schedule, completions, sessions, today, date]);
+  ])].sort(), [schedule, completions, sessions, today, date, revisions, skipDates]);
   const todaysAgenda = schedule.find((day) => day.date >= today);
   useEffect(() => {
     if (todaysAgenda.date !== today) return;
-    const next = homeworkPlanFor(todaysAgenda, plan);
+    const next = homeworkPlanFor(todaysAgenda, plan, skips);
     if (next === plan) return;
-    updateData((current) => current.homework === plan
+    updateData((current) => current.homework === plan && current.homeworkSkips === skips
       ? { ...current, homework: next }
       : current);
-  }, [plan, today, todaysAgenda, updateData]);
+  }, [plan, skips, today, todaysAgenda, updateData]);
 
   const selectedDayIndex = studyDates.indexOf(date);
   const day = schedule.find((day) => day.date === date);
+
+  function postpone(until) {
+    const id = skipQuestion.id;
+    if (updateData((current) => ({
+      ...current,
+      homeworkSkips: deferHomeworkQuestion(current.homeworkSkips, id, until),
+      revisions: deferRevision(current.revisions, id, until),
+    }))) setSkipQuestion(null);
+  }
 
   function renderRevision(track, item) {
     const revision = revisionsById.get(item.id);
@@ -228,13 +287,13 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
   }
 
   const revisionsByTrack = { dsa: [], lld: [], hld: [] };
-  if (date === today) {
-    const due = revisions.filter((record) => record.dueDate <= today)
-      .sort((first, second) => first.dueDate.localeCompare(second.dueDate));
-    for (const record of due) {
-      const question = revisionQuestion(record);
-      if (question) revisionsByTrack[revisionTrack(record)].push({ question, revision: record });
-    }
+  const due = revisions.filter((record) => {
+    const until = skipDates.get(record.id) ?? '';
+    return record.dueDate <= date && (date === today ? until <= today : date > today && until === date);
+  }).sort((first, second) => first.dueDate.localeCompare(second.dueDate));
+  for (const record of due) {
+    const question = revisionQuestion(record);
+    if (question) revisionsByTrack[revisionTrack(record)].push({ question, revision: record });
   }
   const tracks = Object.values(TRACKS).flatMap((track) => {
     const { id } = track;
@@ -256,7 +315,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
     }];
   });
   const extraPlan = date === today && plan?.date === today && !tracks.length
-    ? extraHomeworkPlan(plan, dsa)
+    ? extraHomeworkPlan(plan, dsa, skips)
     : null;
   const dsaTrack = tracks.find(({ id }) => id === 'dsa') ?? {
     ...TRACKS.dsa, items: [], assignmentCount: 0, revisionCount: 0,
@@ -321,12 +380,14 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
       </header>
 
       <div className="panel min-w-0 overflow-hidden">
-        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete} renderRevision={renderRevision}
+        <AgendaSection track={dsaTrack} today={today} onOpen={setActiveTab} onComplete={complete}
+          onSkip={setSkipQuestion} renderRevision={renderRevision}
           emptyMessage={extraPlan ? 'Today’s homework is complete.' : 'No DSA questions for this day.'}
           emptyAction={extraPlan && (
             <button type="button" className="button-secondary"
-              onClick={() => updateData((current) => current.homework === plan &&
-                !current.revisions.some((record) => record.dueDate <= today && revisionQuestion(record))
+              onClick={() => updateData((current) => current.homework === plan && current.homeworkSkips === skips &&
+                !current.revisions.some((record) => record.dueDate <= today &&
+                  (skipDates.get(record.id) ?? '') <= today && revisionQuestion(record))
                 ? { ...current, homework: extraPlan }
                 : current)}>
               Get more work
@@ -337,7 +398,7 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
         {designTracks.length > 0 ? (
           designTracks.map((track) => (
             <AgendaSection key={track.id} track={track} today={today} onOpen={setActiveTab} onComplete={complete}
-              renderRevision={renderRevision} />
+              onSkip={setSkipQuestion} renderRevision={renderRevision} />
           ))
         ) : (
           <section aria-labelledby="agenda-design" className="px-4 py-4 sm:px-6">
@@ -349,6 +410,8 @@ export default function HomeworkAgenda({ date, today, sessions, onSelectDate, se
         )}
       </div>
       <CompletedQuestions date={date} today={today} questions={completions.get(date)} renderRevision={renderRevision} />
+      {skipQuestion && <SkipQuestionDialog question={skipQuestion} from={date < today ? today : date}
+        onSkip={postpone} onClose={() => setSkipQuestion(null)} />}
     </section>
   );
 }

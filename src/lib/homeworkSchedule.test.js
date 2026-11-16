@@ -4,7 +4,7 @@ import { lldTopics } from '../data/lldTopics.js';
 import { hldTopics } from '../data/hldTopics.js';
 import { striverDsaTopics } from './dsaPlan.js';
 import {
-  buildHomeworkSchedule, DESIGN_POINTS, extraHomeworkPlan, homeworkPlanFor, homeworkPoints,
+  buildHomeworkSchedule, deferHomeworkQuestion, DESIGN_POINTS, extraHomeworkPlan, homeworkPlanFor, homeworkPoints,
   HOMEWORK_TARGET, normalizeHomeworkPlan,
 } from './homeworkSchedule.js';
 
@@ -13,6 +13,36 @@ const planned = ({ dsa, designs }) => dsa.reduce(
   (points, item) => points + homeworkPoints('dsa', item), designs.length * DESIGN_POINTS,
 );
 const ids = (items) => items.map((item) => item.id);
+
+test('skipping a saved DSA or design assignment places it on its return date exactly once', () => {
+  const [first] = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, today);
+  const plan = homeworkPlanFor(first);
+  const [dsaId] = plan.dsa;
+  const designId = plan.design.id;
+  const until = '2026-11-12';
+  const skips = deferHomeworkQuestion(deferHomeworkQuestion([], dsaId, until), designId, until);
+  const schedule = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, today, plan, skips);
+  assert.deepEqual(ids(schedule[0].dsa), plan.dsa.slice(1));
+  assert.deepEqual(schedule[0].designs, []);
+  assert.deepEqual(schedule.filter((day) => day.dsa.some(({ id }) => id === dsaId)).map(({ date }) => date), [until]);
+  assert.deepEqual(schedule.filter((day) => day.designs.some(({ item }) => item.id === designId)).map(({ date }) => date), [until]);
+  assert.ok(!extraHomeworkPlan(plan, striverDsaTopics, skips).dsa.includes(dsaId));
+
+  const returning = schedule.find(({ date }) => date === until);
+  const nextPlan = homeworkPlanFor(returning, plan, skips);
+  assert.ok(!nextPlan.dsa.includes(dsaId));
+  const [overdue] = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, '2026-11-13', nextPlan, skips);
+  assert.ok(overdue.dsa.some(({ id }) => id === dsaId));
+  assert.ok(overdue.designs.some(({ item }) => item.id === designId));
+});
+
+test('a skipped question still returns when it is the only remaining assignment', () => {
+  const question = { id: 'last', difficulty: 'Easy' };
+  const until = '2027-01-31';
+  const skips = deferHomeworkQuestion([], question.id, until);
+  const schedule = buildHomeworkSchedule([question], [], [], today, null, skips);
+  assert.deepEqual(schedule.map(({ date, dsa }) => [date, ids(dsa)]), [[today, []], [until, [question.id]]]);
+});
 
 test('the sheet is scheduled without repeats, completed problems, or days over the points target', () => {
   const schedule = buildHomeworkSchedule(striverDsaTopics, lldTopics, hldTopics, today);

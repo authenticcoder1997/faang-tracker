@@ -35,3 +35,9 @@ export function markRevisionReviewed(revisions, id, today) {
     return { ...item, dueDate: addDays(today, delay), reviewedOn: today, reviewCount: item.reviewCount + 1 };
   });
 }
+
+export function deferRevision(revisions, id, until) {
+  const revision = revisions.find((item) => item.id === id);
+  if (!revision || revision.dueDate >= until) return revisions;
+  return revisions.map((item) => item === revision ? { ...item, dueDate: until } : item);
+}

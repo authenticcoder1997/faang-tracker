@@ -6,6 +6,7 @@ export const DESIGN_POINTS = 10;
 const EXTRA_DSA_POINTS = 10;
 const DESIGN_TRACKS = ['lld', 'hld'];
 export const DSA_POINTS = { Easy: 1, Medium: 3, Hard: 5 };
+const validId = (id) => typeof id === 'string' && id.length > 0 && id.length <= 300;
 
 function isWeekend(date) {
   const day = new Date(date).getUTCDay();
@@ -38,7 +39,6 @@ function selectDsa(items, budget) {
 
 export function normalizeHomeworkPlan(value) {
   if (value == null) return null;
-  const validId = (id) => typeof id === 'string' && id.length > 0 && id.length <= 300;
   const validDesign = (item) => DESIGN_TRACKS.includes(item?.track) && validId(item.id);
   const copyDesign = ({ track, id }) => ({ track, id });
   const { date, round, dsa, design, weekendDesigns } = value;
@@ -57,14 +57,28 @@ export function normalizeHomeworkPlan(value) {
   };
 }
 
+export function normalizeHomeworkSkip(value) {
+  if (!validId(value?.id) || !isValidDate(value.until)) throw new Error('Invalid Homework skip');
+  return { id: value.id, until: value.until };
+}
+
+export function deferHomeworkQuestion(skips, id, until) {
+  const previous = skips.find((skip) => skip.id === id);
+  if (previous?.until >= until) return skips;
+  const next = normalizeHomeworkSkip({ id, until });
+  return previous ? skips.map((skip) => skip.id === id ? next : skip) : [...skips, next];
+}
+
 function savedDesigns(plan) {
   return plan?.weekendDesigns ?? (plan?.design ? [plan.design] : []);
 }
 
-export function homeworkPlanFor(day, saved = null) {
+export function homeworkPlanFor(day, saved = null, skips = []) {
   const weekend = isWeekend(day.date);
   if (saved?.date > day.date || (saved?.date === day.date && (!weekend || saved.weekendDesigns))) return saved;
-  const designs = day.designs.map(({ track, item }) => ({ track, id: item.id }));
+  // Explicitly deferred items are handled separately from the fixed daily batch.
+  const skippedIds = new Set(skips.map(({ id }) => id));
+  const designs = day.designs.filter(({ item }) => !skippedIds.has(item.id)).map(({ track, item }) => ({ track, id: item.id }));
   if (saved?.date === day.date) {
     const weekendDesigns = saved.design
       ? [saved.design, ...designs.filter(({ track }) => track !== saved.design.track)]
@@ -74,14 +88,16 @@ export function homeworkPlanFor(day, saved = null) {
   return {
     date: day.date,
     round: 0,
-    dsa: day.dsa.map(({ id }) => id),
+    dsa: day.dsa.filter(({ id }) => !skippedIds.has(id)).map(({ id }) => id),
     design: designs[0] ?? null,
     ...(weekend ? { weekendDesigns: designs } : {}),
   };
 }
 
-export function extraHomeworkPlan(plan, dsa) {
-  const batch = selectDsa(dsa.filter((item) => !item.completed && homeworkPoints('dsa', item)), EXTRA_DSA_POINTS);
+export function extraHomeworkPlan(plan, dsa, skips = []) {
+  const skippedIds = new Set(skips.map(({ id }) => id));
+  const batch = selectDsa(dsa.filter((item) => !item.completed && !skippedIds.has(item.id) &&
+    homeworkPoints('dsa', item)), EXTRA_DSA_POINTS);
   return batch.length ? {
     date: plan.date,
     round: plan.round + 1,
@@ -126,7 +142,7 @@ function assignDesigns(queues, date, completedTracks, fixedPlan, carry, budget) 
   return queues[track].length ? [{ track, item: queues[track].shift() }] : [];
 }
 
-export function buildHomeworkSchedule(dsa, lld, hld, today, plan = null) {
+export function buildHomeworkSchedule(dsa, lld, hld, today, plan = null, skips = []) {
   const earned = new Map();
   for (const [track, items] of [['dsa', dsa], ['lld', lld], ['hld', hld]]) {
     for (const item of items) {
@@ -141,27 +157,46 @@ export function buildHomeworkSchedule(dsa, lld, hld, today, plan = null) {
   const schedule = new Map([...earned].map(([date, { points }]) => [
     date, { date, earned: points, dsa: [], designs: [] },
   ]));
-  let remainingDsa = dsa.filter((item) => !item.completed && homeworkPoints('dsa', item));
-  const remainingDesign = {
-    lld: lld.filter((item) => !item.completed),
-    hld: hld.filter((item) => !item.completed),
-  };
   const firstDate = today < START_DATE ? START_DATE : today;
+  const skipDates = new Map(skips.map(({ id, until }) => [id, until]));
+  const returning = new Map();
+  function unscheduled(track, items) {
+    return items.filter((item) => {
+      if (item.completed || !homeworkPoints(track, item)) return false;
+      const until = skipDates.get(item.id);
+      if (!until) return true;
+      const date = until < firstDate ? firstDate : until;
+      if (!returning.has(date)) returning.set(date, { dsa: [], designs: [] });
+      const day = returning.get(date);
+      if (track === 'dsa') day.dsa.push(item);
+      else day.designs.push({ track, item });
+      return false;
+    });
+  }
+  let remainingDsa = unscheduled('dsa', dsa);
+  const remainingDesign = {
+    lld: unscheduled('lld', lld),
+    hld: unscheduled('hld', hld),
+  };
   const carryDesigns = plan?.date < firstDate ? savedDesigns(plan) : [];
   let date = firstDate;
 
   do {
     const completed = earned.get(date);
-    const completedTracks = completed?.designTracks ?? new Set();
+    const resumed = returning.get(date);
+    const resumedDesigns = resumed?.designs ?? [];
+    const resumedDsa = resumed?.dsa ?? [];
+    const committedTracks = new Set([...(completed?.designTracks ?? []), ...resumedDesigns.map(({ track }) => track)]);
     const earnedPoints = completed?.points ?? 0;
     const saved = date === firstDate && plan?.date <= date ? plan : null;
     const fixed = saved?.date === date;
-    const designs = assignDesigns(remainingDesign, date, completedTracks, fixed ? saved : null,
-      carryDesigns, HOMEWORK_TARGET - earnedPoints);
-    const designTracks = new Set([...completedTracks, ...designs.map(({ track }) => track)]);
+    const designs = [...resumedDesigns, ...assignDesigns(remainingDesign, date, committedTracks, fixed ? saved : null,
+      carryDesigns, HOMEWORK_TARGET - earnedPoints)];
+    const designTracks = new Set([...committedTracks, ...designs.map(({ track }) => track)]);
     // A second weekend design exercise adds to the day without using the DSA budget.
     const target = HOMEWORK_TARGET + (isWeekend(date) && designTracks.size === 2 ? DESIGN_POINTS : 0);
-    const budget = Math.max(0, target - earnedPoints - designs.length * DESIGN_POINTS);
+    const resumedPoints = resumedDsa.reduce((sum, item) => sum + homeworkPoints('dsa', item), 0);
+    const budget = Math.max(0, target - earnedPoints - designs.length * DESIGN_POINTS - resumedPoints);
     const savedIds = new Set(saved?.dsa);
     const savedDsa = saved?.dsa.map((id) => remainingDsa.find((item) => item.id === id)).filter(Boolean) ?? [];
     const carried = fixed ? savedDsa : selectDsa(savedDsa, budget);
@@ -172,9 +207,14 @@ export function buildHomeworkSchedule(dsa, lld, hld, today, plan = null) {
     ];
     const assignedIds = new Set(assignedDsa.map((item) => item.id));
     remainingDsa = remainingDsa.filter((item) => !assignedIds.has(item.id));
-    schedule.set(date, { date, earned: earnedPoints, dsa: assignedDsa, designs });
+    schedule.set(date, { date, earned: earnedPoints, dsa: [...resumedDsa, ...assignedDsa], designs });
+    returning.delete(date);
     date = addDays(date, 1);
   } while (remainingDsa.length || remainingDesign.lld.length || remainingDesign.hld.length);
+
+  for (const [date, { dsa, designs }] of returning) {
+    schedule.set(date, { date, earned: earned.get(date)?.points ?? 0, dsa, designs });
+  }
 
   return [...schedule.values()].sort((first, second) => first.date.localeCompare(second.date));
 }

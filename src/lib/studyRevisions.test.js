@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { markRevisionReviewed, queueRevision, revisionTrack } from './studyRevisions.js';
+import { deferRevision, markRevisionReviewed, queueRevision, revisionTrack } from './studyRevisions.js';
 import { revisionQuestion } from './revisionQuestions.js';
 import { applyWorkspacePatch, makeWorkspacePatch, normalizeWorkspace, workspaceWriteFields, reuseWorkspace } from './workspace.js';
 import { createWorkspace } from './workspaceLegacy.js';
@@ -16,6 +16,15 @@ test('reviews schedule increasingly spaced dates and only count once per day', (
   const second = markRevisionReviewed(first, 'dsa-5', '2026-11-13');
   assert.equal(second[0].reviewCount, 2);
   assert.equal(second[0].dueDate, '2026-11-16');
+});
+
+test('skipping a revision postpones its due date and keeps its review history', () => {
+  const initial = queueRevision([], 'dsa-5', 'tuf', '2026-11-09');
+  const reviewed = markRevisionReviewed(initial, 'dsa-5', '2026-11-11');
+  const skipped = deferRevision(reviewed, 'dsa-5', '2026-11-18');
+  assert.deepEqual(skipped[0], { ...reviewed[0], dueDate: '2026-11-18' });
+  assert.equal(deferRevision(skipped, 'dsa-5', '2026-11-17'), skipped);
+  assert.equal(markRevisionReviewed(skipped, 'dsa-5', '2026-11-18')[0].reviewCount, 2);
 });
 
 test('revision writes merge across devices without modifying solved progress or notes', () => {
