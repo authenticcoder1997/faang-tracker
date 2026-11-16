@@ -58,7 +58,7 @@ function RevisionRows({ records, skipDates, today, onReviewed, onRemove }) {
 }
 
 export default function RevisionQueue({ track, revisions, today, onReviewed, onRemove, onBrowse }) {
-  const [filter, setFilter] = useState('due');
+  const [filter, setFilter] = useState('all');
   const saving = useWorkspaceSaving('revisions');
   const error = useWorkspaceValue((state) => state.error);
   const skips = useWorkspaceValue((state) => state.data.homeworkSkips);
