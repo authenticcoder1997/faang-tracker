@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   applyStudySessionPatch, deleteStudySession, diffStudySessions, editStudySession, logStudyTime,
-  normalizeStudySession, studySessionsByDate,
+  normalizeStudySession, saveStudyRange, studySessionsByDate,
 } from './studySessions.js';
 
 const hour = 3_600_000;
@@ -33,6 +33,23 @@ test('legacy manual entries use the original log date and live timers split at m
   assert.deepEqual(days.get('2026-11-12').map(({ duration }) => duration), [4 * hour, 2 * hour]);
   assert.deepEqual(studySessionsByDate(sessions, '2026-11-12').get('2026-11-12'), days.get('2026-11-12'));
   assert.equal(days.size, 2);
+});
+
+test('manual start and end times sync and count only the time on each day', () => {
+  const start = timestamp('2026-11-11T23:30:00');
+  const stop = timestamp('2026-11-12T00:45:00');
+  const added = saveStudyRange([], 'range', start, stop);
+  const sessions = applyStudySessionPatch([], diffStudySessions([], added));
+  const days = studySessionsByDate(sessions, '2026-11-11', '2026-11-12');
+  assert.deepEqual(sessions, [{ id: 'range', startedAt: start, stoppedAt: stop }]);
+  assert.equal(days.get('2026-11-11')[0].duration, hour / 2);
+  assert.equal(days.get('2026-11-12')[0].duration, hour * 0.75);
+
+  const durationOnly = logStudyTime([], 'range', hour, stop, '2026-11-12');
+  const corrected = saveStudyRange(durationOnly, 'range', start, stop, true);
+  const patch = diffStudySessions(durationOnly, corrected);
+  assert.deepEqual(applyStudySessionPatch(durationOnly, patch), sessions);
+  assert.deepEqual(applyStudySessionPatch([], patch), []);
 });
 
 test('editing moves an existing entry by ID without duplicating it or reviving a deleted entry', () => {

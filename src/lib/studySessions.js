@@ -96,6 +96,11 @@ function replaceStudySession(sessions, edited) {
   return sessions.map((session) => session === entry ? updated : session);
 }
 
+export function saveStudyRange(sessions, id, startedAt, stoppedAt, editing = false) {
+  const entry = normalizeStudySession({ id, startedAt, stoppedAt });
+  return editing ? replaceStudySession(sessions, entry) : appendStudySession(sessions, entry);
+}
+
 export function editStudySession(sessions, id, durationMs, studyDate) {
   const entry = sessions.find((session) => session.id === id && session.stoppedAt !== null);
   if (!entry) return sessions;

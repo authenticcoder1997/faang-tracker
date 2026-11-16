@@ -2,16 +2,38 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pencil, Play, Plus, Square, Timer, Trash2, X } from 'lucide-react';
 import { useWorkspace } from '../hooks/useWorkspace';
 import {
-  activeStudySession, deleteStudySession, editStudySession, logStudyTime, startStudySession, stopStudySession,
+  activeStudySession, deleteStudySession, editStudySession, logStudyTime, saveStudyRange, startStudySession, stopStudySession,
   studySessionDate, studySessionsByDate,
 } from '../lib/studySessions';
-import { dateKey, isValidDate } from '../lib/tasks';
+import { addDays, dateKey, isValidDate } from '../lib/tasks';
 
 const sessionDate = new Intl.DateTimeFormat('en', {
   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit',
 });
 
 const studyDay = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' });
+const shortDay = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' });
+const clockTime = new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit' });
+const clockSeconds = new Intl.DateTimeFormat('en', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+
+function timeInputValue(timestamp) {
+  const time = new Date(timestamp);
+  return [time.getHours(), time.getMinutes(), time.getSeconds()].map((part) => String(part).padStart(2, '0')).join(':');
+}
+
+function StudyTimeRange({ start, end }) {
+  const startTime = new Date(start);
+  const endTime = new Date(end);
+  const format = startTime.getSeconds() || endTime.getSeconds() ? clockSeconds : clockTime;
+  return (
+    <span className="flex flex-wrap gap-x-2 text-muted">
+      <span>From <time className="font-medium text-ink" dateTime={startTime.toISOString()}>{format.format(startTime)}</time></span>
+      <span>To <time className="font-medium text-ink" dateTime={endTime.toISOString()}>
+        {format.format(endTime)}{dateKey(startTime) !== dateKey(endTime) && ` (${shortDay.format(endTime)})`}
+      </time></span>
+    </span>
+  );
+}
 
 function durationParts(ms) {
   const seconds = Math.floor(ms / 1000);
@@ -26,6 +48,10 @@ function durationLabel(ms) {
 function StudyTimeDialog({ date, today, entry, onCancel, onSave }) {
   const dialog = useRef(null);
   const [error, setError] = useState('');
+  const hasRange = !!entry && entry.durationMs === undefined;
+  const [mode, setMode] = useState(entry && !hasRange ? 'duration' : 'range');
+  const from = hasRange ? timeInputValue(entry.startedAt) : '';
+  const to = hasRange ? timeInputValue(entry.stoppedAt) : '';
   const duration = entry ? entry.durationMs ?? (entry.stoppedAt - entry.startedAt) : 0;
   const [hours, minutes, seconds] = durationParts(duration);
   const title = entry ? 'Edit study time' : 'Add study time';
@@ -38,19 +64,36 @@ function StudyTimeDialog({ date, today, entry, onCancel, onSave }) {
   function submit(event) {
     event.preventDefault();
     const fields = new FormData(event.currentTarget);
-    const wholeSeconds = Number(fields.get('hours')) * 3600 + Number(fields.get('minutes')) * 60 +
-      Number(fields.get('seconds'));
-    const durationMs = wholeSeconds === Math.floor(duration / 1000) ? duration : wholeSeconds * 1000;
     const studyDate = fields.get('date');
     if (!isValidDate(studyDate) || studyDate > dateKey()) {
       setError('Choose today or an earlier date.');
       return;
     }
+    if (mode === 'range') {
+      const start = fields.get('from').padEnd(8, ':00');
+      const end = fields.get('to').padEnd(8, ':00');
+      if (hasRange && studyDate === studySessionDate(entry) && start === from && end === to) {
+        onSave({ startedAt: entry.startedAt, stoppedAt: entry.stoppedAt, studyDate });
+        return;
+      }
+      const startedAt = new Date(`${studyDate}T${start}`).getTime();
+      const endDate = end < start ? addDays(studyDate, 1) : studyDate;
+      const stoppedAt = new Date(`${endDate}T${end}`).getTime();
+      if (!(stoppedAt > startedAt && stoppedAt <= Date.now() && stoppedAt - startedAt <= 86_400_000)) {
+        setError('Choose a completed time range of up to 24 hours.');
+        return;
+      }
+      onSave({ startedAt, stoppedAt, studyDate });
+      return;
+    }
+    const wholeSeconds = Number(fields.get('hours')) * 3600 + Number(fields.get('minutes')) * 60 +
+      Number(fields.get('seconds'));
+    const durationMs = wholeSeconds === Math.floor(duration / 1000) ? duration : wholeSeconds * 1000;
     if (!Number.isInteger(wholeSeconds) || durationMs < (entry ? 1000 : 60_000) || durationMs > 86_400_000) {
       setError(entry ? 'Enter a duration between 1 second and 24 hours.' : 'Enter a duration between 1 minute and 24 hours.');
       return;
     }
-    onSave(durationMs, studyDate);
+    onSave({ durationMs, studyDate });
   }
 
   return (
@@ -63,7 +106,27 @@ function StudyTimeDialog({ date, today, entry, onCancel, onSave }) {
           <input type="date" name="date" defaultValue={entry ? studySessionDate(entry) : date}
             max={today} required className="input-control mt-1" />
         </label>
-        <div className={`mt-4 grid gap-3 ${entry ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Time entry mode">
+          {[['range', 'From / to'], ['duration', 'Duration only']].map(([value, label]) => (
+            <button key={value} type="button" className="filter-tag" aria-pressed={mode === value}
+              onClick={() => { setMode(value); setError(''); }}>{label}</button>
+          ))}
+        </div>
+        <fieldset hidden={mode !== 'range'} disabled={mode !== 'range'} className="mt-3">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="min-w-0 text-xs font-medium text-muted">
+              From
+              <input type="time" name="from" step="1" defaultValue={from} required className="input-control mt-1" />
+            </label>
+            <label className="min-w-0 text-xs font-medium text-muted">
+              To
+              <input type="time" name="to" step="1" defaultValue={to} required className="input-control mt-1" />
+            </label>
+          </div>
+          <p className="mt-2 text-xs text-muted">An earlier end time means the session ended the next day.</p>
+        </fieldset>
+        <fieldset hidden={mode !== 'duration'} disabled={mode !== 'duration'}
+          className={`mt-3 gap-3 ${mode === 'duration' ? 'grid' : ''} ${entry ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <label className="text-xs font-medium text-muted">
             Hours
             <input type="number" name="hours" min="0" max="24" step="1" inputMode="numeric"
@@ -81,8 +144,8 @@ function StudyTimeDialog({ date, today, entry, onCancel, onSave }) {
                 defaultValue={seconds} placeholder="0" className="input-control mt-1" />
             </label>
           )}
-        </div>
-        {entry && entry.durationMs === undefined && (
+        </fieldset>
+        {hasRange && mode === 'duration' && (
           <p className="mt-3 text-xs text-muted">Saving a correction logs the full session on the selected date.</p>
         )}
         {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
@@ -172,13 +235,14 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
     if (saveSessions((current) => deleteStudySession(current, session.id))) setPendingDeletion(null);
   }
 
-  function saveTime(durationMs, studyDate) {
+  function saveTime({ durationMs, startedAt, stoppedAt, studyDate }) {
     const { entry } = timeEditor;
     const loggedAt = Date.now();
     const id = entry?.id ?? crypto.randomUUID();
-    const change = entry
-      ? (current) => editStudySession(current, id, durationMs, studyDate)
-      : (current) => logStudyTime(current, id, durationMs, loggedAt, studyDate);
+    const change = startedAt !== undefined
+      ? (current) => saveStudyRange(current, id, startedAt, stoppedAt, !!entry)
+      : (current) => entry ? editStudySession(current, id, durationMs, studyDate)
+        : logStudyTime(current, id, durationMs, loggedAt, studyDate);
     if (saveSessions(change)) {
       setTimeEditor(null);
       if (studyDate !== date) onSelectDate(studyDate);
@@ -234,9 +298,8 @@ export default function StudyTimer({ date, today, isActive, sessions, onSelectDa
           <ul aria-label={`Study sessions for ${dateLabel}`} className="max-h-60 divide-y divide-line overflow-y-auto">
             {history.map(({ session, start, end, duration }) => (
               <li key={session.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
-                <span className="text-muted">
-                  {session.durationMs ? 'Manual entry' : sessionDate.formatRange(start, end)}
-                </span>
+                {session.durationMs === undefined ? <StudyTimeRange start={start} end={end} />
+                  : <span className="text-muted">Duration only</span>}
                 <div className="flex items-center gap-2">
                   <span className="font-medium tabular-nums text-ink">
                     {durationLabel(duration)}
